@@ -1,0 +1,16 @@
+﻿using System.Reflection;
+
+namespace Engine.Decorators;
+
+public interface IDecoratorAttribute
+{
+    /// <summary>
+    /// Перехватывает вызов метода
+    /// </summary>
+    /// <param name="target">Целевой объект</param>
+    /// <param name="targetMethod">Метод для вызова</param>
+    /// <param name="args">Аргументы метода</param>
+    /// <param name="proceed">Функция для продолжения выполнения оригинального метода</param>
+    /// <returns>Результат выполнения</returns>
+    object? Intercept(object? target, MethodInfo targetMethod, object?[]? args, Func<object?> proceed);
+}
