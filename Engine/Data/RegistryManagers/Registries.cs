@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace Engine.Data.RegistryManagers;
 
-using Arrays;
+using Collections;
 using Asset;
 
 public struct Registries

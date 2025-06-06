@@ -1,4 +1,4 @@
-﻿namespace Engine.Data.Arrays;
+﻿namespace Engine.Data.Collections;
 
 public interface IDataContainer
 {

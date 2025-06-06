@@ -2,7 +2,7 @@
 
 using System;
 using Data;
-using Data.Arrays;
+using Data.Collections;
 using Data.Meta;
 
 public sealed class Catch : MetaObject<CatchMeta>, IDisposable

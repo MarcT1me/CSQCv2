@@ -6,22 +6,37 @@ namespace Engine.Data.Tracer;
 using Decorators;
 using RegistryManagers;
 
+/// <summary>
+/// Quantum Tracer - система трассировки и автоматического применения декораторов
+/// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 public class QTraceAttribute(ScanTypes scanType) : Attribute
 {
+    private static readonly Dictionary<Type, bool> DecoratedTypeCache = new();
+    private static readonly HashSet<Type> _processedTypes = new();
+
     public static void HandleAssembly()
     {
         var types = EngineCore.AppLibAssembly.GetTypes();
 
+        // Сначала сканируем все типы
         foreach (var type in types)
         {
-            HandleClasses(type);
+            HandleTypeScanning(type);
+        }
 
-            // handle method attributes
-            foreach (var method in type.GetMethods())
-            {
-                HandleMethods(type, method);
-            }
+        // Затем обрабатываем декораторы для всех найденных типов
+        ProcessDecoratedTypes();
+    }
+
+    private static void HandleTypeScanning(Type type)
+    {
+        HandleClasses(type);
+
+        // Сканируем методы
+        foreach (var method in type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static))
+        {
+            HandleMethods(type, method);
         }
     }
 
@@ -31,6 +46,13 @@ public class QTraceAttribute(ScanTypes scanType) : Attribute
         foreach (var attr in classAttributes.OfType<QTraceAttribute>())
         {
             attr.ScanHandling(type);
+        }
+
+        // Проверяем, есть ли декорированные методы в классе
+        if (HasDecoratedMethods(type))
+        {
+            DecoratedTypeCache[type] = true;
+            QuantumTracer.RegisterDecoratedType(type);
         }
     }
 
@@ -42,9 +64,23 @@ public class QTraceAttribute(ScanTypes scanType) : Attribute
         {
             attr.ScanHandling(type, method);
         }
-        foreach (var _ in methodAttributes.OfType<IDecoratorAttribute>())
+
+        // Регистрируем методы с декораторами
+        if (methodAttributes.OfType<IDecoratorAttribute>().Any())
         {
-            HandleMethodProxy(type, method);
+            QuantumTracer.RegisterDecoratedMethod(type, method);
+        }
+    }
+
+    private static void ProcessDecoratedTypes()
+    {
+        foreach (var type in DecoratedTypeCache.Keys)
+        {
+            if (!_processedTypes.Contains(type))
+            {
+                QuantumTracer.ProcessTypeForDecorators(type);
+                _processedTypes.Add(type);
+            }
         }
     }
 
@@ -71,7 +107,9 @@ public class QTraceAttribute(ScanTypes scanType) : Attribute
         Registries.MethodRegistry.Register(method);
     }
 
-    private static void HandleMethodProxy(Type @class, MethodInfo method)
+    private static bool HasDecoratedMethods(Type type)
     {
+        return type.GetMethods(BindingFlags.Public | BindingFlags.Instance)
+            .Any(m => m.GetCustomAttributes().OfType<IDecoratorAttribute>().Any());
     }
 }

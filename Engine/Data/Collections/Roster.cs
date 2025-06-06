@@ -2,7 +2,7 @@
 
 using System.Collections.Concurrent;
 
-namespace Engine.Data.Arrays;
+namespace Engine.Data.Collections;
 
 using Meta;
 

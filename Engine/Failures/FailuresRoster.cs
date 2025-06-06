@@ -1,7 +1,7 @@
 ﻿namespace Engine.Failures;
 
 using Data.Meta;
-using Data.Arrays;
+using Data.Collections;
 
 public sealed class FailuresRoster(MetaData metaData) : Roster<FailureException>(metaData)
 {

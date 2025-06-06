@@ -4,7 +4,7 @@ using System.Collections.Concurrent;
 
 namespace Engine.Data.RegistryManagers;
 
-using Arrays;
+using Collections;
 
 internal sealed class ContainerRegistryManager : IRegistryManager<IDataContainer>
 {
