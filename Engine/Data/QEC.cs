@@ -2,6 +2,10 @@
 
 namespace Engine.Data;
 
+/// <summary>
+/// Динамический объект для передачи данных
+/// </summary>
+/// <remarks>Чаще всего используется в движке. Убедитесь в присутствии аттрибута в объекте перед его изъятием</remarks>
 public class QExtended : DynamicObject
 {
     private readonly Dictionary<string, object> _properties = new();

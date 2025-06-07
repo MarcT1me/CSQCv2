@@ -2,7 +2,10 @@
 
 namespace Engine.Decorators;
 
-public interface IDecoratorAttribute
+/// <summary>
+/// Базовый интерфейс для всех декорирующих аттрибутов
+/// </summary>
+public interface IQuantumDecorator
 {
     /// <summary>
     /// Перехватывает вызов метода

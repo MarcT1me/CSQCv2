@@ -1,5 +1,8 @@
 ﻿namespace Engine.Configuration;
 
+/// <summary>
+/// Конфигурация запуска движка
+/// </summary>
 public static class BaseConfig
 {
     public static bool Headless = false;

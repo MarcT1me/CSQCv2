@@ -4,6 +4,9 @@ using Data;
 using Data.Meta;
 using Failures;
 
+/// <summary>
+/// Класс потоков с авторской реализацией, внедрённый в системы движка
+/// </summary>
 public class QThread : MetaObject<QThreadMeta>, IDisposable, IFailureHandler
 {
     #region Static Members
@@ -51,6 +54,14 @@ public class QThread : MetaObject<QThreadMeta>, IDisposable, IFailureHandler
 
     #endregion
 
+    /// <summary>
+    /// Создание потока
+    /// </summary>
+    /// <param name="name">Имя (в последствии Identifier потока)</param>
+    /// <param name="failureLevel">Уровень ошибок, обрабатываемый в потоках</param>
+    /// <param name="isBackground">Позволяет потоку работать после прекращения главного потока</param>
+    /// <param name="lifetimeSeconds">Время жизни потока с начала работы</param>
+    /// <exception cref="AlreadyExistThreadException">Если такой поток уже существует</exception>
     protected QThread(
         string? name = null,
         FailureLevel? failureLevel = null,
@@ -72,11 +83,25 @@ public class QThread : MetaObject<QThreadMeta>, IDisposable, IFailureHandler
 
     #region Default life mtods
 
+    /// <summary>
+    /// Метод, запускаемый в другом потоке
+    /// </summary>
+    /// <returns>Результат его выполнения</returns>
     protected virtual object? Action()
     {
         return null;
     }
 
+    /// <summary>
+    /// Запуск действий в новом потоке
+    /// </summary>
+    public void Start() => _thread.Start(() => Run());
+
+    /// <summary>
+    /// Просто запуск действий
+    /// </summary>
+    /// <exception cref="PendingThreadNotExistException">Если поток был потерян во время выполнения</exception>
+    /// <remarks>Происходит в том же потоке</remarks>
     private void Run()
     {
         try
@@ -89,6 +114,9 @@ public class QThread : MetaObject<QThreadMeta>, IDisposable, IFailureHandler
                     Monitor.Wait(ImportantLock);
                 }
             }
+            
+            // update lifetime after waiting
+            MetaData.RessetLifetime();
 
             // move to working threads
             lock (GlobalLock)
@@ -111,8 +139,11 @@ public class QThread : MetaObject<QThreadMeta>, IDisposable, IFailureHandler
         }
     }
 
-    public void Start() => _thread.Start();
-
+    /// <summary>
+    /// Присоединение потока к текущему
+    /// </summary>
+    /// <param name="timeoutSeconds">Максимальное время ожидания</param>
+    /// <returns>Успешность действия</returns>
     public bool Join(float? timeoutSeconds = null)
     {
         var timeout = timeoutSeconds.HasValue
@@ -124,15 +155,22 @@ public class QThread : MetaObject<QThreadMeta>, IDisposable, IFailureHandler
         return _thread.Join(timeout);
     }
 
+    /// <summary>
+    /// Реализация обработки ошибок
+    /// </summary>
+    /// <param name="failure"></param>
     public void OnFailure(FailureException failure)
     {
-        Console.WriteLine($"Thread {Id} non-critical error: {failure.Message}");
+        Console.WriteLine($"Thread {Id} catch {failure.Level} level error: {failure.Message}");
     }
 
     #endregion
 
     #region Impotant operations
 
+    /// <summary>
+    /// Установка потока, как важного
+    /// </summary>
     public void SetImportant()
     {
         ImportantThreadId = Id;
@@ -142,6 +180,9 @@ public class QThread : MetaObject<QThreadMeta>, IDisposable, IFailureHandler
         }
     }
 
+    /// <summary>
+    /// Обнуление важного потока
+    /// </summary>
     public static void MuteImportant()
     {
         ImportantThreadId = null;
@@ -155,12 +196,18 @@ public class QThread : MetaObject<QThreadMeta>, IDisposable, IFailureHandler
 
     #region Waiting
 
+    /// <summary>
+    /// Ожидание выполнения всех запланированных потоков
+    /// </summary>
     public static void WaitAll()
     {
         WaitPending();
         WaitWorked();
     }
 
+    /// <summary>
+    /// Ожидания ждущих потоков
+    /// </summary>
     public static void WaitPending()
     {
         while (Roster.Pending.Count > 0)
@@ -169,6 +216,12 @@ public class QThread : MetaObject<QThreadMeta>, IDisposable, IFailureHandler
         }
     }
 
+    /// <summary>
+    /// Ожидание работающих потоков
+    /// </summary>
+    /// <param name="timeout">Максимальное время ожидания</param>
+    /// <param name="fromThreadId">Поток, вызвавший функцию</param>
+    /// <exception cref="TimeoutException">Если время вышло, а потоки всё ещё работают</exception>
     public static void WaitWorked(TimeSpan? timeout = null, Identifier? fromThreadId = null)
     {
         var start = DateTime.UtcNow;
@@ -199,6 +252,10 @@ public class QThread : MetaObject<QThreadMeta>, IDisposable, IFailureHandler
 
     #region IDisposable Support
 
+    /// <summary>
+    /// Предварительная работа по удалению потока
+    /// </summary>
+    /// <exception cref="ThreadReleaseException">Если в результате удаления потока из контейнера произошёл сбой</exception>
     public void Release()
     {
         lock (GlobalLock)
@@ -218,6 +275,9 @@ public class QThread : MetaObject<QThreadMeta>, IDisposable, IFailureHandler
         }
     }
 
+    /// <summary>
+    /// Очистка потока из памяти
+    /// </summary>
     public void Dispose()
     {
         if (_isDisposed) return;

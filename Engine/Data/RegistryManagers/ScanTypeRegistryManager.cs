@@ -11,13 +11,17 @@ internal sealed class ScanTypeRegistryManager : IRegistryManager<Type>
 
     public void Register(Type obj)
     {
-        ScanTypes[obj.Name] = obj;
+        ScanTypes[$"{obj}/{obj.Name}"] = obj;
     }
 
     public Type? Get(object id)
     {
-        if (id is string str)
-            return ScanTypes.GetValueOrDefault(str);
+        if (id is not string name) return null;
+
+        foreach (var (key, value) in ScanTypes)
+            if (key.Contains(name))
+                return value;
+
         return null;
     }
 }

@@ -14,7 +14,7 @@ internal sealed class IdentifierRegistryManager : IRegistryManager<Identifier>
         Identifiers.Add(identifier);
     }
 
-    public Identifier? Get(object id) => id switch
+    public Identifier? Get(object? id) => id switch
     {
         Identifier identifier => identifier,
         string s => Identifiers.FirstOrDefault(identifier => identifier.Name != null && identifier.Name.Equals(s)),

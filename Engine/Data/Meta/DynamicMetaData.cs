@@ -2,6 +2,11 @@
 
 namespace Engine.Data.Meta;
 
+/// <summary>
+/// Метаданные, динамически меняющиеся в ходе выполнения
+/// </summary>
+/// <param name="core">Метаданные, которые стоит считать динамическими</param>
+/// <remarks>Невозможно превратить обратно, но есть возможность прочитать данные ядра</remarks>
 public class DynamicMetaData(MetaData core) : DynamicObject
 {
     private readonly Dictionary<string, object?> _data = new();

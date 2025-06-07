@@ -4,6 +4,10 @@ namespace Engine.Data.Collections;
 
 using Meta;
 
+/// <summary>
+/// Мутабельный объект с данными
+/// </summary>
+/// <typeparam name="T">Тип данных контейнера</typeparam>
 public sealed class WritableTale<T> : DataContainer<T>
 {
     public WritableTale(MetaData metaData)
@@ -16,15 +20,17 @@ public sealed class WritableTale<T> : DataContainer<T>
     {
     }
 
-    public override void Set(Identifier key, T? value)
+    public override void Set(object? key, T? value)
     {
+        if (Identifier.GiveFromUncertain(key) is not { } identifier) return;
+
         if (value == null)
         {
-            Data.TryRemove(key, out _);
+            Data.TryRemove(identifier, out _);
         }
         else
         {
-            Data[key] = value;
+            Data[identifier] = value;
         }
     }
 }

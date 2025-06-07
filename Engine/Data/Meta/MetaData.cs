@@ -9,16 +9,29 @@ using StringKeyMap = IEnumerable<
     >
 >;
 
+/// <summary>
+/// Метаданные объекта движка
+/// </summary>
+/// <param name="identifier">Уникальный идентификатор объекта в системе</param>
 public class MetaData(Identifier? identifier = null)
 {
     public Identifier Identifier { get; } = identifier ?? new Identifier();
-
+    
+    /// <summary>
+    /// Вносит изменения в метаданные
+    /// </summary>
+    /// <param name="changes">Вносимые изменения</param>
     public virtual void Modify(StringKeyMap changes)
     {
         foreach (var (key, value) in changes)
             Modify(key, value);
     }
 
+    /// <summary>
+    /// Вносит изменения в метаданные
+    /// </summary>
+    /// <param name="key">Имя аттрибуты</param>
+    /// <param name="value">Новое значение</param>
     public virtual void Modify(string key, object value)
     {
         var property = GetProp(key);

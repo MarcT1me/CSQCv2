@@ -5,7 +5,7 @@ using System.Collections.Concurrent;
 /// <summary>
 /// Потокобезопасная реализация HashSet
 /// </summary>
-public class ConcurrentHashSet<T> : IDisposable
+public class ConcurrentHashSet<T> : IDisposable where T : notnull
 {
     private readonly ConcurrentDictionary<T, byte> _dictionary = new();
 

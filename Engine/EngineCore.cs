@@ -3,9 +3,12 @@
 namespace Engine;
 
 using Configuration;
-using Data.Tracer;
+using Extensions.Tracer;
 using Failures;
 
+/// <summary>
+/// Стандартный обработчик ошибок
+/// </summary>
 internal sealed class ConsoleFailureHandler : IFailureHandler
 {
     public void OnFailure(FailureException failure)
@@ -25,6 +28,12 @@ internal sealed class ConsoleFailureHandler : IFailureHandler
     }
 }
 
+/// <summary>
+/// Ядро движка: <br/>
+/// * Инициализация <br/>
+/// * Запуск AppLib <br/>
+/// * Хранение базовых данных <br/>
+/// </summary>
 public static class EngineCore
 {
     public static string RootDirectory = "";
@@ -35,13 +44,14 @@ public static class EngineCore
     static EngineCore()
     {
         DefaultFailureHandler = new ConsoleFailureHandler();
-        Initialize();
+        // Initialize();
         
 #if !DEBUG
         BaseConfig.DebugMode = false;
 #endif
     }
 
+    [Obsolete("Use only one times after game initialization")]
     public static void Initialize()
     {
         Console.WriteLine("| INFO    | Engine Initialization Started");
@@ -58,7 +68,7 @@ public static class EngineCore
             EnableDebugFeatures();
         }
 
-        QTraceAttribute.HandleAssembly();
+        QuantumTracer.HandleAssembly();
     }
 
     private static void EnableDebugFeatures()

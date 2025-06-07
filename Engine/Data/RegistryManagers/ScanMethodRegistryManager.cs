@@ -12,13 +12,17 @@ internal sealed class ScanMethodRegistryManager : IRegistryManager<MethodInfo>
 
     public void Register(MethodInfo obj)
     {
-        ScanMethods[obj.Name] = obj;
+        ScanMethods[$"{obj}/{obj.Name}"] = obj;
     }
 
     public MethodInfo? Get(object id)
     {
-        if (id is string str)
-            return ScanMethods.GetValueOrDefault(str);
+        if (id is not string name) return null;
+
+        foreach (var (key, value) in ScanMethods)
+            if (key.Contains(name))
+                return value;
+
         return null;
     }
 }

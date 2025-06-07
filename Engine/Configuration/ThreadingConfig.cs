@@ -2,6 +2,9 @@
 
 using Failures;
 
+/// <summary>
+/// Конфигурация потоков движка
+/// </summary>
 public static class ThreadingConfig
 {
     public static FailureLevel BaseFailureLevel = FailureLevel.Second;

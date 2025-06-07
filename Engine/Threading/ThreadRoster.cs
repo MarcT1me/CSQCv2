@@ -3,6 +3,9 @@
 using Data.Collections;
 using Data.Meta;
 
+/// <summary>
+/// Контейнер для хранения потоков
+/// </summary>
 internal sealed class ThreadRoster : Roster<QThread>
 {
     public Roster<QThread> Pending => GetBranch("threadRoster-branch-pending")!;

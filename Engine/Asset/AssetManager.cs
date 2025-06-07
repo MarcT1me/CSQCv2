@@ -1,23 +1,42 @@
 ﻿namespace Engine.Asset;
 
 using Data.Meta;
-using Data.Arrays;
+using Data.Collections;
 using Data.RegistryManagers;
 
+/// <summary>
+/// Менеджер, управляющий ассетами
+/// </summary>
+/// <param name="resolver">Объект управляющий зависимостями ассетов</param>
 public sealed class AssetManager(DependencyResolver resolver)
 {
     public Roster<AssetData> Storage { get; } = new(new MetaData("assetStorage"));
 
+    /// <summary>
+    /// Регистрация ассета
+    /// </summary>
+    /// <param name="type">Тип ассета</param>
+    /// <exception cref="InvalidAssetTypeError">В случае, если тип ассета уже зарегистрирован</exception>
     public static void RegisterAssetType(AssetType type)
     {
+        if (Registries.AssetTypeRegistry.Get(type.Name) != null)
+            throw new InvalidAssetTypeError(type.Name);
         Registries.AssetTypeRegistry.Register(type);
     }
 
+    /// <summary>
+    /// Метод загрузки ассета
+    /// </summary>
+    /// <param name="assetFile">Данные о загрузке</param>
+    /// <param name="alreadyLoadedDependencies">Уже загруженные ассеты, если такие есть</param>
+    /// <returns></returns>
+    /// <exception cref="InvalidAssetTypeError">В случае, если тип ассета был указан не верно</exception>
+    /// <exception cref="AssetError">В любых других случаях, если ассет не был загружен до конца</exception>
     public AssetData Load(AssetFile assetFile, IEnumerable<AssetData>? alreadyLoadedDependencies = null)
     {
         var assetType = Registries.AssetTypeRegistry.Get(assetFile.TypeName);
         if (assetType == null)
-            throw new InvalidAssetTypeError(assetFile);
+            throw new InvalidAssetTypeError(assetFile.TypeName);
 
         try
         {

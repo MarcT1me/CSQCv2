@@ -5,14 +5,24 @@ using Data;
 using Data.Collections;
 using Data.Meta;
 
+/// <summary>
+/// Catch с авторской реализацией отлова ошибок
+/// </summary>
 public sealed class Catch : MetaObject<CatchMeta>, IDisposable
 {
-    private static readonly WritableTale<Catch> ActiveCatches = new(new MetaData("catchesRoster"));
+    public static readonly WritableTale<Catch> ActiveCatches = new(new MetaData("catchesRoster"));
 
     public bool IsRunning { get; private set; }
 
     public bool IsSuccess => MetaData.Failures.IsEmpty(); 
 
+    /// <summary>
+    /// Создание Catch
+    /// </summary>
+    /// <param name="identifier">Объект, ассоциируемый с сетью</param>
+    /// <param name="failureLevel">Уровень ошибок по умолчанию</param>
+    /// <param name="handler">Обработчик ошибок</param>
+    /// <exception cref="InvalidOperationException">Если такой Catch</exception>
     public Catch(
         object? identifier = null,
         FailureLevel failureLevel = FailureLevel.Second,
@@ -25,6 +35,13 @@ public sealed class Catch : MetaObject<CatchMeta>, IDisposable
         ActiveCatches[Id] = this;
     }
 
+    /// <summary>
+    /// Метод для безопасного запуска опасной функции
+    /// </summary>
+    /// <param name="func">Обрабатываемая функция</param>
+    /// <param name="defaultValue">Возвращаемое значение по умолчанию (если случилась ошибка)</param>
+    /// <typeparam name="T">Тип возвращаемый из функции</typeparam>
+    /// <returns>В удачном случае - результат выполнения оригинальной функции, в ином defaultValue</returns>
     public T? TryFunc<T>(Func<T> func, T? defaultValue = default)
     {
         try
@@ -55,6 +72,11 @@ public sealed class Catch : MetaObject<CatchMeta>, IDisposable
         }
     }
 
+    /// <summary>
+    /// Обработка ошибок
+    /// </summary>
+    /// <param name="ex">Обрабатываемая ошибка</param>
+    /// <exception cref="FailureException">Если обрабатываемая ошибка отмечена как критичная</exception>
     private void HandleException(Exception ex)
     {
         var failure = ex as FailureException ?? new FailureException(ex.Message, ex)

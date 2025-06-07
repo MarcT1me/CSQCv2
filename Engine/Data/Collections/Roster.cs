@@ -6,8 +6,15 @@ namespace Engine.Data.Collections;
 
 using Meta;
 
+/// <summary>
+/// Контейнер, хранящий данные в древовидной структуре
+/// </summary>
+/// <typeparam name="T">Тип хранимых данных</typeparam>
 public class Roster<T> : DataContainer<T>
 {
+    /// <summary>
+    /// Ветки массива
+    /// </summary>
     public ConcurrentDictionary<Identifier, Roster<T>> Branches { get; } = [];
 
     public Roster(MetaData metaData)
@@ -22,8 +29,19 @@ public class Roster<T> : DataContainer<T>
 
     #region Branch creating operations
 
+    /// <summary>
+    /// Создание новой ветки в структуре (сохраняется в Branch)
+    /// </summary>
+    /// <param name="metaData">Метаданные новой ветки</param>
+    /// <returns>Новая ветка</returns>
     public Roster<T> NewBranch(MetaData metaData) => NewBranch(metaData, new List<KeyValuePair<Identifier, T>>());
 
+    /// <summary>
+    /// Создание новой ветки в структуре (сохраняется в Branch)
+    /// </summary>
+    /// <param name="metaData">Метаданные новой ветки</param>
+    /// <param name="data">Данные из которых будет создана ветка</param>
+    /// <returns>Новая ветка</returns>
     public Roster<T> NewBranch(MetaData metaData, IEnumerable<KeyValuePair<Identifier, T>> data)
     {
         var branch = new Roster<T>(metaData, data);
@@ -31,11 +49,20 @@ public class Roster<T> : DataContainer<T>
         return branch;
     }
 
+    /// <summary>
+    /// Сохраняет ветку
+    /// </summary>
+    /// <param name="branch">Ветка на сохранение</param>
     public void SaveBranch(Roster<T> branch)
     {
         Branches[branch.Id] = branch;
     }
 
+    /// <summary>
+    /// Выдаёт ветку
+    /// </summary>
+    /// <param name="id">Неуверенный идентификатор ветки в структуре</param>
+    /// <returns>Ветка, если есть</returns>
     public Roster<T>? GetBranch(object id)
     {
         Identifier? identifier = Identifier.GiveFromUncertain(id);
@@ -44,15 +71,17 @@ public class Roster<T> : DataContainer<T>
 
     #endregion
 
-    public override void Set(Identifier key, T? value)
+    public override void Set(object? key, T? value)
     {
+        if (Identifier.GiveFromUncertain(key) is not { } identifier) return;
+
         if (value == null)
         {
-            Data.TryRemove(key, out _);
+            Data.TryRemove(identifier, out _);
         }
         else
         {
-            Data[key] = value;
+            Data[identifier] = value;
         }
     }
 }

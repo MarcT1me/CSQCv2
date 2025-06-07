@@ -36,9 +36,20 @@ public abstract class DataContainer<T> : MetaObject<MetaData>, IDataContainer
         set => Set(key, value);
     }
 
-    public object? Get(Identifier key) => Data.GetValueOrDefault(key);
+    /// <summary>
+    /// Выдаёт данные из контейнера
+    /// </summary>
+    /// <param name="key">Уникальный идентификатор данных в контейнере</param>
+    /// <returns>Данные в чистом виде, если есть</returns>
+    public object? Get(object key) =>
+        Identifier.GiveFromUncertain(key) is { } identifier ? Data.GetValueOrDefault(identifier) : null;
 
-    public virtual void Set(Identifier key, T? value)
+    /// <summary>
+    /// Сохраняет данные в контейнер
+    /// </summary>
+    /// <param name="key">Объект, ассоциируемый со значением</param>
+    /// <param name="value">Значение на сохранение</param>
+    public virtual void Set(object? key, T? value)
     {
     }
 

@@ -3,6 +3,12 @@
 using Data.Meta;
 using Data;
 
+/// <summary>
+/// Метаданные Catch
+/// </summary>
+/// <param name="identifier">Идентификатор Catch</param>
+/// <param name="failureLevel">Уровень критичности ошибки</param>
+/// <param name="handler">Обработчик ошибки</param>
 public sealed class CatchMeta(
     object? identifier,
     FailureLevel failureLevel,

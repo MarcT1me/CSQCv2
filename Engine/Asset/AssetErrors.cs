@@ -28,13 +28,13 @@ public sealed class CyclicDependencyError : AssetError
 
 public sealed class InvalidAssetTypeError : AssetError
 {
-    public InvalidAssetTypeError(AssetFile file
-    ) : base($"Asset type {file.TypeName} not found")
+    public InvalidAssetTypeError(string typeName
+    ) : base($"Asset type {typeName} not found")
     {
     }
 
-    public InvalidAssetTypeError(AssetFile file, Exception innerException
-    ) : base($"Asset type {file.TypeName} not found", innerException)
+    public InvalidAssetTypeError(string typeName, Exception innerException
+    ) : base($"Asset type {typeName} not found", innerException)
     {
     }
 }
