@@ -1,4 +1,6 @@
-﻿namespace Engine.Asset;
+﻿using Engine.Logging;
+
+namespace Engine.Asset;
 
 using Data.Meta;
 using Data.Collections;
@@ -19,7 +21,7 @@ public sealed class AssetManager(DependencyResolver resolver)
     /// <exception cref="InvalidAssetTypeError">В случае, если тип ассета уже зарегистрирован</exception>
     public static void RegisterAssetType(AssetType type)
     {
-        if (Registries.AssetTypeRegistry.Get(type.Name) != null)
+        if (Registries.AssetTypeRegistry.Get(type.Name) is not null)
             throw new InvalidAssetTypeError(type.Name);
         Registries.AssetTypeRegistry.Register(type);
     }
@@ -61,6 +63,8 @@ public sealed class AssetManager(DependencyResolver resolver)
 
             // save in asset branch
             branch[assetData.Identifier] = assetData;
+            
+            Logger.Success($"Asset {assetFile.Identifier} loaded");
 
             return assetData;
         }

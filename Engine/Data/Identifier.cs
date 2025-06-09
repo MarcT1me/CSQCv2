@@ -9,7 +9,7 @@ public sealed class Identifier
 {
     public string? Name { get; }
     public Guid Uuid { get; } = Guid.NewGuid();
-    
+
     public static implicit operator Identifier(string? name) => new(name);
 
     public Identifier(string? name = null)
@@ -32,13 +32,14 @@ public sealed class Identifier
         string s => new Identifier(s),
         _ => new Identifier()
     };
-    
+
     /// <summary>
     /// Выдаёт хранящийся в реестре идентификатор
     /// </summary>
     /// <param name="value">Объект, предположительно лежащий в реестре, как Identifier</param>
     /// <returns>Первый совпавший с value идентификатор</returns>
-    public static Identifier? GiveFromUncertain(object? value) => Registries.IdentifierRegistry.Get(value);
+    public static Identifier? GiveFromUncertain(object? value) =>
+        value is null ? null : Registries.IdentifierRegistry.Get(value);
 
     public override string ToString() => Name ?? Uuid.ToString();
 }

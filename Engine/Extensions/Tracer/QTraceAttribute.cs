@@ -6,6 +6,7 @@ using System.Reflection;
 namespace Engine.Extensions.Tracer;
 
 using Data.RegistryManagers;
+using Logging;
 
 /// <summary>
 /// Аттрибут для добавления классов и методов в список типов движка (можно будет использовать в любой момент)
@@ -17,12 +18,14 @@ public class QTraceAttribute(ScanTypes scanType) : Attribute
     /// <summary>
     /// Метод для регистрирования классов
     /// </summary>
-    public void ScanHandling(Type @class)
+    public void ScanHandling(Type @class, bool fromMethodScanning = false)
     {
         Debug.Assert(
             scanType == ScanTypes.Scan,
             "traceType does not match the Scan"
         );
+
+        Logger.Info($"Add new scanned class [{@class.Name}]" + (fromMethodScanning ? " for method scanning" : ""));
 
         Registries.TypeRegistry.Register(@class);
     }
@@ -38,7 +41,9 @@ public class QTraceAttribute(ScanTypes scanType) : Attribute
         );
 
         if (Registries.TypeRegistry.Get(@class.Name) == null)
-            Registries.TypeRegistry.Register(@class);
+            ScanHandling(@class, true);
+
+        Logger.Info($"Add new scanned method [{method.Name}] -> {scanType}");
 
         Registries.MethodRegistry.Register(method);
     }

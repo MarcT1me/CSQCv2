@@ -1,11 +1,15 @@
 ﻿namespace Engine.Asset;
 
+using Logging;
+
 public sealed class DependencyResolver(AssetManager manager)
 {
     private readonly HashSet<string> _loadedSet = [];
 
     public LinkedList<AssetData> Resolve(AssetFile assetFile)
     {
+        Logger.Info($"Resolving asset dependencies for {assetFile.Identifier}");
+        
         LinkedList<AssetData> dependencies = new();
 
         if (assetFile.Dependencies.Count == 0)

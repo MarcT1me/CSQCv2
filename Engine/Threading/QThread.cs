@@ -164,7 +164,7 @@ public class QThread : MetaObject<QThreadMeta>, IDisposable, IFailureHandler
     {
         Logger.Warning(
             $"Thread {Id} catch got {failure.Level} level error:\n" +
-            $"{failure.GetType()}: {failure.Message}"
+            $"{failure.GetType().Name}: {failure.Message}"
         );
         
         failure.Handle();

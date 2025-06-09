@@ -3,6 +3,7 @@
 namespace Engine.Data.RegistryManagers;
 
 using Asset;
+using Logging;
 
 internal sealed class AssetTypeRegistryManager : IRegistryManager<AssetType>
 {
@@ -13,6 +14,7 @@ internal sealed class AssetTypeRegistryManager : IRegistryManager<AssetType>
 
     public void Register(AssetType obj)
     {
+        Logger.Info($"Register AssetType<{obj.AssetLoader.GetType().Name}> - {obj.Name}");
         AssetTypes[obj.Name] = obj;
     }
 

@@ -5,6 +5,7 @@ using System.Collections.Concurrent;
 namespace Engine.Data.RegistryManagers;
 
 using Collections;
+using Logging;
 
 internal sealed class ContainerRegistryManager : IRegistryManager<IDataContainer>
 {
@@ -15,6 +16,7 @@ internal sealed class ContainerRegistryManager : IRegistryManager<IDataContainer
 
     public void Register(IDataContainer container)
     {
+        Logger.Info($"Register new {GetType().Name}");
         Objects[container.Id] = container;
     }
 

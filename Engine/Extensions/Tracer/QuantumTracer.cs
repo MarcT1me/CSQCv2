@@ -4,6 +4,7 @@ namespace Engine.Extensions.Tracer;
 
 using Data.RegistryManagers;
 using Decorators;
+using Logging;
 
 /// <summary>
 /// Quantum Tracer - система трассировки и автоматического применения декораторов
@@ -18,7 +19,8 @@ public static class QuantumTracer
     {
         foreach (var assembly in assemblies)
         {
-            // Сначала сканируем все типы движка
+            Logger.Info($"Scanning assembly: {assembly.FullName}");
+            
             var types = assembly.GetTypes();
             foreach (var type in types)
             {

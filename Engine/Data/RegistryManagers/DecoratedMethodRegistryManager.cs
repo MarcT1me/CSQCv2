@@ -4,6 +4,7 @@ using System.Reflection;
 namespace Engine.Data.RegistryManagers;
 
 using Decorators;
+using Logging;
 
 public class DecoratedMethodRegistryManager : IRegistryManager<DecoratedMethodInfo>
 {
@@ -15,6 +16,7 @@ public class DecoratedMethodRegistryManager : IRegistryManager<DecoratedMethodIn
     
     public void Register(DecoratedMethodInfo decoratedMethod)
     {
+        Logger.Info($"Register Quantum Decorator for {decoratedMethod.Method.Name}");
         var key = $"{decoratedMethod.Method.DeclaringType?.FullName}/{decoratedMethod.Method.Name}";
         Methods[key] = decoratedMethod;
     }
