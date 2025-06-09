@@ -17,16 +17,19 @@ public class TimedMetaData : MetaData
         }
     }
 
-    public void SetLifetime(float seconds) =>
-        ExpiresAt = DateTime.UtcNow.AddSeconds(seconds);
-
     public void RessetLifetime()
     {
         if (Lifetime != TimeSpan.MaxValue)
         {
-            SetLifetime(Lifetime.Seconds);
+            SetLifetime(Lifetime);
         }
     }
+
+    public void SetLifetime(TimeSpan lifetime) =>
+        ExpiresAt = DateTime.UtcNow.Add(lifetime);
+
+    public void SetLifetime(float seconds) =>
+        ExpiresAt = DateTime.UtcNow.AddSeconds(seconds);
 
     public TimeSpan Lifetime => ExpiresAt?.Subtract(CreatedAt) ?? TimeSpan.MaxValue;
 

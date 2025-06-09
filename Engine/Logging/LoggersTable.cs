@@ -1,17 +1,7 @@
-﻿using Engine.Data;
-using Engine.Data.Meta;
-
+﻿
 namespace Engine.Logging;
 
+using Data.Meta;
 using Data.Collections;
 
-public class LoggersTable : WritableTale<ILogger>
-{
-    public LoggersTable(MetaData metaData) : base(metaData)
-    {
-    }
-
-    public LoggersTable(MetaData metaData, IEnumerable<KeyValuePair<Identifier, ILogger>> data) : base(metaData, data)
-    {
-    }
-}
+public class LoggersTable() : WritableTale<ILogger>(new MetaData("logger-table"));

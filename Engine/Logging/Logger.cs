@@ -8,16 +8,16 @@ using Data.Meta;
 /// Класс логирования
 /// </summary>
 /// <param name="filePath">Путь до файла</param>
-/// <param name="logFormat">Формат логирования</param>
+/// <param name="logFormats">Форматы логирования</param>
 /// <param name="timeDuration">Время жизни файла</param>
 public sealed class Logger(
     string? filePath = null,
-    string? logFormat = null,
+    LoggerFormats? logFormats = null,
     float? timeDuration = null
 ) : MetaObject<LoggerMeta>(
     new LoggerMeta(
         filePath: filePath,
-        logFormat: logFormat,
+        logFormats: logFormats,
         timeDuration: timeDuration
     )
 ), ILogger, IDisposable
@@ -26,8 +26,10 @@ public sealed class Logger(
 
     static Logger()
     {
-        Loggers = new LoggersTable(new MetaData("logger-table"));
+        Console.OutputEncoding = System.Text.Encoding.UTF8;
+        Loggers = new LoggersTable();
         AddLogger(new Logger());
+        Logger.Success("Default Logger added");
     }
 
     /// <summary>
@@ -133,7 +135,7 @@ public sealed class Logger(
     {
         foreach (var logger in Loggers.Values)
         {
-            logger.Log(LogLevel.Warning, message);
+            logger.Log(LogLevel.Error, message);
         }
     }
 
@@ -168,24 +170,29 @@ public sealed class Logger(
 
     private void LogInConsole(LogLevel level, string message)
     {
-        Console.WriteLine(
-            MetaData.LogFormat,
+        var format = MetaData.LogFormat.GetFormat(level);
+        var formattedMessage = string.Format(
+            format.Format,
             DateTime.Now,
             level,
             GetMethodName(),
             message
         );
+    
+        // Добавляем цветовые коды
+        Console.WriteLine($"{format.ColorStart}{formattedMessage}{format.ColorEnd}");
     }
 
     private void LogInFile(LogLevel level, string message)
     {
-        if (MetaData.IsExpired & MetaData.File is not null)
+        if (MetaData is { IsExpired: true, File: not null })
         {
             MetaData.File = LoggerFile.GetOrCreate(MetaData.File?.Info.Name);
+            MetaData.RessetLifetime();
         }
 
         MetaData.File?.Writer.WriteLine(
-            MetaData.LogFormat,
+            MetaData.LogFormat.GetFormat(level).Format,
             DateTime.Now,
             level,
             GetMethodName(),

@@ -10,5 +10,5 @@ public enum LogLevel
     Warning,
     // error levels
     Error,
-    Exception,
+    Exception
 }

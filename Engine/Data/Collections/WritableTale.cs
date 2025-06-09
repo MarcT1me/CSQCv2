@@ -37,7 +37,9 @@ public class WritableTale<T> : DataContainer<T>
     public override object? Pop(object? key)
     {
         var identifier = Identifier.GiveFromUncertain(key);
+        
         if (identifier == null) return null;
+        
         Data.TryRemove(identifier, out var obj);
         return obj;
     }

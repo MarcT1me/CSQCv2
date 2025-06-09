@@ -57,6 +57,7 @@ public abstract class DataContainer<T> : MetaObject<MetaData>, IDataContainer
     /// Вынимает данные из контейнера
     /// </summary>
     /// <param name="key">Объект, ассоциируемый со значением</param>
+    /// <returns>Данные, лежащие по ключу или пустоту, если их нет</returns>
     public virtual object? Pop(object? key)
     {
         return null;

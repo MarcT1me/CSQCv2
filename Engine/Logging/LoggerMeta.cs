@@ -11,7 +11,7 @@ using Data.Meta;
 /// <param name="timeDuration">Время жизни файла</param>
 public class LoggerMeta(
     string? filePath = null,
-    string? logFormat = null,
+    LoggerFormats? logFormats = null,
     bool isActive = true,
     float? timeDuration = null
 ) : TimedMetaData(
@@ -20,5 +20,5 @@ public class LoggerMeta(
 {
     public bool IsActive = isActive;
     public LoggerFile? File = LoggerFile.GetOrCreate(filePath);
-    public readonly string LogFormat = logFormat ?? "{0} | {1} | {2} | {3}";
+    public readonly LoggerFormats LogFormat = logFormats ?? new LoggerFormats();
 }
