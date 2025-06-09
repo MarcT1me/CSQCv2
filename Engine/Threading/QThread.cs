@@ -3,6 +3,7 @@
 using Data;
 using Data.Meta;
 using Failures;
+using Logging;
 
 /// <summary>
 /// Класс потоков с авторской реализацией, внедрённый в системы движка
@@ -114,7 +115,7 @@ public class QThread : MetaObject<QThreadMeta>, IDisposable, IFailureHandler
                     Monitor.Wait(ImportantLock);
                 }
             }
-            
+
             // update lifetime after waiting
             MetaData.RessetLifetime();
 
@@ -161,7 +162,12 @@ public class QThread : MetaObject<QThreadMeta>, IDisposable, IFailureHandler
     /// <param name="failure"></param>
     public void OnFailure(FailureException failure)
     {
-        Console.WriteLine($"Thread {Id} catch {failure.Level} level error: {failure.Message}");
+        Logger.Warning(
+            $"Thread {Id} catch got {failure.Level} level error:\n" +
+            $"{failure.GetType()}: {failure.Message}"
+        );
+        
+        failure.Handle();
     }
 
     #endregion

@@ -97,11 +97,6 @@ public sealed class Catch : MetaObject<CatchMeta>, IDisposable
                 EngineCore.DefaultFailureHandler?.OnFailure(failure);
             }
         }
-
-        if (MetaData.FailureLevel is FailureLevel.Second)
-        {
-            throw failure;
-        }
     }
 
     public void Dispose() => ActiveCatches[Id] = null;

@@ -1,6 +1,7 @@
 ﻿namespace Engine.Failures;
 
 using Data;
+using Logging;
 
 public class FailureException : Exception
 {
@@ -19,4 +20,15 @@ public class FailureException : Exception
     public override string ToString() =>
         $"FailureException<{CatchId?.ToString() ?? "N/A"}>: {Message} " +
         $"(Critical: {Level}, Timestamp: {Timestamp:O})";
+
+    public void Handle(string message = "exception has Second level => rethrow")
+    {
+        if (Level == FailureLevel.Second)
+            Logger.Exception(message, this);
+
+        if (Level is FailureLevel.Second)
+        {
+            throw this;
+        }
+    }
 }

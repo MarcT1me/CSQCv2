@@ -8,7 +8,7 @@ using Meta;
 /// Мутабельный объект с данными
 /// </summary>
 /// <typeparam name="T">Тип данных контейнера</typeparam>
-public sealed class WritableTale<T> : DataContainer<T>
+public class WritableTale<T> : DataContainer<T>
 {
     public WritableTale(MetaData metaData)
         : base(metaData)
@@ -26,11 +26,19 @@ public sealed class WritableTale<T> : DataContainer<T>
 
         if (value == null)
         {
-            Data.TryRemove(identifier, out _);
+            Pop(key);
         }
         else
         {
             Data[identifier] = value;
         }
+    }
+    
+    public override object? Pop(object? key)
+    {
+        var identifier = Identifier.GiveFromUncertain(key);
+        if (identifier == null) return null;
+        Data.TryRemove(identifier, out var obj);
+        return obj;
     }
 }

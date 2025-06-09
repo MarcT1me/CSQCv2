@@ -51,6 +51,15 @@ public abstract class DataContainer<T> : MetaObject<MetaData>, IDataContainer
     /// <param name="value">Значение на сохранение</param>
     public virtual void Set(object? key, T? value)
     {
+    }    
+    
+    /// <summary>
+    /// Вынимает данные из контейнера
+    /// </summary>
+    /// <param name="key">Объект, ассоциируемый со значением</param>
+    public virtual object? Pop(object? key)
+    {
+        return null;
     }
 
     #endregion

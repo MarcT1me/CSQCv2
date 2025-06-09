@@ -14,23 +14,16 @@ public static class QuantumTracer
     /// Метод сканирования домена AppLib на наличие аттрибутов
     /// </summary>
     [Obsolete("It is used only in the engine, not in game logic.", true)]
-    public static void HandleAssembly()
+    public static void HandleAssembly(Assembly[] assemblies)
     {
-        var assembly = GetScanned("Engine", ScanTypes.Assembly) as Assembly;
-
-        // Сначала сканируем все типы движка
-        var types = assembly?.GetTypes();
-        if (types == null) return;
-        foreach (var type in types)
+        foreach (var assembly in assemblies)
         {
-            HandleTypeScanning(type);
-        }
-
-        // Потом игры
-        types = EngineCore.AppLibAssembly.GetTypes();
-        foreach (var type in types)
-        {
-            HandleTypeScanning(type);
+            // Сначала сканируем все типы движка
+            var types = assembly.GetTypes();
+            foreach (var type in types)
+            {
+                HandleTypeScanning(type);
+            }
         }
     }
 

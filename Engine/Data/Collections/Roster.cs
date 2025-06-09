@@ -77,11 +77,19 @@ public class Roster<T> : DataContainer<T>
 
         if (value == null)
         {
-            Data.TryRemove(identifier, out _);
+            Pop(key);
         }
         else
         {
             Data[identifier] = value;
         }
+    }
+    
+    public override object? Pop(object? key)
+    {
+        var identifier = Identifier.GiveFromUncertain(key);
+        if (identifier == null) return null;
+        Data.TryRemove(identifier, out var obj);
+        return obj;
     }
 }
