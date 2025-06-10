@@ -40,28 +40,31 @@ internal sealed class ConsoleFailureHandler : IFailureHandler
 public static class EngineCore
 {
     public static string RootDirectory = "";
-    public static Assembly AppLibAssembly = null!;
+    public static Assembly? AppLibAssembly = null;
     public static IFailureHandler? DefaultFailureHandler;
 
-    static EngineCore()
+    public static void Initialize(Assembly? appLibAssembly = null, bool is_headless = false)
     {
         using (new Catch("Main EngineCore Catch"))
         {
-#pragma warning disable CS0618 // Type or member is obsolete
+            AppLibAssembly = appLibAssembly;
             DefaultFailureHandler = new ConsoleFailureHandler();
 
 #if !DEBUG
         BaseConfig.DebugMode = false;
 #endif
 
-            Initialize();
+#pragma warning disable CS0618 // Type or member is obsolete
+            InitializeCore();
 #pragma warning restore CS0618 // Type or member is obsolete
         }
     }
 
     [Obsolete("Use only one times after game initialization")]
-    public static void Initialize()
+    private static void InitializeCore()
     {
+        Logger.InitLogger();
+
         Logger.Info("Engine Initialization Started");
 
         Logger.Info(
@@ -71,23 +74,23 @@ public static class EngineCore
             $"Asset path: {BaseConfig.AssetPath}"
         );
 
-        Logger.Success("Engine initialized");
-
-        if (BaseConfig.DebugMode)
-        {
-            EnableDebugFeatures();
-        }
-
         QuantumTracer.HandleAssembly(
             [
                 Assembly.GetExecutingAssembly(),
                 AppLibAssembly
             ]
         );
+
+        Logger.Success("Engine initialized\n");
+
+        if (BaseConfig.DebugMode)
+        {
+            EnableDebugFeatures();
+        }
     }
 
     private static void EnableDebugFeatures()
     {
-        Logger.Debug("Enable Debug Features");
+        Logger.Debug("Enable Debug Features\n");
     }
 }

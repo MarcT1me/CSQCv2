@@ -21,7 +21,7 @@ public class QTraceAttribute(ScanTypes scanType) : Attribute
     public void ScanHandling(Type @class, bool fromMethodScanning = false)
     {
         Debug.Assert(
-            scanType == ScanTypes.Scan,
+            scanType == ScanTypes.Scan || fromMethodScanning,
             "traceType does not match the Scan"
         );
 

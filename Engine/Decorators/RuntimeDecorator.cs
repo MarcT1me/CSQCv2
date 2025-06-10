@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Engine.Logging;
 
 namespace Engine.Decorators;
 
@@ -17,43 +18,26 @@ public static class RuntimeDecorator
 
         foreach (var method in methods)
         {
-            var decorators = method.GetCustomAttributes().OfType<IQuantumDecorator>();
-            var quantumDecorators = decorators as IQuantumDecorator[] ?? decorators.ToArray();
+            var decorators = method.GetCustomAttributes<QuantumDecoratorAttribute>();
+            var quantumDecorators = decorators as QuantumDecoratorAttribute[] ?? decorators.ToArray();
 
             if (quantumDecorators.Length == 0) continue;
-
-            var decoratedMethod = new DecoratedMethodInfo
+            
+            var decoratedMethod = new QuantumMethodInfo
             {
                 Method = method,
-                Decorators = quantumDecorators
+                Attributes = quantumDecorators
             };
 
             Registries.DecoratedMethodsRegistry.Register(decoratedMethod);
         }
     }
 
-    public static object? InvokeDecoratedMethod(object? target, MethodInfo method, object?[]? args = null)
+    public static T? InvokeDecoratedMethod<T>(object? target, MethodInfo method, object?[]? args = null) where T : struct
     {
         var decoratedMethod = Registries.DecoratedMethodsRegistry.Get(method);
-
-        if (decoratedMethod == null) return method.Invoke(target, args);
-
-        Func<object?>? proceed = null;
-
-        // Строим цепочку вызовов в обратном порядке
-        foreach (var decorator in decoratedMethod.Decorators.Reverse())
-        {
-            var currentProceed = proceed;
-            var currentDecorator = decorator;
-
-            proceed = () => currentDecorator.Intercept(
-                target,
-                method,
-                args,
-                currentProceed ?? (() => method.Invoke(target, args))
-            );
-        }
-
-        return proceed?.Invoke();
+        Logger.Debug($"{decoratedMethod}");
+        if (decoratedMethod == null) return (T?) method.Invoke(target, args);
+        return null;
     }
 }

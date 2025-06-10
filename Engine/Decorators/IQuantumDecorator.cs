@@ -5,7 +5,7 @@ namespace Engine.Decorators;
 /// <summary>
 /// Базовый интерфейс для всех декорирующих аттрибутов
 /// </summary>
-public interface IQuantumDecorator
+public abstract class QuantumDecoratorAttribute : QuantumAttribute
 {
     /// <summary>
     /// Перехватывает вызов метода
@@ -15,5 +15,5 @@ public interface IQuantumDecorator
     /// <param name="args">Аргументы метода</param>
     /// <param name="proceed">Функция для продолжения выполнения оригинального метода</param>
     /// <returns>Результат выполнения</returns>
-    object? Intercept(object? target, MethodInfo targetMethod, object?[]? args, Func<object?> proceed);
+    public abstract object? Intercept(object? target, MethodInfo targetMethod, object?[]? args, Func<object?> proceed);
 }

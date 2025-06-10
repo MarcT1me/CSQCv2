@@ -12,8 +12,12 @@ public abstract class AssetLoader
     /// Создание данных ассета
     /// </summary>
     /// <param name="assetFile">Данные загрузки ассета</param>
+    /// <param name="ct">Остановка задачи</param>
     /// <returns>Загруженные данные</returns>
-    public abstract object LoadFile(AssetFile assetFile);
+    public abstract Task<object> LoadFileAsync(
+        AssetFile assetFile,
+        CancellationToken ct = default
+    );
 
     /// <summary>
     /// Создание объекта данных ассета
@@ -22,31 +26,35 @@ public abstract class AssetLoader
     /// <param name="dependencies">Уже загруженные зависимости ассета</param>
     /// <param name="content">ДанныеЮ загруженные из AssetLoader.LoadFile</param>
     /// <returns>Данные ассета, готовые к упаковки в реестр</returns>
-    public abstract AssetData CreateAsset(
+    public static async Task<AssetData> CreateAsset(
         AssetFile assetFile,
         IEnumerable<AssetData>? dependencies,
         object content
-    );
+    )
+    {
+        return await Task.FromResult(new AssetData(
+            assetFile.TypeName,
+            assetFile.Identifier,
+            content,
+            dependencies: dependencies
+        ));
+    }
 
     /// <summary>
     /// Загрузка файла, как текстового
     /// </summary>
     /// <param name="path">Путь до файла</param>
     /// <returns>Текст из файла</returns>
-    protected static string ReadTextFile(string path)
-    {
-        return File.ReadAllText(path);
-    }
+    protected static async Task<string> ReadTextFileAsync(string path)
+        => await File.ReadAllTextAsync(path);
 
     /// <summary>
     /// Загрузка файла, как бинарного
     /// </summary>
     /// <param name="path">Путь до файла</param>
     /// <returns>Бинарные данные файла</returns>
-    protected static byte[] ReadBinaryFile(string path)
-    {
-        return File.ReadAllBytes(path);
-    }
+    protected static async Task<byte[]> ReadBinaryFileAsync(string path)
+        => await File.ReadAllBytesAsync(path);
 
     /// <summary>
     /// Открытие файла на чтение
@@ -54,10 +62,8 @@ public abstract class AssetLoader
     /// <param name="path">Путь до файла</param>
     /// <returns>Поток чтения данных</returns>
     /// <remarks>Не безопасно использовать в контексте AssetLoader</remarks>
-    protected static Stream OpenFile(string path)
-    {
-        return File.OpenRead(path);
-    }
+    protected static async Task<FileStream> OpenFileAsync(string path)
+        => await Task.FromResult(File.OpenRead(path));
 
     public static string AssetDirectory => Path.Combine(
         EngineCore.RootDirectory,

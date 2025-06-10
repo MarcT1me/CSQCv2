@@ -10,9 +10,9 @@ using Decorators;
 /// </summary>
 /// <param name="defaultValue">Значение по умолчанию, если метод где-то используется</param>
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Event | AttributeTargets.Constructor)]
-public class DevOnlyAttribute(object? defaultValue = null) : Attribute, IQuantumDecorator
+public class DevOnlyAttribute(object? defaultValue = null) : QuantumDecoratorAttribute
 {
-    public object? Intercept(object? target, MethodInfo targetMethod, object?[]? args, Func<object?> proceed)
+    public override object? Intercept(object? target, MethodInfo targetMethod, object?[]? args, Func<object?> proceed)
     {
         return BaseConfig.DebugMode ? proceed() : defaultValue;
     }

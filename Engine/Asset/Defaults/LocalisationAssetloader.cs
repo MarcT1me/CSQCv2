@@ -31,9 +31,14 @@ public sealed class LocalisationAssetloader : AssetLoader
 {
     private static readonly FileIniDataParser IniParser = new();
 
-    public override object LoadFile(AssetFile assetFile)
+    public override async Task<object> LoadFileAsync(
+        AssetFile assetFile,
+        CancellationToken ct = default
+    )
     {
-        var data = IniParser.ReadFile(assetFile.GetFullPath());
+        var data = await Task.FromResult(
+            IniParser.ReadFile(assetFile.GetFullPath())
+        );
 
         LocalisationData localisation = new(
             new Vector2i
@@ -45,14 +50,5 @@ public sealed class LocalisationAssetloader : AssetLoader
         );
 
         return localisation;
-    }
-
-    public override AssetData CreateAsset(AssetFile assetFile, IEnumerable<AssetData>? dependencies, object content)
-    {
-        return new AssetData(
-            assetFile.TypeName,
-            content,
-            identifier: assetFile.Identifier
-        );
     }
 }

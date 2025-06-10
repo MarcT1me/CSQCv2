@@ -2,16 +2,19 @@
 
     <PropertyGroup>
         <TargetFramework>net9.0</TargetFramework>
+        
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <OutDir>bin\$(Configuration)\$(TargetFramework)\bin\</OutDir>
+
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <OutputPath>bin\</OutputPath>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="ini-parser" Version="2.5.2" />
-        <PackageReference Include="OpenTK.Graphics" Version="4.8.2" />
-        <PackageReference Include="OpenTK.Mathematics" Version="4.8.2" />
+        <PackageReference Include="OpenTK.Graphics" Version="4.9.4" />
+        <PackageReference Include="OpenTK.Mathematics" Version="4.9.4" />
         <PackageReference Include="OpenTK.redist.glfw" Version="3.4.0.44" />
         <PackageReference Include="SDL2-CS.NetCore" Version="2.0.8" />
         <PackageReference Include="SpaceWizards.SharpFont" Version="1.0.2" />
@@ -24,16 +27,5 @@
     </ItemGroup>
 
     <!-- adding engine binary -->
-    <ItemGroup>
-<!--        <Content Include="Graphics\Font\freetype6.dll">-->
-<!--            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>-->
-<!--            <Link>freetype6.dll</Link>-->
-<!--        </Content>-->
-
-<!--        <Content Include="Graphics\Window\SDL2.dll">-->
-<!--            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>-->
-<!--            <Link>SDL2.dll</Link>-->
-<!--        </Content>-->
-    </ItemGroup>
 
 </Project>

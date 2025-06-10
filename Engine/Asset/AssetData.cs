@@ -12,9 +12,9 @@ using Data.Meta;
 /// <param name="identifier">Уникальны идентификатор ассета</param>
 public sealed class AssetData(
     string typeName,
+    Identifier identifier,
     object content,
-    IEnumerable<AssetData>? dependencies = null,
-    Identifier? identifier = null
+    IEnumerable<AssetData>? dependencies = null
 ) : MetaData(identifier)
 {
     public string Name { get; } = typeName;

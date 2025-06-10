@@ -22,7 +22,7 @@ public class Roster<T> : DataContainer<T>
     {
     }
 
-    public Roster(MetaData metaData, IEnumerable<KeyValuePair<Identifier, T>> data)
+    public Roster(MetaData metaData, Dictionary<Identifier, T> data)
         : base(metaData, data)
     {
     }
@@ -34,7 +34,7 @@ public class Roster<T> : DataContainer<T>
     /// </summary>
     /// <param name="metaData">Метаданные новой ветки</param>
     /// <returns>Новая ветка</returns>
-    public Roster<T> NewBranch(MetaData metaData) => NewBranch(metaData, new List<KeyValuePair<Identifier, T>>());
+    public Roster<T> NewBranch(MetaData metaData) => NewBranch(metaData, new Dictionary<Identifier, T>());
 
     /// <summary>
     /// Создание новой ветки в структуре (сохраняется в Branch)
@@ -42,7 +42,7 @@ public class Roster<T> : DataContainer<T>
     /// <param name="metaData">Метаданные новой ветки</param>
     /// <param name="data">Данные из которых будет создана ветка</param>
     /// <returns>Новая ветка</returns>
-    public Roster<T> NewBranch(MetaData metaData, IEnumerable<KeyValuePair<Identifier, T>> data)
+    public Roster<T> NewBranch(MetaData metaData, Dictionary<Identifier, T> data)
     {
         var branch = new Roster<T>(metaData, data);
         SaveBranch(branch);

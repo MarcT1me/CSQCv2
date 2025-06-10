@@ -11,14 +11,14 @@ public abstract class DataContainer<T> : MetaObject<MetaData>, IDataContainer
     #region Constructors
 
     protected DataContainer(MetaData metaData)
-        : this(metaData, new List<KeyValuePair<Identifier, T>>())
+        : this(metaData, new Dictionary<Identifier, T>())
     {
     }
 
-    protected DataContainer(MetaData metaData, IEnumerable<KeyValuePair<Identifier, T>> data)
+    protected DataContainer(MetaData metaData, Dictionary<Identifier, T> data)
         : base(metaData)
     {
-        Data = (ConcurrentIdentifierMap<object>)data;
+        Data = new ConcurrentIdentifierMap<object>(data as Dictionary<Identifier, object>);
         Registries.DataContainerRegistry.Register(
             this
         );
@@ -72,7 +72,7 @@ public abstract class DataContainer<T> : MetaObject<MetaData>, IDataContainer
     public int Count => Data.Count;
 
     public ICollection<Identifier> Keys => Data.Keys;
-    public ICollection<T> Values => (ICollection<T>)Data.Values;
+    public ICollection<object> Values => Data.Values;
 
     #endregion
 }

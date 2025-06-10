@@ -15,7 +15,7 @@ public class WritableTale<T> : DataContainer<T>
     {
     }
 
-    public WritableTale(MetaData metaData, IEnumerable<KeyValuePair<Identifier, T>> data)
+    public WritableTale(MetaData metaData, Dictionary<Identifier, T> data)
         : base(metaData, data)
     {
     }

@@ -31,10 +31,15 @@ public sealed class AssetManager(DependencyResolver resolver)
     /// </summary>
     /// <param name="assetFile">Данные о загрузке</param>
     /// <param name="alreadyLoadedDependencies">Уже загруженные ассеты, если такие есть</param>
+    /// <param name="ct">Остановка задачи</param>
     /// <returns></returns>
     /// <exception cref="InvalidAssetTypeError">В случае, если тип ассета был указан не верно</exception>
     /// <exception cref="AssetError">В любых других случаях, если ассет не был загружен до конца</exception>
-    public AssetData Load(AssetFile assetFile, IEnumerable<AssetData>? alreadyLoadedDependencies = null)
+    public async Task<AssetData> LoadAsync(
+        AssetFile assetFile, 
+        IEnumerable<AssetData>? alreadyLoadedDependencies = null,
+        CancellationToken ct = default
+        )
     {
         var assetType = Registries.AssetTypeRegistry.Get(assetFile.TypeName);
         if (assetType == null)
@@ -52,14 +57,14 @@ public sealed class AssetManager(DependencyResolver resolver)
             );
 
             // resolve dependencies
-            var resolvedDependencies = resolver.Resolve(assetFile);
+            var resolvedDependencies = await resolver.ResolveAsync(assetFile, ct: ct);
 
             // load content from file 
-            var loadedContent = assetType.AssetLoader.LoadFile(assetFile);
+            var loadedContent = await assetType.AssetLoader.LoadFileAsync(assetFile, ct: ct);
 
             // create asset data instance
             var finalDependencies = resolvedDependencies.Concat(alreadyLoadedDependencies ?? []);
-            var assetData = assetType.AssetLoader.CreateAsset(assetFile, finalDependencies, loadedContent);
+            var assetData = await AssetLoader.CreateAsset(assetFile, finalDependencies, loadedContent);
 
             // save in asset branch
             branch[assetData.Identifier] = assetData;

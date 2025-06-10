@@ -12,7 +12,8 @@ internal sealed class ScanMethodRegistryManager : IRegistryManager<MethodInfo>
 
     public void Register(MethodInfo obj)
     {
-        ScanMethods[$"{obj}/{obj.Name}"] = obj;
+        var key = $"{obj.DeclaringType?.FullName}.{obj.Name}";
+        ScanMethods.TryAdd(key, obj);
     }
 
     public MethodInfo? Get(object id)

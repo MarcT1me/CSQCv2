@@ -11,9 +11,9 @@ using Configuration;
 /// </summary>
 /// <param name="logMessage">Сообщение лога</param>
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Event | AttributeTargets.Constructor)]
-public class LogAttribute(string logMessage, bool debugOnly = false) : Attribute, IQuantumDecorator
+public class LogAttribute(string logMessage, bool debugOnly = false) : QuantumDecoratorAttribute
 {
-    public object? Intercept(object? target, MethodInfo targetMethod, object?[]? args, Func<object?> proceed)
+    public override object? Intercept(object? target, MethodInfo targetMethod, object?[]? args, Func<object?> proceed)
     {
         if (debugOnly)
         {

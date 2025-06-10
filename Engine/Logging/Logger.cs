@@ -26,10 +26,14 @@ public sealed class Logger(
 
     static Logger()
     {
-        Console.OutputEncoding = System.Text.Encoding.UTF8;
         Loggers = new LoggersTable();
+        Console.OutputEncoding = System.Text.Encoding.UTF8;
+    }
+
+    public static void InitLogger()
+    {
         AddLogger(new Logger());
-        Logger.Success("Default Logger added");
+        Success("Default Logger added");
     }
 
     /// <summary>
@@ -85,7 +89,7 @@ public sealed class Logger(
     /// <param name="message">Текст с информацией</param>
     public static void Info(string message)
     {
-        foreach (var logger in Loggers.Values)
+        foreach (ILogger logger in Loggers.Values)
         {
             logger.Log(LogLevel.Info, message);
         }
@@ -97,7 +101,7 @@ public sealed class Logger(
     /// <param name="message">Сообщение</param>
     public static void Debug(string message)
     {
-        foreach (var logger in Loggers.Values)
+        foreach (ILogger logger in Loggers.Values)
         {
             logger.Log(LogLevel.Debug, message);
         }
@@ -109,7 +113,7 @@ public sealed class Logger(
     /// <param name="message">Сообщение</param>
     public static void Success(string message)
     {
-        foreach (var logger in Loggers.Values)
+        foreach (ILogger logger in Loggers.Values)
         {
             logger.Log(LogLevel.Success, message);
         }
@@ -121,7 +125,7 @@ public sealed class Logger(
     /// <param name="message">Текст предупреждения</param>
     public static void Warning(string message)
     {
-        foreach (var logger in Loggers.Values)
+        foreach (ILogger logger in Loggers.Values)
         {
             logger.Log(LogLevel.Warning, message);
         }
@@ -133,7 +137,7 @@ public sealed class Logger(
     /// <param name="message">Сообщение о ошибке</param>
     public static void Error(string message)
     {
-        foreach (var logger in Loggers.Values)
+        foreach (ILogger logger in Loggers.Values)
         {
             logger.Log(LogLevel.Error, message);
         }
@@ -146,7 +150,7 @@ public sealed class Logger(
     /// <param name="e">Обрабатываемая ошибка</param>
     public static void Exception(string message, Exception e)
     {
-        foreach (var logger in Loggers.Values)
+        foreach (ILogger logger in Loggers.Values)
         {
             logger.Log(LogLevel.Exception, message);
             if (e.StackTrace != null) logger.LogWithoutFormat(e.StackTrace);
@@ -155,35 +159,44 @@ public sealed class Logger(
         }
     }
 
-    public void LogWithoutFormat(string message)
+    public void LogWithoutFormat(string message) => LogWithoutFormatAsync(message).GetAwaiter().GetResult();
+
+    private async Task LogWithoutFormatAsync(string message)
     {
         Console.WriteLine(message);
-        MetaData.File?.Writer.WriteLine(message);
+        await MetaData.File?.Writer.WriteLineAsync(message)!;
     }
 
-    public void Log(LogLevel level, string message)
+    public void Log(LogLevel level, string message) => LogAsync(level, message).GetAwaiter().GetResult();
+    
+    private async Task LogAsync(LogLevel level, string message)
     {
         if (!MetaData.IsActive) return;
-        LogInConsole(level, message);
-        LogInFile(level, message);
+        await LogInConsoleAsync(level, message);
+        await LogInFileAsync(level, message);
     }
 
-    private void LogInConsole(LogLevel level, string message)
+    private Task LogInConsoleAsync(LogLevel level, string message)
     {
         var format = MetaData.LogFormat.GetFormat(level);
+        GetMethodName(out var typeName, out var methodName);
+        
         var formattedMessage = string.Format(
-            format.Format,
+            format.ColorizedFormat ?? format.Format,
             DateTime.Now,
+            DateTime.Now.Millisecond,
             level,
-            GetMethodName(),
+            typeName,
+            methodName,
             message
         );
-    
+
         // Добавляем цветовые коды
-        Console.WriteLine($"{format.ColorStart}{formattedMessage}{format.ColorEnd}");
+        Console.WriteLine($"{formattedMessage}");
+        return Task.CompletedTask;
     }
 
-    private void LogInFile(LogLevel level, string message)
+    private async Task LogInFileAsync(LogLevel level, string message)
     {
         if (MetaData is { IsExpired: true, File: not null })
         {
@@ -191,30 +204,46 @@ public sealed class Logger(
             MetaData.RessetLifetime();
         }
 
-        MetaData.File?.Writer.WriteLine(
-            MetaData.LogFormat.GetFormat(level).Format,
+        var format = MetaData.LogFormat.GetFormat(level);
+        GetMethodName(out var typeName, out var methodName);
+        
+        var formattedMessage = string.Format(
+            format.Format,
             DateTime.Now,
+            DateTime.Now.Millisecond,
             level,
-            GetMethodName(),
+            typeName,
+            methodName,
             message
         );
+
+        if (MetaData.File is { } file)
+        {
+            await file.Writer.WriteLineAsync(formattedMessage);
+        }
     }
 
-    private static string GetMethodName()
+    private static void GetMethodName(out string typeName, out string methodName)
     {
-        var stackTrace = new StackTrace(skipFrames: 2, fNeedFileInfo: true);
+        var stackTrace = new StackTrace(skipFrames: 7, fNeedFileInfo: true);
         var frame = stackTrace.GetFrame(0);
-
-        if (frame == null) return "UnknownType:UnknownMethod";
+        if (frame == null)
+        {
+            typeName = "UnknownType";
+            methodName = "UnknownMethod";
+            return;
+        }
 
         var method = frame.GetMethod();
+        if (method == null)
+        {
+            typeName = "UnknownType";
+            methodName = "UnknownMethod";
+            return;
+        }
 
-        if (method == null) return "UnknownType:UnknownMethod";
-
-        var callerType = method.DeclaringType?.FullName ?? "UnknownType";
-        var callerMethod = method.Name;
-
-        return $"{callerType}:{callerMethod}";
+        typeName = method.DeclaringType?.FullName ?? "UnknownType";
+        methodName = method.Name;
     }
 
     public void Dispose()

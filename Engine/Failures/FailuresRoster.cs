@@ -11,7 +11,7 @@ public sealed class FailuresRoster(MetaData metaData) : Roster<FailureException>
 {
     public bool Contains(Type exceptionType)
     {
-        foreach (var failure in Values)
+        foreach (FailureException failure in Values)
         {
             if (failure.GetType() == exceptionType || failure.InnerException?.GetType() == exceptionType)
                 return true;

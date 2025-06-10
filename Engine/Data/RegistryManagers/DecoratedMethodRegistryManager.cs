@@ -6,22 +6,22 @@ namespace Engine.Data.RegistryManagers;
 using Decorators;
 using Logging;
 
-public class DecoratedMethodRegistryManager : IRegistryManager<DecoratedMethodInfo>
+internal class DecoratedMethodRegistryManager : IRegistryManager<QuantumMethodInfo>
 {
-    private static ConcurrentDictionary<string, DecoratedMethodInfo> Methods { get; } = new();
+    private static ConcurrentDictionary<string, QuantumMethodInfo> Methods { get; } = new();
     private static readonly Lazy<DecoratedMethodRegistryManager> Registry = 
         new(() => new DecoratedMethodRegistryManager());
     
-    public static IRegistryManager<DecoratedMethodInfo> Instance() => Registry.Value;
+    public static IRegistryManager<QuantumMethodInfo> Instance() => Registry.Value;
     
-    public void Register(DecoratedMethodInfo decoratedMethod)
+    public void Register(QuantumMethodInfo quantumMethod)
     {
-        Logger.Info($"Register Quantum Decorator for {decoratedMethod.Method.Name}");
-        var key = $"{decoratedMethod.Method.DeclaringType?.FullName}/{decoratedMethod.Method.Name}";
-        Methods[key] = decoratedMethod;
+        Logger.Info($"Register Quantum Decorator for {quantumMethod.Method.Name}");
+        var key = $"{quantumMethod.Method.DeclaringType?.FullName}/{quantumMethod.Method.Name}";
+        Methods.TryAdd(key, quantumMethod);
     }
 
-    public DecoratedMethodInfo? Get(object id)
+    public QuantumMethodInfo? Get(object id)
     {
         if (id is not MethodInfo method) return null;
         

@@ -10,12 +10,13 @@ using Decorators;
 
 public struct Registries
 {
-    public static readonly IRegistryManager<Type> TypeRegistry = ScanTypeRegistryManager.Instance();
-    public static readonly IRegistryManager<MethodInfo> MethodRegistry = ScanMethodRegistryManager.Instance();
+    public static readonly IRegistryManager<AssetType> AssetTypeRegistry = AssetTypeRegistryManager.Instance();
     public static readonly IRegistryManager<IDataContainer> DataContainerRegistry = ContainerRegistryManager.Instance();
     public static readonly IRegistryManager<Identifier> IdentifierRegistry = IdentifierRegistryManager.Instance();
-    public static readonly IRegistryManager<AssetType> AssetTypeRegistry = AssetTypeRegistryManager.Instance();
+    
+    public static readonly IRegistryManager<Type> TypeRegistry = ScanTypeRegistryManager.Instance();
+    public static readonly IRegistryManager<MethodInfo> MethodRegistry = ScanMethodRegistryManager.Instance();
 
-    public static readonly IRegistryManager<DecoratedMethodInfo> DecoratedMethodsRegistry =
+    public static readonly IRegistryManager<QuantumMethodInfo> DecoratedMethodsRegistry =
         DecoratedMethodRegistryManager.Instance();
 }

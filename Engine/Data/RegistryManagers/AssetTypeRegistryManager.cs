@@ -15,7 +15,7 @@ internal sealed class AssetTypeRegistryManager : IRegistryManager<AssetType>
     public void Register(AssetType obj)
     {
         Logger.Info($"Register AssetType<{obj.AssetLoader.GetType().Name}> - {obj.Name}");
-        AssetTypes[obj.Name] = obj;
+        AssetTypes.TryAdd(obj.Name, obj);
     }
 
     public AssetType? Get(object id)

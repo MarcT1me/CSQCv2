@@ -30,17 +30,13 @@ public readonly struct ImageData
 
 public sealed class ImageAssetLoader : AssetLoader
 {
-    public override object LoadFile(AssetFile assetFile)
+    public override async Task<object> LoadFileAsync(
+        AssetFile assetFile,
+        CancellationToken ct = default
+    )
     {
-        return new ImageData(ReadBinaryFile(assetFile.GetFullPath()));
-    }
-
-    public override AssetData CreateAsset(AssetFile assetFile, IEnumerable<AssetData>? dependencies, object content)
-    {
-        return new AssetData(
-            assetFile.TypeName,
-            content,
-            identifier: assetFile.Identifier
-        );
+        return Task.FromResult<object>(new ImageData(
+            await ReadBinaryFileAsync(assetFile.GetFullPath())
+        ));
     }
 }

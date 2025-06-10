@@ -11,7 +11,8 @@ internal sealed class ScanTypeRegistryManager : IRegistryManager<Type>
 
     public void Register(Type obj)
     {
-        ScanTypes[$"{obj}/{obj.Name}"] = obj;
+        var key = $"{obj}/{obj.Name}";
+        ScanTypes.TryAdd(key, obj);
     }
 
     public Type? Get(object id)
