@@ -40,11 +40,13 @@ internal sealed class ConsoleFailureHandler : IFailureHandler
 public static class EngineCore
 {
     public static string RootDirectory = "";
-    public static Assembly? AppLibAssembly = null;
+    public static Assembly? AppLibAssembly;
     public static IFailureHandler? DefaultFailureHandler;
 
-    public static void Initialize(Assembly? appLibAssembly = null, bool is_headless = false)
+    public static void Initialize(Assembly? appLibAssembly)
     {
+        Console.WriteLine("Initialize EngineCore");
+        
         using (new Catch("Main EngineCore Catch"))
         {
             AppLibAssembly = appLibAssembly;
@@ -67,30 +69,32 @@ public static class EngineCore
 
         Logger.Info("Engine Initialization Started");
 
-        Logger.Info(
-            $"In Headless mode: {BaseConfig.Headless}\n" +
-            $"App name: {BaseConfig.AppName}\n" +
-            $"App path: {RootDirectory}\n" +
-            $"Asset path: {BaseConfig.AssetPath}"
+        Logger.Info($"In Headless mode: {BaseConfig.Headless}\n" +
+                    $"App name: {BaseConfig.AppName}\n" +
+                    $"App path: {RootDirectory}\n" +
+                    $"Asset path: {BaseConfig.AssetPath}"
         );
-
+        Logger.Separator();
+        
         QuantumTracer.HandleAssembly(
             [
                 Assembly.GetExecutingAssembly(),
                 AppLibAssembly
             ]
         );
-
-        Logger.Success("Engine initialized\n");
+        Logger.Separator();
 
         if (BaseConfig.DebugMode)
         {
             EnableDebugFeatures();
         }
+
+        Logger.Success("Engine initialized");
+        Logger.Separator();
     }
 
     private static void EnableDebugFeatures()
     {
-        Logger.Debug("Enable Debug Features\n");
+        Logger.Debug("Enable Debug Features");
     }
 }

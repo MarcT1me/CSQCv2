@@ -1,5 +1,3 @@
 ﻿namespace Engine.Decorators;
 
-public class QuantumAttribute : Attribute
-{
-}
+public abstract class QuantumAttribute : Attribute;

@@ -5,8 +5,4 @@ namespace Engine.Decorators;
 /// <summary>
 /// Метод задекорированный аттрибутом
 /// </summary>
-public record QuantumMethodInfo
-{
-    public required MethodInfo Method { get; init; }
-    public required QuantumAttribute[] Attributes { get; init; }
-}
+public record QuantumMethodInfo(MethodInfo Method, IEnumerable<QuantumDecoratorAttribute> Decorators);

@@ -23,11 +23,15 @@ public sealed class Logger(
 ), ILogger, IDisposable
 {
     private static readonly LoggersTable Loggers;
+    private static readonly Lock Locker = new();
+    private static readonly Lock FileLocker = new();
 
     static Logger()
     {
         Loggers = new LoggersTable();
         Console.OutputEncoding = System.Text.Encoding.UTF8;
+        Console.Title = "Quantum console";
+        Console.Out.Flush();
     }
 
     public static void InitLogger()
@@ -159,44 +163,79 @@ public sealed class Logger(
         }
     }
 
-    public void LogWithoutFormat(string message) => LogWithoutFormatAsync(message).GetAwaiter().GetResult();
-
-    private async Task LogWithoutFormatAsync(string message)
+    /// <summary>
+    /// Вывод пустую строку
+    /// </summary>
+    public static void Separator()
     {
-        Console.WriteLine(message);
-        await MetaData.File?.Writer.WriteLineAsync(message)!;
+        foreach (ILogger logger in Loggers.Values)
+        {
+            logger.LogWithoutFormat("");
+        }
     }
 
-    public void Log(LogLevel level, string message) => LogAsync(level, message).GetAwaiter().GetResult();
-    
-    private async Task LogAsync(LogLevel level, string message)
-    {
-        if (!MetaData.IsActive) return;
-        await LogInConsoleAsync(level, message);
-        await LogInFileAsync(level, message);
-    }
+    public void LogWithoutFormat(string message) => LogWithoutFormatAsync(message).Wait();
 
-    private Task LogInConsoleAsync(LogLevel level, string message)
+    private Task LogWithoutFormatAsync(string message)
     {
-        var format = MetaData.LogFormat.GetFormat(level);
-        GetMethodName(out var typeName, out var methodName);
-        
-        var formattedMessage = string.Format(
-            format.ColorizedFormat ?? format.Format,
-            DateTime.Now,
-            DateTime.Now.Millisecond,
-            level,
-            typeName,
-            methodName,
-            message
-        );
-
-        // Добавляем цветовые коды
-        Console.WriteLine($"{formattedMessage}");
+        WriteInConsole(LogLevel.Info, message);
+        WriteInFile(message);
         return Task.CompletedTask;
     }
 
-    private async Task LogInFileAsync(LogLevel level, string message)
+    public void Log(LogLevel level, string message) => LogAsync(level, message).Wait();
+
+    private async Task LogAsync(LogLevel level, string message)
+    {
+        if (!MetaData.IsActive) return;
+
+        GetCalledMethodName(out var typeName, out var methodName, out var lineNumber);
+        var format = MetaData.LogFormat.GetFormat(level);
+        var nowTime = DateTime.Now;
+
+        await LogInConsole(
+            level, message, format, nowTime,
+            typeName, methodName, lineNumber);
+        await LogInFile(
+            level, message, format, nowTime,
+            typeName, methodName, lineNumber
+        );
+    }
+
+    private async Task LogInConsole(
+        LogLevel level, string message, LogFormat format, DateTime nowTime,
+        string typeName, string methodName, int lineNumber
+    )
+    {
+        var formattedMessage = string.Format(
+            format.ColorizedFormat ?? format.Format,
+            nowTime,
+            nowTime.Millisecond * 10 + float.Round(nowTime.Nanosecond / 100f, 0),
+            level,
+            typeName,
+            methodName,
+            lineNumber,
+            message
+        );
+
+        await WriteInConsole(level, formattedMessage);
+    }
+
+    private Task WriteInConsole(LogLevel level, string message)
+    {
+        var writer = level is LogLevel.Error or LogLevel.Exception ? Console.Error : Console.Out;
+        lock (Locker)
+        {
+            writer.WriteLineAsync(message);
+            writer.FlushAsync();
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private async Task LogInFile(
+        LogLevel level, string message, LogFormat format, DateTime nowTime,
+        string typeName, string methodName, int lineNumber)
     {
         if (MetaData is { IsExpired: true, File: not null })
         {
@@ -204,33 +243,43 @@ public sealed class Logger(
             MetaData.RessetLifetime();
         }
 
-        var format = MetaData.LogFormat.GetFormat(level);
-        GetMethodName(out var typeName, out var methodName);
-        
         var formattedMessage = string.Format(
             format.Format,
-            DateTime.Now,
-            DateTime.Now.Millisecond,
+            nowTime,
+            nowTime.Millisecond * 10 + float.Round(nowTime.Nanosecond / 100f, 0),
             level,
             typeName,
             methodName,
+            lineNumber,
             message
         );
 
-        if (MetaData.File is { } file)
-        {
-            await file.Writer.WriteLineAsync(formattedMessage);
-        }
+        await WriteInFile(formattedMessage);
     }
 
-    private static void GetMethodName(out string typeName, out string methodName)
+    private Task WriteInFile(string message)
     {
-        var stackTrace = new StackTrace(skipFrames: 7, fNeedFileInfo: true);
+        if (MetaData.File is not { } file) return Task.CompletedTask;
+        lock (FileLocker)
+        {
+            file.Writer.WriteLineAsync(message);
+            file.Writer.FlushAsync();
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private static void GetCalledMethodName(
+        out string typeName, out string methodName, out int lineNumber
+    )
+    {
+        var stackTrace = new StackTrace(skipFrames: 6, fNeedFileInfo: true);
         var frame = stackTrace.GetFrame(0);
         if (frame == null)
         {
             typeName = "UnknownType";
             methodName = "UnknownMethod";
+            lineNumber = -1;
             return;
         }
 
@@ -239,11 +288,13 @@ public sealed class Logger(
         {
             typeName = "UnknownType";
             methodName = "UnknownMethod";
+            lineNumber = -1;
             return;
         }
 
         typeName = method.DeclaringType?.FullName ?? "UnknownType";
         methodName = method.Name;
+        lineNumber = frame.GetFileLineNumber();
     }
 
     public void Dispose()

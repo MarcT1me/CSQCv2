@@ -20,14 +20,10 @@ public static class QuantumTracer
         foreach (var assembly in assemblies)
         {
             if (assembly is null) continue;
-            
+
             Logger.Info($"Scanning assembly: {assembly.FullName}");
 
-            var types = assembly.GetTypes();
-            foreach (var type in types)
-            {
-                HandleTypeScanning(type);
-            }
+            ProcessAssembly(assembly);
         }
     }
 
@@ -43,44 +39,56 @@ public static class QuantumTracer
         {
             (_, ScanTypes.Scan) => Registries.TypeRegistry.Get(id),
             (_, ScanTypes.Callback) => Registries.MethodRegistry.Get(id),
-            (_, ScanTypes.Decorated) => Registries.DecoratedMethodsRegistry.Get(id),
             (string name, ScanTypes.Assembly) => AppDomain.CurrentDomain.GetAssemblies()
                 .FirstOrDefault(a => a.GetName().Name == name),
             _ => null
         };
     }
 
-    private static void HandleTypeScanning(Type type)
+    public static void ProcessAssembly(Assembly assembly)
     {
-        HandleClass(type);
+        var types = assembly.GetTypes();
 
-        // Сканируем методы
-        foreach (var method in type.GetMethods(
-                     BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
-                )
+        foreach (var type in types)
         {
-            HandleMethod(type, method);
+            ProcessType(type);
+
+            // Сканируем методы
+            foreach (var method in type.GetMethods())
+            {
+                ProcessMethod(type, method);
+            }
         }
     }
 
-    private static void HandleClass(Type type)
+    public static void ProcessType(Type type)
     {
         var classAttributes = type.GetCustomAttributes(false);
         foreach (var attr in classAttributes.OfType<QTraceAttribute>())
         {
             attr.ScanHandling(type);
         }
-
-        RuntimeDecorator.SaveClassDecorators(type);
     }
 
-    private static void HandleMethod(Type type, MethodInfo method)
+    public static void ProcessMethod(Type type, MethodInfo methodInfo)
     {
-        var methodAttributes = method.GetCustomAttributes(false);
+        // var methodInfo = type.GetMethod(methodSymbol.Name);
+        // if (methodInfo is null) return;
 
-        foreach (var attr in methodAttributes.OfType<QTraceAttribute>())
+        var methodAttributes = methodInfo.GetCustomAttributes(false);
+
+        var scanAttr = methodAttributes.OfType<QTraceAttribute>().ToHashSet();
+        if (scanAttr.Count == 1)
         {
-            attr.ScanHandling(type, method);
+            scanAttr.First().ScanHandling(type, methodInfo);
+        }
+
+        var decorators = methodAttributes.OfType<QuantumDecoratorAttribute>().ToHashSet();
+        if (decorators.Count > 0)
+        {
+            Registries.MethodRegistry.Register(
+                new QuantumMethodInfo(methodInfo, decorators)
+            );
         }
     }
 }

@@ -15,5 +15,10 @@ public abstract class QuantumDecoratorAttribute : QuantumAttribute
     /// <param name="args">Аргументы метода</param>
     /// <param name="proceed">Функция для продолжения выполнения оригинального метода</param>
     /// <returns>Результат выполнения</returns>
-    public abstract object? Intercept(object? target, MethodInfo targetMethod, object?[]? args, Func<object?> proceed);
+    public abstract object? Intercept(
+        object? target,
+        MethodInfo targetMethod,
+        object?[]? args,
+        Func<object?> proceed
+    );
 }

@@ -19,14 +19,19 @@ public class LogAttribute(string logMessage, bool debugOnly = false) : QuantumDe
         {
             if (BaseConfig.DebugMode)
             {
-                Logger.Info(logMessage);
+                Log(targetMethod);
             }
         }
         else
         {
-            Logger.Info(logMessage);
+            Log(targetMethod);
         }
 
         return proceed();
+    }
+
+    private void Log(MethodInfo targetMethod)
+    {
+        Logger.Info($"\e[36m{targetMethod.Name}\e[0m \e[31m-\e[0m {logMessage}");
     }
 }

@@ -9,6 +9,5 @@ public enum ScanTypes
     Assembly,
     
     Callback,
-    Bind,
-    Decorated
+    Bind
 }

@@ -7,25 +7,23 @@ namespace Engine.Extensions.Tracer;
 
 using Data.RegistryManagers;
 using Logging;
+using Decorators;
 
 /// <summary>
 /// Аттрибут для добавления классов и методов в список типов движка (можно будет использовать в любой момент)
 /// </summary>
 /// <param name="scanType">Тип, указывающий сканеру область для сохранения</param>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
-public class QTraceAttribute(ScanTypes scanType) : Attribute
+public class QTraceAttribute(ScanTypes scanType) : QuantumAttribute
 {
     /// <summary>
     /// Метод для регистрирования классов
     /// </summary>
-    public void ScanHandling(Type @class, bool fromMethodScanning = false)
+    public void ScanHandling(Type @class)
     {
-        Debug.Assert(
-            scanType == ScanTypes.Scan || fromMethodScanning,
-            "traceType does not match the Scan"
-        );
+        Debug.Assert(scanType == ScanTypes.Scan, "traceType does not match the Scan");
 
-        Logger.Info($"Add new scanned class [{@class.Name}]" + (fromMethodScanning ? " for method scanning" : ""));
+        Logger.Info($"Add new scanned class [{@class.Name}]");
 
         Registries.TypeRegistry.Register(@class);
     }
@@ -41,10 +39,10 @@ public class QTraceAttribute(ScanTypes scanType) : Attribute
         );
 
         if (Registries.TypeRegistry.Get(@class.Name) == null)
-            ScanHandling(@class, true);
+            ScanHandling(@class);
 
         Logger.Info($"Add new scanned method [{method.Name}] -> {scanType}");
 
-        Registries.MethodRegistry.Register(method);
+        Registries.MethodRegistry.Register(new QuantumMethodInfo(method, []));
     }
 }

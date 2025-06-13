@@ -1,22 +1,23 @@
 ﻿using System.Collections.Concurrent;
-using System.Reflection;
 
 namespace Engine.Data.RegistryManagers;
 
-internal sealed class ScanMethodRegistryManager : IRegistryManager<MethodInfo>
+using Decorators;
+
+internal sealed class ScanMethodRegistryManager : IRegistryManager<QuantumMethodInfo>
 {
-    private static ConcurrentDictionary<string, MethodInfo> ScanMethods { get; } = new();
+    private static ConcurrentDictionary<string, QuantumMethodInfo> ScanMethods { get; } = new();
     private static readonly Lazy<ScanMethodRegistryManager> Registry = new(() => new ScanMethodRegistryManager());
 
-    public static IRegistryManager<MethodInfo> Instance() => Registry.Value;
+    public static IRegistryManager<QuantumMethodInfo> Instance() => Registry.Value;
 
-    public void Register(MethodInfo obj)
+    public void Register(QuantumMethodInfo qMethodgod)
     {
-        var key = $"{obj.DeclaringType?.FullName}.{obj.Name}";
-        ScanMethods.TryAdd(key, obj);
+        var key = $"{qMethodgod.Method.DeclaringType?.FullName}.{qMethodgod.Method.Name}";
+        ScanMethods.TryAdd(key, qMethodgod);
     }
 
-    public MethodInfo? Get(object id)
+    public QuantumMethodInfo? Get(object id)
     {
         if (id is not string name) return null;
 

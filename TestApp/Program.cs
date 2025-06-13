@@ -1,27 +1,17 @@
-﻿using System.Reflection;
-using Engine;
-using Engine.Extensions.DebugFeatures;
-using Engine.Logging;
+﻿using QuantumLauncher;
 
 namespace TestApp;
 
-public partial class Program
+public class Program
 {
-    [Obsolete("Obsolete")]
     public static void Main(string[] args)
     {
-        EngineCore.Initialize(
-            appLibAssembly: Assembly.GetExecutingAssembly()
-        );
-        
-        var app = new Program();
-        var ret = app.TestLogMethod();
-        Logger.Debug(ret.ToString() ?? string.Empty);
-    }
+        // load engine and link to loaded App
+        var (app, eng) = QLauncher.InitProject(AppDomain.CurrentDomain);
+        eng.Activate(); // activate Engine
 
-    [Log("ХУЙ")]
-    public int? TestLogMethod()
-    {
-        return 120;
+        // activate and start app
+        app.Activate();
+        app.Start();
     }
 }
