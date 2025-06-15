@@ -9,10 +9,9 @@ using Data.RegistryManagers;
 /// <summary>
 /// Менеджер, управляющий ассетами
 /// </summary>
-/// <param name="resolver">Объект управляющий зависимостями ассетов</param>
-public sealed class AssetManager(DependencyResolver resolver)
+public static class AssetManager
 {
-    public Roster<AssetData> Storage { get; } = new(new MetaData("assetStorage"));
+    public static Roster<AssetData> Storage { get; } = new(new MetaData("assetStorage"));
 
     /// <summary>
     /// Регистрация ассета
@@ -35,7 +34,7 @@ public sealed class AssetManager(DependencyResolver resolver)
     /// <returns></returns>
     /// <exception cref="InvalidAssetTypeError">В случае, если тип ассета был указан не верно</exception>
     /// <exception cref="AssetError">В любых других случаях, если ассет не был загружен до конца</exception>
-    public async Task<AssetData> LoadAsync(
+    public static async Task<AssetData> LoadAsync(
         AssetFile assetFile, 
         IEnumerable<AssetData>? alreadyLoadedDependencies = null,
         CancellationToken ct = default
@@ -57,7 +56,7 @@ public sealed class AssetManager(DependencyResolver resolver)
             );
 
             // resolve dependencies
-            var resolvedDependencies = await resolver.ResolveAsync(assetFile, ct: ct);
+            var resolvedDependencies = await DependencyResolver.ResolveAsync(assetFile, ct: ct);
 
             // load content from file 
             var loadedContent = await assetType.AssetLoader.LoadFileAsync(assetFile, ct: ct);

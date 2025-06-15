@@ -8,9 +8,11 @@ using QuantumEvents;
 using Configuration;
 using Threading;
 
+public delegate void EventHandlingEvent(QuantumEvent e);
+
 public class QuantumEventHandler
 {
-    public static event HandleEvent? OnEvent;
+    public static event EventHandlingEvent? EventHandling;
     private static readonly Lock Lock = new();
 
     private class EventBatchHandler : IDisposable
@@ -27,11 +29,11 @@ public class QuantumEventHandler
         {
             if (ThreadingConfig.IsMultiThreadEventHanlding)
             {
-                _threadPool?.QueueWorkItem(() => OnEvent?.Invoke(qEvent));
+                _threadPool?.QueueWorkItem(() => EventHandling?.Invoke(qEvent));
             }
             else
             {
-                OnEvent?.Invoke(qEvent);
+                EventHandling?.Invoke(qEvent);
             }
         }
 

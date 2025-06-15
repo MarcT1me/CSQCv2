@@ -4,11 +4,11 @@ namespace Engine.Asset;
 
 using Logging;
 
-public class DependencyResolver(AssetManager manager)
+public static class DependencyResolver
 {
-    private readonly ConcurrentHashSet<string> _loadedSet = new();
+    private static readonly ConcurrentHashSet<string> LoadedSet = new();
 
-    public async Task<LinkedList<AssetData>> ResolveAsync(
+    public static async Task<LinkedList<AssetData>> ResolveAsync(
         AssetFile assetFile,
         CancellationToken ct = default
     )
@@ -22,18 +22,18 @@ public class DependencyResolver(AssetManager manager)
 
         var cacheKey = assetFile.Path;
 
-        if (!_loadedSet.Contains(cacheKey))
+        if (!LoadedSet.Contains(cacheKey))
             throw new CyclicDependencyError(assetFile);
 
-        _loadedSet.Add(cacheKey);
+        LoadedSet.Add(cacheKey);
 
         AssetFile? currentDependency = null;
         try
         {
             var loadTasks = assetFile.Dependencies
-                .Select(dep => manager.LoadAsync(dep, ct: ct))
+                .Select(dep => AssetManager.LoadAsync(dep, ct: ct))
                 .ToList();
-
+            
             await Task.WhenAll(loadTasks);
             foreach (var task in loadTasks) dependencies.AddLast(task.Result);
 
@@ -47,7 +47,7 @@ public class DependencyResolver(AssetManager manager)
         }
         finally
         {
-            _loadedSet.Remove(cacheKey);
+            LoadedSet.Remove(cacheKey);
         }
     }
 }
