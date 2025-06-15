@@ -20,7 +20,7 @@ public class WritableTale<T> : DataContainer<T>
     {
     }
 
-    public override void Set(object? key, T? value)
+    public override void Set(object key, T? value)
     {
         if (Identifier.GiveFromUncertain(key) is not { } identifier) return;
 
@@ -34,7 +34,7 @@ public class WritableTale<T> : DataContainer<T>
         }
     }
     
-    public override object? Pop(object? key)
+    public override object? Pop(object key)
     {
         var identifier = Identifier.GiveFromUncertain(key);
         

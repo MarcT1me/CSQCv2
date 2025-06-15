@@ -6,15 +6,36 @@ using Data.Meta;
 /// <summary>
 /// Контейнер для хранения потоков
 /// </summary>
-internal sealed class ThreadRoster : Roster<QThread>
+public class ThreadRoster : Roster<QuantumThread>
 {
-    public Roster<QThread> Pending => GetBranch("threadRoster-branch-pending")!;
-    public Roster<QThread> Worked => GetBranch("threadRoster-branch-worked")!;
+    public Roster<QuantumThread> Pending => GetBranch("threadRoster-branch-pending")!;
+    public Roster<QuantumThread> Worked => GetBranch("threadRoster-branch-worked")!;
 
     public ThreadRoster() : base(new MetaData("threadRoster"))
     {
         NewBranch(new MetaData("threadRoster-branch-pending"));
         NewBranch(new MetaData("threadRoster-branch-worked"));
+    }
+    
+    public void Cleanup()
+    {
+        lock (this)
+        {
+            foreach (var id in Pending.Keys.ToList())
+            {
+                Pending[id]?.Dispose();
+                Pending[id] = null;
+            }
+        
+            foreach (var id in Worked.Keys.ToList())
+            {
+                Worked[id]?.Dispose();
+                Worked[id] = null;
+            }
+        
+            Pending.Clear();
+            Worked.Clear();
+        }
     }
 
     public void CleanupExpired()
@@ -26,7 +47,7 @@ internal sealed class ThreadRoster : Roster<QThread>
         }
     }
 
-    private void CleanBranch(Roster<QThread> branch)
+    private void CleanBranch(Roster<QuantumThread> branch)
     {
         foreach (var id in branch.Keys.ToList())
         {

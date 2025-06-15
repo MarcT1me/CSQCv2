@@ -26,11 +26,11 @@ public sealed class Identifier
     /// </summary>
     /// <param name="value">Объект, который стоит превратить в Identifier</param>
     /// <returns>Уникальный идентификатор, созданный из неопределённого типа</returns>
-    public static Identifier FromUncertain(object? value) => value switch
+    public static Identifier FromUncertain(object value) => value switch
     {
         Identifier id => id,
         string s => new Identifier(s),
-        _ => new Identifier()
+        _ => new Identifier(value.ToString())
     };
 
     /// <summary>
@@ -38,8 +38,8 @@ public sealed class Identifier
     /// </summary>
     /// <param name="value">Объект, предположительно лежащий в реестре, как Identifier</param>
     /// <returns>Первый совпавший с value идентификатор</returns>
-    public static Identifier? GiveFromUncertain(object? value) =>
-        value is null ? null : Registries.IdentifierRegistry.Get(value);
+    public static Identifier? GiveFromUncertain(object value) =>
+        Registries.IdentifierRegistry.Get(value);
 
     public override string ToString() => Name ?? Uuid.ToString();
 }

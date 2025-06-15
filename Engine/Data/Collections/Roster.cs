@@ -71,7 +71,7 @@ public class Roster<T> : DataContainer<T>
 
     #endregion
 
-    public override void Set(object? key, T? value)
+    public override void Set(object key, T? value)
     {
         if (Identifier.GiveFromUncertain(key) is not { } identifier) return;
 

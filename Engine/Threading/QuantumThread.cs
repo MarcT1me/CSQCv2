@@ -8,7 +8,7 @@ using Logging;
 /// <summary>
 /// Класс потоков с авторской реализацией, внедрённый в системы движка
 /// </summary>
-public class QThread : MetaObject<QThreadMeta>, IDisposable, IFailureHandler
+public class QuantumThread : MetaObject<QThreadMeta>, IDisposable, IFailureHandler
 {
     #region Static Members
 
@@ -31,7 +31,7 @@ public class QThread : MetaObject<QThreadMeta>, IDisposable, IFailureHandler
         }
     }
 
-    public static QThread? Current
+    public static QuantumThread? Current
     {
         get
         {
@@ -46,12 +46,12 @@ public class QThread : MetaObject<QThreadMeta>, IDisposable, IFailureHandler
     #region props and incapsulations
 
     private readonly Thread _thread;
-    private object? _actionResult;
     private bool _isDisposed;
 
     public bool IsAlive => _thread.IsAlive;
-    public object? Result => _actionResult;
     public ThreadState State => _thread.ThreadState;
+
+    private readonly Action? _action;
 
     #endregion
 
@@ -62,12 +62,14 @@ public class QThread : MetaObject<QThreadMeta>, IDisposable, IFailureHandler
     /// <param name="failureLevel">Уровень ошибок, обрабатываемый в потоках</param>
     /// <param name="isBackground">Позволяет потоку работать после прекращения главного потока</param>
     /// <param name="lifetimeSeconds">Время жизни потока с начала работы</param>
+    /// <param name="action">Действие, для быстрого создания потока</param>
     /// <exception cref="AlreadyExistThreadException">Если такой поток уже существует</exception>
-    protected QThread(
+    public QuantumThread(
         string? name = null,
         FailureLevel? failureLevel = null,
         bool isBackground = true,
-        float? lifetimeSeconds = null
+        float? lifetimeSeconds = null,
+        Action? action = null
     ) : base(new QThreadMeta(name, failureLevel, isBackground, lifetimeSeconds))
     {
         if (Roster.Pending.Contains(Id) || Roster.Worked.Contains(Id))
@@ -78,6 +80,7 @@ public class QThread : MetaObject<QThreadMeta>, IDisposable, IFailureHandler
             Name = Id.ToString(),
             IsBackground = MetaData.IsBackground
         };
+        _action = action;
 
         Roster.Pending[Id] = this;
     }
@@ -88,9 +91,9 @@ public class QThread : MetaObject<QThreadMeta>, IDisposable, IFailureHandler
     /// Метод, запускаемый в другом потоке
     /// </summary>
     /// <returns>Результат его выполнения</returns>
-    protected virtual object? Action()
+    protected virtual void Action()
     {
-        return null;
+        _action?.Invoke();
     }
 
     /// <summary>
@@ -131,7 +134,7 @@ public class QThread : MetaObject<QThreadMeta>, IDisposable, IFailureHandler
 
             using (new Catch(failureLevel: MetaData.FailureLevel, handler: this))
             {
-                _actionResult = Action();
+                Action();
             }
         }
         finally
@@ -305,7 +308,7 @@ public class QThread : MetaObject<QThreadMeta>, IDisposable, IFailureHandler
         GC.SuppressFinalize(this);
     }
 
-    ~QThread() => Dispose();
+    ~QuantumThread() => Dispose();
 
     #endregion
 }

@@ -30,7 +30,7 @@ public abstract class DataContainer<T> : MetaObject<MetaData>, IDataContainer
 
     #region Item support
 
-    public T? this[Identifier key]
+    public T? this[object key]
     {
         get => (T)Get(key)!;
         set => Set(key, value);
@@ -49,7 +49,7 @@ public abstract class DataContainer<T> : MetaObject<MetaData>, IDataContainer
     /// </summary>
     /// <param name="key">Объект, ассоциируемый со значением</param>
     /// <param name="value">Значение на сохранение</param>
-    public virtual void Set(object? key, T? value)
+    public virtual void Set(object key, T? value)
     {
     }    
     
@@ -58,7 +58,7 @@ public abstract class DataContainer<T> : MetaObject<MetaData>, IDataContainer
     /// </summary>
     /// <param name="key">Объект, ассоциируемый со значением</param>
     /// <returns>Данные, лежащие по ключу или пустоту, если их нет</returns>
-    public virtual object? Pop(object? key)
+    public virtual object? Pop(object key)
     {
         return null;
     }
@@ -73,6 +73,8 @@ public abstract class DataContainer<T> : MetaObject<MetaData>, IDataContainer
 
     public ICollection<Identifier> Keys => Data.Keys;
     public ICollection<object> Values => Data.Values;
+    
+    public void Clear() => Data.Clear();
 
     #endregion
 }
