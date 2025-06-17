@@ -1,13 +1,15 @@
 ﻿namespace Engine.Time;
 
 using Data.Meta;
+using Data.Collections;
+using Defers;
 
-public class ClockMeta : TimedMetaData
+public sealed class ClockMeta : TimedMetaData
 {
     private uint _tickRate;
 
-    public SpeedTable SpeedTable { get; init; }
-    public DeferTable DeferTable { get; init; }
+    public WritableTale<float> SpeedTable { get; init; }
+    public WritableTale<Defer> DeferTable { get; init; }
 
     public double TickDelay { get; private set; }
     public double DeltaTime { get; private set; }
@@ -33,13 +35,13 @@ public class ClockMeta : TimedMetaData
 
     public double CurrentTps => 1.0d / DeltaTime;
 
-    public ClockMeta(uint tickRate, double currentTime, SpeedTable speedTable)
+    public ClockMeta(uint tickRate, double currentTime, WritableTale<float> speedTable)
         : base($"ClockData<{currentTime}, {tickRate}>")
     {
         Tps = tickRate;
         CurrentTime = currentTime;
         SpeedTable = speedTable;
-        DeferTable = new DeferTable(new MetaData());
+        DeferTable = new (new MetaData());
     }
 
     public void Tick(double currentTime)

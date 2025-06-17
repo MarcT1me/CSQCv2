@@ -1,4 +1,5 @@
-﻿using Engine.Data.Collections;
+﻿using System.Collections.Concurrent;
+using Engine.Data.Collections;
 
 namespace Engine.Asset;
 
@@ -6,7 +7,7 @@ using Logging;
 
 public static class DependencyResolver
 {
-    private static readonly ConcurrentHashSet<string> LoadedSet = new();
+    private static readonly ConcurrentSet<string> LoadedSet = new();
 
     public static async Task<LinkedList<AssetData>> ResolveAsync(
         AssetFile assetFile,

@@ -1,8 +1,11 @@
 ﻿namespace Engine.Objects;
 
+
 public interface IExitHandler
 {
-    public void OnExitEvent()
-    {
-    }
+    /// <summary>
+    /// Событие выхода из приложения
+    /// </summary>
+    /// <remarks>Только для использования с event</remarks>
+    void OnExitHandling();
 }

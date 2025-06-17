@@ -9,7 +9,7 @@ using Data.Meta;
 using Events.QuantumEvents;
 using Events.QuantumEvents.Joy;
 
-public class Joy(DeviceEvent deviceEvent)
+public sealed class Joy(DeviceEvent deviceEvent)
 {
     public static readonly WritableTale<Joy> Joys = new(new MetaData("JoysList"));
 

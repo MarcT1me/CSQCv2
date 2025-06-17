@@ -5,7 +5,7 @@ using Data.Meta;
 using Events.QuantumEvents;
 using Events.QuantumEvents.Controller;
 
-public class Controller(DeviceEvent deviceEvent)
+public sealed class Controller(DeviceEvent deviceEvent)
 {
     public static readonly WritableTale<Controller> Controllers = new(new MetaData("ControllersList"));
 

@@ -16,10 +16,7 @@ public abstract class Defer(DeferMeta metaData)
         }
     }
 
-    protected virtual bool Check()
-    {
-        return false;
-    }
+    protected abstract bool Check();
 
     public void Start()
     {

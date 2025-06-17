@@ -26,11 +26,11 @@ public sealed class Identifier
     /// </summary>
     /// <param name="value">Объект, который стоит превратить в Identifier</param>
     /// <returns>Уникальный идентификатор, созданный из неопределённого типа</returns>
-    public static Identifier FromUncertain(object value) => value switch
+    public static Identifier FromUncertain(object? value) => value switch
     {
         Identifier id => id,
         string s => new Identifier(s),
-        _ => new Identifier(value.ToString())
+        _ => new Identifier(value?.ToString())
     };
 
     /// <summary>

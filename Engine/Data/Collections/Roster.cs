@@ -85,11 +85,11 @@ public class Roster<T> : DataContainer<T>
         }
     }
     
-    public override object? Pop(object? key)
+    public override T? Pop(object key)
     {
         var identifier = Identifier.GiveFromUncertain(key);
-        if (identifier == null) return null;
+        if (identifier == null) return default;
         Data.TryRemove(identifier, out var obj);
-        return obj;
+        return (T)obj!;
     }
 }

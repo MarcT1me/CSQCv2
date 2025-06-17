@@ -10,30 +10,29 @@ using Events;
 using Failures;
 using Logging;
 
-public delegate void OnExitEvent();
-
 public abstract class App
-    : MetaObject<AppData>, 
-        IInitable, IExitHandler, IDisposable,  // lifetime methods
-        IEventful, IUpdatable, IRenderable  // loop methods
+    : MetaObject<AppData>,
+        IPreparableInstance, IExitHandler, IDisposable, // lifetime methods
+        IEventful, IUpdatable, IRenderable // loop methods
 {
     public Clock Clock { get; }
     public bool Running { get; private set; } = true;
     public static App? Instance { get; private set; }
 
-    public event OnExitEvent? ExitEvent;
+    public ObjectStatusFlags ObjectStatus => ObjectStatusFlags.All;
+
 
     #region Initialization
 
     protected App(AppData appData) : base(appData)
     {
         // ReSharper disable once VirtualMemberCallInConstructor
-        PreInit();
+        PrepareInstance();
         Clock = new(appData.ClockMeta);
-        ExitEvent += OnExitEvent;
+        ExitHandling += OnExitHandling;
     }
 
-    public virtual void PreInit()
+    public virtual void PrepareInstance()
     {
     }
 
@@ -42,6 +41,7 @@ public abstract class App
     public abstract object CreateGlData();
 
     #endregion
+
 
     #region Mainloop methods
 
@@ -87,7 +87,7 @@ public abstract class App
         }
 
         Logger.Info("App ended");
-        ExitEvent?.Invoke();
+        HandleExitEvent();
     }
 
     public virtual void PostInit()
@@ -100,6 +100,8 @@ public abstract class App
 
     public abstract void Update();
 
+    public abstract void PostUpdate();
+
     public abstract void PreRender();
 
     public abstract void Render();
@@ -108,9 +110,10 @@ public abstract class App
 
     #endregion
 
+
     #region Exiting from App
 
-    public virtual void OnExitEvent()
+    public virtual void OnExitHandling()
     {
     }
 

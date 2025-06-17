@@ -5,18 +5,24 @@ namespace Engine.Time;
 using Defers;
 using Data;
 using Data.Meta;
+using Data.Collections;
 
-public class Clock(ClockMeta metaData) : MetaObject<ClockMeta>(metaData)
+public sealed class Clock(ClockMeta metaData) : MetaObject<ClockMeta>(metaData)
 {
-    public Clock(uint tps, SpeedTable? speedRoster = null)
+    public Clock(uint tps, WritableTale<float>? speedRoster = null)
         : this(new ClockMeta(
-            tps, SDL.SDL_GetTicks(), speedRoster ?? new SpeedTable(new MetaData())
+            tps, SDL.SDL_GetTicks(), speedRoster ?? new(new MetaData())
         ))
     {
     }
 
     public void Tick()
     {
+        foreach (Defer defer in MetaData.DeferTable.Values)
+        {
+            defer.Handle();
+        }
+
         var currentCounter = SDL.SDL_GetPerformanceCounter();
         var currentFrequency = SDL.SDL_GetPerformanceFrequency();
         MetaData.Tick((double)currentCounter / currentFrequency);

@@ -38,6 +38,17 @@
             <Link>SDL2.dll</Link>
         </Content>
     </ItemGroup>
+    <ItemGroup>
+      <Folder Include="Graphic\OpenGl\Buffers\" />
+      <Folder Include="Graphic\OpenGl\GlObject\" />
+      <Folder Include="Graphic\OpenGl\Shader\" />
+      <Folder Include="Graphic\OpenGl\Texture\" />
+      <Folder Include="Graphic\OpenGl\Vertex\" />
+      <Folder Include="Graphic\Interface\" />
+      <Folder Include="Graphic\Model\" />
+      <Folder Include="Graphic\Renderer\" />
+      <Folder Include="Graphic\Surface\" />
+    </ItemGroup>
 
     <!-- adding engine binary -->
 

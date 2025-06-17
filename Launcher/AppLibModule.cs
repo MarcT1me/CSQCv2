@@ -40,7 +40,7 @@ public class AppLibModule : QuantumModule
         var fullPath = Path.Combine(
             QLauncher.RootDir,
             assemblyPath
-            );
+        );
 
         Console.WriteLine(
             $"Load new Assembly: {assemblyName} - {assemblyPath}"

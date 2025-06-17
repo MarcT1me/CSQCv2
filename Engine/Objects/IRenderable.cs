@@ -1,8 +1,21 @@
 ﻿namespace Engine.Objects;
 
-public interface IRenderable
+public interface IRenderable : IHasActorStatus
 {
-    public void PreRender();
-    public void Render();
-    public void PostRender();
+    public bool IsVisible() => IsActive() || ObjectStatus.HasFlag(ObjectStatusFlags.Visible);
+
+    /// <summary>
+    /// Подготовка перед отображением (рендер поверхностей и работа над текстом)
+    /// </summary>
+    void PreRender();
+
+    /// <summary>
+    /// Отображение на экран
+    /// </summary>
+    void Render();
+
+    /// <summary>
+    /// Очистка ресурсов после отображения
+    /// </summary>
+    void PostRender();
 }

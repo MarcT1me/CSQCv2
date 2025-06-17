@@ -8,7 +8,7 @@ using Meta;
 /// Мутабельный объект с данными
 /// </summary>
 /// <typeparam name="T">Тип данных контейнера</typeparam>
-public class WritableTale<T> : DataContainer<T>
+public sealed class WritableTale<T> : DataContainer<T>
 {
     public WritableTale(MetaData metaData)
         : base(metaData)
@@ -34,13 +34,13 @@ public class WritableTale<T> : DataContainer<T>
         }
     }
     
-    public override object? Pop(object key)
+    public override T? Pop(object key)
     {
         var identifier = Identifier.GiveFromUncertain(key);
         
-        if (identifier == null) return null;
+        if (identifier == null) return default;
         
         Data.TryRemove(identifier, out var obj);
-        return obj;
+        return (T)obj!;
     }
 }

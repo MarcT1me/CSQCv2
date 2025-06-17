@@ -3,6 +3,7 @@
 namespace Engine.Logging;
 
 using Data.Meta;
+using Data.Collections;
 
 /// <summary>
 /// Класс логирования
@@ -22,13 +23,13 @@ public sealed class Logger(
     )
 ), ILogger, IDisposable
 {
-    private static readonly LoggersTable Loggers;
+    private static readonly WritableTale<ILogger> Loggers;
     private static readonly Lock Locker = new();
     private static readonly Lock FileLocker = new();
 
     static Logger()
     {
-        Loggers = new LoggersTable();
+        Loggers = new(new("logger-table"));
         Console.OutputEncoding = System.Text.Encoding.UTF8;
         Console.Title = "Quantum console";
         Console.Out.Flush();

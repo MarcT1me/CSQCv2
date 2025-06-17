@@ -58,9 +58,9 @@ public abstract class DataContainer<T> : MetaObject<MetaData>, IDataContainer
     /// </summary>
     /// <param name="key">Объект, ассоциируемый со значением</param>
     /// <returns>Данные, лежащие по ключу или пустоту, если их нет</returns>
-    public virtual object? Pop(object key)
+    public virtual T? Pop(object key)
     {
-        return null;
+        return default;
     }
 
     #endregion

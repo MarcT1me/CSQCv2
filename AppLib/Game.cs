@@ -1,7 +1,10 @@
-﻿using Engine.Decorators;
+﻿using Engine.Data;
+using Engine.Decorators;
 using Engine.Extensions.DebugFeatures;
 using Engine.Extensions.Tracer;
 using Engine.Logging;
+using Engine.Objects.Light;
+using OpenTK.Mathematics;
 
 namespace AppLib;
 
@@ -23,6 +26,17 @@ public class Game
         {
             Logger.Debug(methodInfo2.Method.Invoke(app, [1, 2])?.ToString() ?? String.Empty);
         }
+
+        var light = new PointLightData(new Color4(), 1.0f, identifier: "TestPointLightData")
+        {
+            Transform = new Transform(),
+            CastShadows = false,
+            MaxDistance = 50f
+        };
+        Logger.Separator();
+        Logger.Debug(
+            $"Light: '{light.Identifier}', '{light.LightType}', '{light.Status}', {light.Color}, {light.MaxDistance}"
+        );
     }
 }
 

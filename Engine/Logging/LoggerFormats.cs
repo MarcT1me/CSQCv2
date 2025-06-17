@@ -1,6 +1,6 @@
 ﻿namespace Engine.Logging;
 
-public class LoggerFormats
+public sealed class LoggerFormats
 {
     public LogFormat Info { get; init; } = new()
     {

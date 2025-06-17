@@ -10,7 +10,7 @@ using Threading;
 
 public delegate void EventHandlingEvent(QuantumEvent e);
 
-public class QuantumEventHandler
+public static class QuantumEventHandler
 {
     public static event EventHandlingEvent? EventHandling;
     private static readonly Lock Lock = new();

@@ -5,7 +5,7 @@
 /// </summary>
 /// <param name="info">Информация о файле</param>
 /// <param name="writer">Писатель в файл</param>
-public class LoggerFile(FileInfo info, StreamWriter writer) : IDisposable
+public sealed class LoggerFile(FileInfo info, StreamWriter writer) : IDisposable
 {
     private static LoggerFile? _instance;
 

@@ -4,11 +4,11 @@ namespace QuantumLauncher;
 
 public abstract class QuantumModule
 {
-    public Assembly Assembly { get; protected set; } = default;
+    public Assembly? Assembly { get; protected init; }
 
     public Type? GetAssemblyType(string name)
     {
-        return Assembly.GetType(name);
+        return Assembly?.GetType(name);
     }
 
     public FieldInfo? GetAssemblyProp(string type, string name)
