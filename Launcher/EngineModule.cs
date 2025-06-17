@@ -19,6 +19,7 @@ public class EngineModule : QuantumModule
         );
         LoadNative("SDL2");
         LoadNative("freetype6");
+        LoadNative("MethodHookerCLILib");
         
         Assembly = Assembly.Load("Engine");
 

@@ -6,7 +6,7 @@ public sealed class WinData
 {
     private Vector2i _size;
     private Vector2 _resolutionScaling;
-    public Vector2i Resolution { get; protected set; }
+    public Vector2i Resolution { get; private set; }
 
     public Vector2 ResolutionScaling
     {

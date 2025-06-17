@@ -9,6 +9,7 @@ using Decorators;
 /// Декорирующий аттрибут, исключающий выполнения в Release сборке 
 /// </summary>
 /// <param name="defaultValue">Значение по умолчанию, если метод где-то используется</param>
+[Obsolete("BROKEN", true)]
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Event | AttributeTargets.Constructor)]
 public class DevOnlyAttribute(object? defaultValue = null) : QuantumDecoratorAttribute
 {

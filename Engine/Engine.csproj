@@ -14,6 +14,7 @@
 
     <ItemGroup>
         <PackageReference Include="ini-parser" Version="2.5.2"/>
+        <PackageReference Include="Lib.Harmony" Version="2.3.6" />
         <PackageReference Include="OpenTK.Graphics" Version="4.9.4"/>
         <PackageReference Include="OpenTK.Mathematics" Version="4.9.4"/>
         <PackageReference Include="OpenTK.redist.glfw" Version="3.4.0.44"/>
@@ -38,6 +39,7 @@
             <Link>SDL2.dll</Link>
         </Content>
     </ItemGroup>
+    
     <ItemGroup>
       <Folder Include="Graphic\OpenGl\Buffers\" />
       <Folder Include="Graphic\OpenGl\GlObject\" />

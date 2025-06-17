@@ -1,6 +1,5 @@
 ﻿using Engine.Data;
 using Engine.Decorators;
-using Engine.Extensions.DebugFeatures;
 using Engine.Extensions.Tracer;
 using Engine.Logging;
 using Engine.Objects.Light;
@@ -13,19 +12,22 @@ public class Game
     public static void StartGame()
     {
         var app = new TestClass();
-
-        var ret = app.TestLogMethod();
-        Logger.Debug(ret);
+        Logger.Separator();
+        Logger.Separator();
 
         if (QuantumTracer.GetScanned("TestCallback", ScanTypes.Callback) is QuantumMethodInfo methodInfo)
         {
+            Logger.Debug("Found TestCallback method");
             Logger.Debug(methodInfo.Method.Invoke(app, [1, 2])?.ToString() ?? String.Empty);
         }
 
-        if (QuantumTracer.GetScanned("TestCallback2", ScanTypes.Callback) is QuantumMethodInfo methodInfo2)
-        {
-            Logger.Debug(methodInfo2.Method.Invoke(app, [1, 2])?.ToString() ?? String.Empty);
-        }
+        Logger.Info("Calling TestLogMethod...");
+        var ret = TestClass.TestLogMethod();
+        Logger.Debug($"TestLogMethod returned: {ret}");
+
+        Logger.Info("Calling instance method...");
+        var result = app.TestInstanceMethod("Hello", "World");
+        Logger.Debug($"Instance method returned: {result}");
 
         var light = new PointLightData(new Color4(), 1.0f, identifier: "TestPointLightData")
         {
@@ -43,20 +45,21 @@ public class Game
 [QTrace(ScanTypes.Scan)]
 public class TestClass
 {
-    [Log("test logging")]
-    public string TestLogMethod()
+    public static string TestLogMethod()
     {
         return "some string";
     }
 
-    [QTrace(ScanTypes.Callback)]
-    public int TestCallback(int x, int y)
+    public string TestInstanceMethod(string a, string b)
     {
-        return x * y;
+        Logger.Debug($"Inside TestInstanceMethod - concatenating '{a}' and '{b}'");
+        return a + " " + b;
     }
 
-    public int TestCallback2(int x, int y)
+    [QTrace(ScanTypes.Callback)]
+    public static int TestCallback(int x, int y)
     {
-        return x + y;
+        Logger.Debug($"Inside TestCallback - calculating {x} * {y}");
+        return x * y;
     }
 }

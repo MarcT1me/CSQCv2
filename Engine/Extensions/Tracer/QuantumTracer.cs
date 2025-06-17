@@ -22,7 +22,6 @@ public static class QuantumTracer
             if (assembly is null) continue;
 
             Logger.Info($"Scanning assembly: {assembly.FullName}");
-
             ProcessAssembly(assembly);
         }
     }
@@ -54,7 +53,7 @@ public static class QuantumTracer
             ProcessType(type);
 
             // Сканируем методы
-            foreach (var method in type.GetMethods())
+            foreach (var method in type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance))
             {
                 ProcessMethod(type, method);
             }
@@ -72,9 +71,6 @@ public static class QuantumTracer
 
     public static void ProcessMethod(Type type, MethodInfo methodInfo)
     {
-        // var methodInfo = type.GetMethod(methodSymbol.Name);
-        // if (methodInfo is null) return;
-
         var methodAttributes = methodInfo.GetCustomAttributes(false);
 
         var scanAttr = methodAttributes.OfType<QTraceAttribute>().ToHashSet();
@@ -83,12 +79,27 @@ public static class QuantumTracer
             scanAttr.First().ScanHandling(type, methodInfo);
         }
 
-        var decorators = methodAttributes.OfType<QuantumDecoratorAttribute>().ToHashSet();
+        var decorators = methodAttributes.OfType<QuantumDecoratorAttribute>().ToList();
         if (decorators.Count > 0)
         {
-            Registries.MethodRegistry.Register(
-                new QuantumMethodInfo(methodInfo, decorators)
-            );
+            Logger.Debug($"Found {decorators.Count} decorators for method {methodInfo.Name}");
+            
+            var qmInfo = new QuantumMethodInfo(methodInfo, decorators);
+            
+            // Проверяем, есть ли уже такой метод в реестре
+            var existingMethod = Registries.MethodRegistry.Get(methodInfo);
+            if (existingMethod != null)
+            {
+                Logger.Debug($"Method {methodInfo.Name} already registered, updating decorators");
+                // Объединяем декораторы если нужно
+                var allDecorators = existingMethod.Decorators.Concat(decorators).Distinct().ToList();
+                qmInfo = new QuantumMethodInfo(methodInfo, allDecorators);
+            }
+            
+            Registries.MethodRegistry.Register(qmInfo);
+        
+            // Применяем декораторы через Harmony
+            QuantumIlRewriter.ApplyDecorators(qmInfo);
         }
     }
 }

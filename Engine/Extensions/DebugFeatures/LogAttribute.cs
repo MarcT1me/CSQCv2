@@ -10,28 +10,35 @@ using Configuration;
 /// Декорирующий аттрибут, выводящий сообщение при вызове
 /// </summary>
 /// <param name="logMessage">Сообщение лога</param>
-[AttributeUsage(AttributeTargets.Method | AttributeTargets.Event | AttributeTargets.Constructor)]
+[Obsolete("BROKEN", true)]
+[AttributeUsage(AttributeTargets.Method)]
 public class LogAttribute(string logMessage, bool debugOnly = false) : QuantumDecoratorAttribute
 {
     public override object? Intercept(object? target, MethodInfo targetMethod, object?[]? args, Func<object?> proceed)
     {
-        if (debugOnly)
+        if (debugOnly && !BaseConfig.DebugMode)
+            return proceed();
+
+        Logger.Separator();
+        Logger.Info($"\e[36m{targetMethod.DeclaringType?.Name}.{targetMethod.Name}\e[0m \e[31m-\e[0m {logMessage}");
+
+        // Логируем аргументы если они есть
+        if (args != null && args.Length > 0)
         {
-            if (BaseConfig.DebugMode)
-            {
-                Log(targetMethod);
-            }
-        }
-        else
-        {
-            Log(targetMethod);
+            Logger.Info($"Arguments: [{string.Join(", ", args.Select(a => a?.ToString() ?? "null"))}]");
         }
 
-        return proceed();
-    }
+        Logger.Separator();
 
-    private void Log(MethodInfo targetMethod)
-    {
-        Logger.Info($"\e[36m{targetMethod.Name}\e[0m \e[31m-\e[0m {logMessage}");
+        // Вызываем оригинальный метод
+        var result = proceed();
+
+        // Логируем результат если он есть
+        if (targetMethod.ReturnType != typeof(void) && result != null)
+        {
+            Logger.Info($"Returned: {result}");
+        }
+
+        return result;
     }
 }
