@@ -2,7 +2,7 @@
 
 using Data;
 
-public sealed class QuantumThreadPool : ThreadRoster, IDisposable
+public sealed class QuantumThreadPool : ThreadRoster
 {
     private readonly CountdownEvent _countdownEvent = new(0);
     private bool _isLaunched;
@@ -16,7 +16,7 @@ public sealed class QuantumThreadPool : ThreadRoster, IDisposable
         lock (this)
         {
             var id = Identifier.FromUncertain(workItem);
-            
+
             Pending[id] = new QuantumThread(
                 name: $"PoolThread-{id}",
                 isBackground: true,
@@ -62,7 +62,7 @@ public sealed class QuantumThreadPool : ThreadRoster, IDisposable
         }
     }
 
-    public void Dispose()
+    public override void Dispose()
     {
         if (_isDisposed) return;
         _isDisposed = true;
@@ -70,8 +70,9 @@ public sealed class QuantumThreadPool : ThreadRoster, IDisposable
         {
             thread.Join(0f);
         }
+
         Cleanup();
-        GC.SuppressFinalize(this);
+        base.Dispose();
     }
 
     ~QuantumThreadPool() => Dispose();

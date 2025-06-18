@@ -6,18 +6,16 @@ namespace Engine.Decorators;
 /// Метод задекорированный аттрибутом
 /// </summary>
 public sealed record QuantumMethodInfo(
-    MethodInfo Method, 
-    IEnumerable<QuantumDecoratorAttribute> Decorators)
+    MethodInfo Method
+)
 {
     public bool Equals(QuantumMethodInfo? other)
     {
-        return other != null && 
-               Method.Equals(other.Method) &&
-               Decorators.SequenceEqual(other.Decorators);
+        return other != null && Method.Equals(other.Method);
     }
-    
+
     public override int GetHashCode()
     {
-        return HashCode.Combine(Method, Decorators);
+        return HashCode.Combine(Method);
     }
 }

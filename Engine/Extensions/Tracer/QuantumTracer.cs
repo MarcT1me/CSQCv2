@@ -78,28 +78,5 @@ public static class QuantumTracer
         {
             scanAttr.First().ScanHandling(type, methodInfo);
         }
-
-        var decorators = methodAttributes.OfType<QuantumDecoratorAttribute>().ToList();
-        if (decorators.Count > 0)
-        {
-            Logger.Debug($"Found {decorators.Count} decorators for method {methodInfo.Name}");
-            
-            var qmInfo = new QuantumMethodInfo(methodInfo, decorators);
-            
-            // Проверяем, есть ли уже такой метод в реестре
-            var existingMethod = Registries.MethodRegistry.Get(methodInfo);
-            if (existingMethod != null)
-            {
-                Logger.Debug($"Method {methodInfo.Name} already registered, updating decorators");
-                // Объединяем декораторы если нужно
-                var allDecorators = existingMethod.Decorators.Concat(decorators).Distinct().ToList();
-                qmInfo = new QuantumMethodInfo(methodInfo, allDecorators);
-            }
-            
-            Registries.MethodRegistry.Register(qmInfo);
-        
-            // Применяем декораторы через Harmony
-            QuantumIlRewriter.ApplyDecorators(qmInfo);
-        }
     }
 }

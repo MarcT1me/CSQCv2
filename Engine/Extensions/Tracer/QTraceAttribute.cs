@@ -43,6 +43,6 @@ public class QTraceAttribute(ScanTypes scanType) : QuantumAttribute
 
         Logger.Info($"Add new scanned method [{method.Name}] -> {scanType}");
 
-        Registries.MethodRegistry.Register(new QuantumMethodInfo(method, []));
+        Registries.MethodRegistry.Register(new QuantumMethodInfo(method));
     }
 }

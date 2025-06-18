@@ -78,7 +78,7 @@ public abstract class DataContainer<T> : MetaObject<MetaData>, IDataContainer, I
 
     #endregion
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         Registries.DataContainerRegistry.Pop(Id);
         GC.SuppressFinalize(this);

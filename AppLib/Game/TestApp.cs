@@ -1,6 +1,7 @@
 ﻿using Engine.Base;
 using Engine.Graphic.Window;
 using Engine.Events.QuantumEvents;
+using Engine.Logging;
 
 namespace AppLib.Game;
 
@@ -18,6 +19,6 @@ public class TestApp : Game<TestAppData, Window>
 
     public override void HandleEvent(QuantumEvent e)
     {
-        Console.Out.WriteLine($"event type: `{e.Type}`");
+        Logger.Info($"event type: `{e.Type}`");
     }
 }
