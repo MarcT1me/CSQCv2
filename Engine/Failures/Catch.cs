@@ -1,4 +1,6 @@
-﻿namespace Engine.Failures;
+﻿using Engine.Logging;
+
+namespace Engine.Failures;
 
 using System;
 using Data;
@@ -31,7 +33,7 @@ public sealed class Catch : MetaObject<CatchMeta>, IContextManager
     ) : base(new CatchMeta(identifier, failureLevel, handler))
     {
         if (ActiveCatches[Id] != null)
-            throw new InvalidOperationException($"Catch with id {Id} already exists");
+            throw new InvalidOperationException($"Catch with id '{Id}' already exists");
 
         ActiveCatches[Id] = this;
         IsRunning = true;
@@ -59,7 +61,7 @@ public sealed class Catch : MetaObject<CatchMeta>, IContextManager
             return defaultValue;
         }
     }
-    
+
     /// <summary>
     /// Обработка ошибок
     /// </summary>
@@ -67,6 +69,11 @@ public sealed class Catch : MetaObject<CatchMeta>, IContextManager
     /// <exception cref="FailureException">Если обрабатываемая ошибка отмечена как критичная</exception>
     public void OnException(Exception ex)
     {
+        Logger.Warning(
+            $"Catch with id '{Id}' got '{MetaData.FailureLevel}' level error:\n" +
+            $"{ex.Message}"
+        );
+
         var failure = ex as FailureException ?? new FailureException(ex.Message, ex)
         {
             Level = MetaData.FailureLevel,
@@ -74,16 +81,15 @@ public sealed class Catch : MetaObject<CatchMeta>, IContextManager
         };
         MetaData.Failures[new Identifier()] = failure;
 
-        if (MetaData.FailureLevel is FailureLevel.First)
+        if (MetaData.FailureLevel is not (FailureLevel.First or FailureLevel.Second)) return;
+        
+        if (MetaData.Handler != null)
         {
-            if (MetaData.Handler != null)
-            {
-                MetaData.Handler.OnFailure(failure);
-            }
-            else
-            {
-                EngineCore.DefaultFailureHandler?.OnFailure(failure);
-            }
+            MetaData.Handler.OnFailure(failure);
+        }
+        else
+        {
+            EngineCore.DefaultFailureHandler.OnFailure(failure);
         }
     }
 

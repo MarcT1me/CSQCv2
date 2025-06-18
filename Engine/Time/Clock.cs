@@ -9,10 +9,8 @@ using Data.Collections;
 
 public sealed class Clock(ClockMeta metaData) : MetaObject<ClockMeta>(metaData)
 {
-    public Clock(uint tps, WritableTale<float>? speedRoster = null)
-        : this(new ClockMeta(
-            tps, SDL.SDL_GetTicks(), speedRoster ?? new(new MetaData())
-        ))
+    public Clock(uint tps, WritableTale<float> speedRoster)
+        : this(new(tps, SDL.SDL_GetTicks(), speedRoster))
     {
     }
 

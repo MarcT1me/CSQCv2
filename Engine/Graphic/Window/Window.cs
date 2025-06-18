@@ -30,7 +30,7 @@ public class Window
         SDL.SDL_Init(SDL.SDL_INIT_VIDEO);
     }
 
-    public static void UnInitialiseSdl()
+    public static void UninitialiseSdl()
     {
         SDL.SDL_Quit();
     }
@@ -45,9 +45,9 @@ public class Window
     ) : base(new WindowData(winData, glData ?? new GlData(), name))
     {
         Logger.Info(
-            $"Creating window '{name}'" +
-            $"Position: {winData.Position}" +
-            $"Size: {winData.Size}" +
+            $"Creating window '{name}'\n" +
+            $"Position: {winData.Position}\n" +
+            $"Size: {winData.Size}\n" +
             $"Opacity: {winData.Opacity}"
         );
 
@@ -55,7 +55,7 @@ public class Window
             name,
             winData.Position.X, winData.Position.Y,
             winData.Size.X, winData.Size.Y,
-            (SDL.SDL_WindowFlags)(winData.Flags | WinFlags.Opengl | WinFlags.Hidden)
+            (SDL.SDL_WindowFlags)(winData.Flags | WinFlags.Opengl)
         );
         if (_window == IntPtr.Zero)
         {
@@ -145,7 +145,7 @@ public class Window
     public void PreRender()
     {
         SetCurrent();
-        GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+        // GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
     }
 
     public void Render()
@@ -162,6 +162,11 @@ public class Window
         DeleteContext();
         Close();
         Registries.WindowRegistry.Pop(Id);
+        
+        QuantumEventHandler.EventHandling -= HandleEvent;
+        
+        Logger.Info($"Window '{Id}' disposed");
+        
         GC.SuppressFinalize(this);
     }
 

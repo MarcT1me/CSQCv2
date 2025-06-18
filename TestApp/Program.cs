@@ -11,7 +11,8 @@ public class Program
         eng.Activate(); // activate Engine
 
         // activate and start app
-        app.Activate();
         app.Start();
+        
+        eng.Deactivate(); // activate Engine
     }
 }

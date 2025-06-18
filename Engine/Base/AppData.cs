@@ -1,14 +1,14 @@
 ﻿namespace Engine.Base;
 
+using Objects;
 using Configuration;
-using Data;
 using Data.Collections;
 using Data.Meta;
-using Time;
 
-public abstract class AppData(ClockMeta clockMeta, Dictionary<Identifier, object>? initData = null) 
-    : MetaData(BaseConfig.AppName)
+public abstract class AppData() : MetaData(BaseConfig.AppName)
 {
-    public ClockMeta ClockMeta { get; } = clockMeta;
-    public Table<object> InitTable { get; } = new(new("AppData.InitTable-Table"), initData ?? new());
+    public uint Tps { get; init; } = 60;
+    public Table<object> InitTable { get; init; } = new(new("Engine.Base.AppData-InitTable"), new());
+    public WritableTale<float> SpeedRoster { get; init; } = new(new("Engine.Base.AppData-SpeedRoster"));
+    public ObjectStatusFlags ObjectStatus = ObjectStatusFlags.All;
 }

@@ -1,7 +1,7 @@
 ﻿namespace Engine.Objects;
 
 
-public interface IExitHandler
+public interface IExitHandler : IDisposable
 {
     /// <summary>
     /// Событие выхода из приложения

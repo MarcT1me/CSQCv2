@@ -1,4 +1,6 @@
-﻿namespace Engine.Base;
+﻿// ReSharper disable VirtualMemberCallInConstructor
+
+namespace Engine.Base;
 
 using Events.QuantumEvents;
 using Threading;
@@ -10,104 +12,114 @@ using Failures;
 using Logging;
 using Extensions;
 
-public abstract class App
-    : MetaObject<AppData>,
-        IPreparableInstance<AppData>, IReloadData, IExitHandler, IDisposable, // lifetime methods
+public abstract class App<TData>
+    : MetaObject<TData>,
+        IPreparableInstance<TData>, IReloadData, IExitHandler, // lifetime methods
         IEventful, IUpdatable, IRenderable // loop methods
+    where TData : AppData
 {
     public Clock Clock { get; }
-    public bool Running { get; private set; } = true;
-    public static App? Instance { get; private set; }
 
-    public ObjectStatusFlags ObjectStatus => ObjectStatusFlags.All;
-
+    // ReSharper disable once StaticMemberInGenericType
+    private static bool _running = true;
+    public static App<TData>? Instance { get; private set; }
+    public ObjectStatusFlags ObjectStatus => MetaData.ObjectStatus;
 
     #region Initialization
 
-    protected App() : base(PrepareInstance())
+    protected App() : base(null!)
     {
-        // ReSharper disable once VirtualMemberCallInConstructor
-        PrepareInstance();
-        Clock = new(MetaData.ClockMeta);
+        MetaData = PrepareInstance();
+        Clock = new(MetaData.Tps, MetaData.SpeedRoster);
         QuantumEventHandler.EventHandling += HandleEvent;
         ExitHandling += OnExitHandling;
     }
 
-    public static AppData PrepareInstance()
+    public abstract TData PrepareInstance();
+
+    public virtual void PostInit()
     {
-        return null!;
     }
 
     #endregion
-    
-    public virtual void OnReloadData()
+
+    public virtual void OnReloadData(MetaData data)
     {
-        HandleReloadDataEvent();
+        HandleReloadDataEvent(data);
     }
 
     #region Mainloop methods
 
-    public static void Mainloop<T>()
-        where T : App, new()
+    public static void Mainloop(Type appType)
     {
-        while (Instance == null || Instance.Running)
+        while (_running || (Instance is not null && Instance.ObjectStatus.HasFlag(ObjectStatusFlags.Active)))
         {
-            Logger.Debug("Mainloop iteration");
-            With.Handle(new Catch("Main Mainloop Catch"), _ =>
+            var cth = new Catch("Mainloop iteration Catch");
+
+            With.Handle(cth, _ =>
             {
-                Instance = Activator.CreateInstance<T>();
-                Instance.Run();
+                Logger.Separator();
+                Logger.Debug("Mainloop Iteration");
+
+                using (Instance = Activator.CreateInstance(appType) as App<TData>)
+                {
+                    if (Instance == null) throw new Exception("App Instance could not be created");
+
+                    Instance.Run();
+                }
             });
 
-            Instance?.Dispose();
+            _running = cth.MetaData.Failures.Count != 0;
         }
     }
 
     public void Run()
     {
+        Instance = this;
         PostInit();
-        Logger.Info("App started");
 
-        while (Running)
+        Logger.Separator();
+        Logger.Info("App Run started");
+
+        bool IsActive() => ObjectStatus.HasFlag(ObjectStatusFlags.Active);
+
+        while (IsActive())
         {
             QuantumEventHandler.HandleEvents();
             QuantumThread.WaitAll();
-            if (!Running) break;
+            if (!IsActive()) break;
 
             // Update
 
             PreUpdate();
             QuantumThread.WaitAll();
-            if (!Running) break;
+            if (!IsActive()) break;
 
             Update();
             QuantumThread.WaitAll();
-            if (!Running) break;
+            if (!IsActive()) break;
 
             // Render
 
             PreRender();
             QuantumThread.WaitAll();
-            if (!Running) break;
+            if (!IsActive()) break;
 
             Render();
             QuantumThread.WaitAll();
-            if (!Running) break;
+            if (!IsActive()) break;
 
             PostRender();
             QuantumThread.WaitAll();
-            if (!Running) break;
+            if (!IsActive()) break;
 
             // time updating
             Clock.Tick();
         }
 
-        Logger.Info("App ended");
+        Logger.Separator();
+        Logger.Info("App Run ended");
         HandleExitEvent();
-    }
-
-    public virtual void PostInit()
-    {
     }
 
     public abstract void HandleEvent(QuantumEvent e);
@@ -131,16 +143,29 @@ public abstract class App
 
     public virtual void OnExitHandling()
     {
+        Logger.Info("App exiting handling");
     }
 
     public virtual void Dispose()
     {
         Quit();
+        Instance = null;
+
+        QuantumEventHandler.EventHandling -= HandleEvent;
+        ExitHandling -= OnExitHandling;
+
+        Logger.Info("App disposed");
+        Logger.Separator();
+
+        GC.SuppressFinalize(this);
     }
 
     protected void Quit()
     {
-        Running = false;
+        if (!MetaData.ObjectStatus.HasFlag(ObjectStatusFlags.Active)) return;
+        MetaData.ObjectStatus &= ~ObjectStatusFlags.Active;
+
+        Logger.Info("App quit");
     }
 
     #endregion

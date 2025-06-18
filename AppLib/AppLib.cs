@@ -1,17 +1,11 @@
 ﻿namespace AppLib;
 
-using Engine.Logging;
+using Game;
 
-public class AppLib
+public static class AppLib
 {
-    public static void Activate()
-    {
-        Logger.Debug("Activating project from a Luncher");
-    }
-
     public static void Start()
     {
-        Logger.Debug("Start App from a Luncher");
-        Game.StartGame();
+        TestApp.Mainloop(typeof(TestApp));
     }
 }

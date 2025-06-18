@@ -42,6 +42,7 @@ public sealed class Identifier : IDisposable
         Registries.IdentifierRegistry.Get(value);
 
     public override string ToString() => Name ?? Uuid.ToString();
+    public string GetNameAnyway() => Name ?? "Unnamed";
     
     public void Dispose()
     {

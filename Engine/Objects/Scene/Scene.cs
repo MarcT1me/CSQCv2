@@ -42,6 +42,11 @@ public class Scene(SceneNodeData nodeData)
         return Nodes.Pop(identifier);
     }
 
+    /// <summary>
+    /// Добавляет узел как ребёнок к текущему
+    /// </summary>
+    /// <param name="node">ребёнок</param>
+    /// <typeparam name="T">тип данных ребёнка</typeparam>
     public void AddChild<T>(SceneNode<T> node) where T: SceneNodeData
     {
         MetaData.ChildrenIds.Add(node.Id);
@@ -65,7 +70,7 @@ public class Scene(SceneNodeData nodeData)
 
     #region Cycle methods
 
-    public void HandleEvent(QuantumEvent e)
+    public virtual void HandleEvent(QuantumEvent e)
     {
         foreach (var eventfulChild in IterChildren<IEventful>())
         {
@@ -74,7 +79,7 @@ public class Scene(SceneNodeData nodeData)
         }
     }
 
-    public void PreUpdate()
+    public virtual void PreUpdate()
     {
         foreach (var updatableChild in IterChildren<IUpdatable>())
         {
@@ -83,7 +88,7 @@ public class Scene(SceneNodeData nodeData)
         }
     }
 
-    public void Update()
+    public virtual void Update()
     {
         foreach (var updatableChild in IterChildren<IUpdatable>())
         {
@@ -92,7 +97,7 @@ public class Scene(SceneNodeData nodeData)
         }
     }
 
-    public void PostUpdate()
+    public virtual void PostUpdate()
     {
         foreach (var updatableChild in IterChildren<IUpdatable>())
         {
@@ -101,7 +106,7 @@ public class Scene(SceneNodeData nodeData)
         }
     }
 
-    public void PreRender()
+    public virtual void PreRender()
     {
         foreach (var updatableChild in IterChildren<IRenderable>())
         {
@@ -110,7 +115,7 @@ public class Scene(SceneNodeData nodeData)
         }
     }
 
-    public void Render()
+    public virtual void Render()
     {
         foreach (var updatableChild in IterChildren<IRenderable>())
         {
@@ -119,7 +124,7 @@ public class Scene(SceneNodeData nodeData)
         }
     }
 
-    public void PostRender()
+    public virtual void PostRender()
     {
         foreach (var updatableChild in IterChildren<IRenderable>())
         {

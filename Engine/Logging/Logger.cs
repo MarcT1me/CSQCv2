@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Engine.Failures;
 
 namespace Engine.Logging;
 
@@ -157,10 +158,13 @@ public sealed class Logger(
     {
         foreach (ILogger logger in Loggers.Values)
         {
-            logger.Log(LogLevel.Exception, message);
-            if (e.StackTrace != null) logger.LogWithoutFormat(e.StackTrace);
-            if (e.Source != null) logger.LogWithoutFormat(e.Source);
-            logger.LogWithoutFormat($"{e.GetType().Name}: {e.Message}");
+            var type = e is FailureException
+                ? e.InnerException?.GetType().Name ?? "FailureException"
+                : e.GetType().Name;
+            logger.Log(
+                LogLevel.Exception,
+                message + "\n" + e + "\n" + $"{type}: {e.Message}"
+            );
         }
     }
 
@@ -275,7 +279,11 @@ public sealed class Logger(
     )
     {
         var stackTrace = new StackTrace(skipFrames: 6, fNeedFileInfo: true);
+#if DEBUG
         var frame = stackTrace.GetFrame(0);
+#else
+        var frame = stackTrace.GetFrame(1);
+#endif
         if (frame == null)
         {
             typeName = "UnknownType";

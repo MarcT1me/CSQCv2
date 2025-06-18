@@ -167,7 +167,7 @@ public class QuantumThread : MetaObject<QThreadMeta>, IDisposable, IFailureHandl
     public void OnFailure(FailureException failure)
     {
         Logger.Warning(
-            $"Thread {Id} catch got {failure.Level} level error:\n" +
+            $"Thread '{Id}' catch got '{failure.Level}' level error:\n" +
             $"{failure.GetType().Name}: {failure.Message}"
         );
 

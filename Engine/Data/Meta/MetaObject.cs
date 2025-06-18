@@ -1,6 +1,6 @@
 ﻿namespace Engine.Data.Meta;
 
-public delegate void ReloadDataEvent();
+public delegate void ReloadDataEvent(MetaData data);
 
 public delegate void OnExitEvent();
 
@@ -14,13 +14,13 @@ public class MetaObject<T>(T metaData) where T : MetaData
     public static event ReloadDataEvent? ReloadingData;
     public static event OnExitEvent? ExitHandling;
 
-    public T MetaData { get; } = metaData;
+    public T MetaData { get; internal set; } = metaData;
 
     public Identifier Id => MetaData.Identifier;
 
-    public static void HandleReloadDataEvent()
+    public static void HandleReloadDataEvent(MetaData data)
     {
-        ReloadingData?.Invoke();
+        ReloadingData?.Invoke(data);
     }
     
     public static void HandleExitEvent()

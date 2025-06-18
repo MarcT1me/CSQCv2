@@ -13,21 +13,23 @@ public class FailureException : Exception
     {
     }
 
+    public FailureLevel Level { get; init; } = FailureLevel.Second;
     public Identifier? CatchId { get; init; }
-    public FailureLevel Level { get; init; }
     public DateTime Timestamp { get; } = DateTime.UtcNow;
 
     public override string ToString() =>
-        $"FailureException<{CatchId?.ToString() ?? "N/A"}>: {Message} " +
-        $"(Critical: {Level}, Timestamp: {Timestamp:O})";
+        $"FailureException<{CatchId?.ToString() ?? "N/A"}>(Critical: {Level}, Timestamp: {Timestamp:O}): {Message}\n" +
+        $"Traceback:\n" +
+        $"{base.ToString()}";
 
-    public void Handle(string message = "exception has Second level => rethrow")
+    public void Handle()
     {
-        if (Level == FailureLevel.Second)
-            Logger.Exception(message, this);
-
         if (Level is FailureLevel.Second)
         {
+            Logger.Exception("Second level exception handling", this);
+            Logger.Separator();
+            
+            Console.WriteLine("Full Traceback (FailureException.Handle):");
             throw this;
         }
     }

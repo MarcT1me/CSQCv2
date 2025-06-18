@@ -17,8 +17,8 @@ internal sealed class ConsoleFailureHandler : IFailureHandler
     public void OnFailure(FailureException failure)
     {
         var message = "Default Engine failure handler got a failure\n" +
-                      $"ID: {failure.CatchId}\n" +
-                      $"Level: {failure.Level}\n" +
+                      $"Catch: '{failure.CatchId}'\n" +
+                      $"Level: '{failure.Level}'\n" +
                       $"Message: {failure.Message}";
 
         if (failure.InnerException != null)
@@ -43,16 +43,13 @@ public static class EngineCore
 {
     public static string RootDirectory = "";
     public static Assembly? AppLibAssembly;
-    public static IFailureHandler? DefaultFailureHandler;
+    public static IFailureHandler DefaultFailureHandler = new ConsoleFailureHandler();
 
     public static void Initialize(Assembly? appLibAssembly)
     {
-        Console.WriteLine("Initialize EngineCore");
-
         With.Handle(new Catch("Main EngineCore Catch"), _ =>
         {
             AppLibAssembly = appLibAssembly;
-            DefaultFailureHandler = new ConsoleFailureHandler();
 
 #if !DEBUG
         BaseConfig.DebugMode = false;
@@ -69,13 +66,16 @@ public static class EngineCore
     {
         Logger.InitLogger();
 
-        Logger.Info("Engine Initialization Started");
+        Logger.Separator();
 
-        Logger.Info($"In Headless mode: {BaseConfig.Headless}\n" +
-                    $"App name: {BaseConfig.AppName}\n" +
-                    $"App path: {RootDirectory}\n" +
-                    $"Asset path: {BaseConfig.AssetPath}"
+        Logger.Info(
+            "Engine Initialization Started\n" +
+            $"Headless: {BaseConfig.Headless}\n" +
+            $"App name: {BaseConfig.AppName}\n" +
+            $"App path: {RootDirectory}\n" +
+            $"Asset path: {BaseConfig.AssetPath}"
         );
+
         Logger.Separator();
 
         QuantumTracer.HandleAssembly(
@@ -86,19 +86,29 @@ public static class EngineCore
         );
         Logger.Separator();
 
+        Logger.Info("Initialize SDL");
         Window.InitialiseSdl();
 
-        if (BaseConfig.DebugMode)
-        {
-            EnableDebugFeatures();
-        }
-
-        Logger.Success("Engine initialized");
         Logger.Separator();
+
+        if (BaseConfig.DebugMode) EnableDebugFeatures();
+
+        Logger.Separator();
+        Logger.Success("Engine initialized");
     }
 
     private static void EnableDebugFeatures()
     {
         Logger.Debug("Enable Debug Features");
+    }
+
+    public static void Uninitialize()
+    {
+        Logger.Info("Uninitialize EngineCore");
+
+        Logger.Info("Initialize SDL");
+        Window.UninitialiseSdl();
+
+        Logger.Success("Engine uninitialized");
     }
 }

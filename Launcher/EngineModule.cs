@@ -19,7 +19,6 @@ public class EngineModule : QuantumModule
         );
         LoadNative("SDL2");
         LoadNative("freetype6");
-        LoadNative("MethodHookerCLILib");
         
         Assembly = Assembly.Load("Engine");
 
@@ -45,5 +44,13 @@ public class EngineModule : QuantumModule
             "Activate EngineModule"
         );
         InvokeAssemblyMethod("Engine.EngineCore", "Initialize", QLauncher.AppLibModule.Assembly);
+    }
+
+    public void Deactivate()
+    {
+        Console.WriteLine(
+            "DeActivate EngineModule"
+        );
+        InvokeAssemblyMethod("Engine.EngineCore", "Uninitialize");
     }
 }

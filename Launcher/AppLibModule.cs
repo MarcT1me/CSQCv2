@@ -54,14 +54,6 @@ public class AppLibModule : QuantumModule
         return EngineBinaries.Contains(assemblyName);
     }
 
-    public void Activate()
-    {
-        Console.WriteLine(
-            "Activate AppLib"
-        );
-        InvokeAssemblyMethod($"{MainClassName}.{MainClassName}", "Activate");
-    }
-
     public void Start()
     {
         Console.WriteLine(
