@@ -1,9 +1,10 @@
-﻿using SDL2;
+﻿using Engine.Input.Controller;
+using SDL2;
 
 namespace Engine.Events.QuantumEvents.Controller;
 
-public class AxisEvent(SDL.SDL_Event e) : ControllerEvent(e)
+public class AxisEvent(SDL.SDL_Event e) : ControllerEvent(e, e.caxis.which, e.caxis.timestamp)
 {
-    public byte Axis = e.caxis.axis;
+    public Axis Axis = (Axis)e.caxis.axis;
     public short AxisValue = e.caxis.axisValue;
 }

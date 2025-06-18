@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using SDL2;
 
 namespace Engine;
 
@@ -6,7 +7,6 @@ using Configuration;
 using Extensions.Tracer;
 using Failures;
 using Logging;
-using Graphic.Window;
 using Extensions;
 
 /// <summary>
@@ -87,7 +87,8 @@ public static class EngineCore
         Logger.Separator();
 
         Logger.Info("Initialize SDL");
-        Window.InitialiseSdl();
+        SDL.SDL_SetHint(SDL.SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS, "1");
+        SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING);
 
         Logger.Separator();
 
@@ -107,7 +108,6 @@ public static class EngineCore
         Logger.Info("Uninitialize EngineCore");
 
         Logger.Info("Initialize SDL");
-        Window.UninitialiseSdl();
 
         Logger.Success("Engine uninitialized");
     }

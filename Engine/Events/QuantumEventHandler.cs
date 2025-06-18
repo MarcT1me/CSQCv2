@@ -1,5 +1,6 @@
 ﻿// ReSharper disable RedundantUnsafeContext
 
+using Engine.Logging;
 using SDL2;
 
 namespace Engine.Events;

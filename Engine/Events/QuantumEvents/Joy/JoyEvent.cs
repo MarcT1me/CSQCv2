@@ -2,7 +2,7 @@
 
 namespace Engine.Events.QuantumEvents.Joy;
 
-public class JoyEvent(SDL.SDL_Event e) : QuantumEvent(e, e.jaxis.timestamp)
+public class JoyEvent(SDL.SDL_Event e, int which, uint timestamp) : QuantumEvent(e, timestamp)
 {
-    public int Which = e.jaxis.which;
+    public int Which = which;
 }

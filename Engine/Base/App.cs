@@ -122,7 +122,10 @@ public abstract class App<TData>
         HandleExitEvent();
     }
 
-    public abstract void HandleEvent(QuantumEvent e);
+    public virtual void HandleEvent(QuantumEvent e)
+    {
+        if (e.Type == EventType.Quit) Quit();
+    }
 
     public abstract void PreUpdate();
 

@@ -25,16 +25,6 @@ public class Window
     private readonly IntPtr _window;
     private readonly IntPtr _glContext;
 
-    public static void InitialiseSdl()
-    {
-        SDL.SDL_Init(SDL.SDL_INIT_VIDEO);
-    }
-
-    public static void UninitialiseSdl()
-    {
-        SDL.SDL_Quit();
-    }
-
     public ObjectStatusFlags ObjectStatus => MetaData.Status;
     public uint WinId => SDL.SDL_GetWindowID(_window);
 
@@ -162,11 +152,11 @@ public class Window
         DeleteContext();
         Close();
         Registries.WindowRegistry.Pop(Id);
-        
+
         QuantumEventHandler.EventHandling -= HandleEvent;
-        
+
         Logger.Info($"Window '{Id}' disposed");
-        
+
         GC.SuppressFinalize(this);
     }
 

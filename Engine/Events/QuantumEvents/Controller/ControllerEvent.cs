@@ -2,7 +2,7 @@
 
 namespace Engine.Events.QuantumEvents.Controller;
 
-public class ControllerEvent(SDL.SDL_Event e) : QuantumEvent(e, e.caxis.timestamp)
+public class ControllerEvent(SDL.SDL_Event e, int which, uint timestamp) : QuantumEvent(e, timestamp)
 {
-    public int Which = e.caxis.which;
+    public int Which = which;
 }

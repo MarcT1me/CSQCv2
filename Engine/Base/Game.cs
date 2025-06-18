@@ -26,18 +26,13 @@ public abstract class Game<TData, TWindow> : App<TData>
     public override void PostInit()
     {
         MainWindow.Show();
+        MainWindow.Maximize();
     }
 
     #region override App cycle
 
     public sealed override void PreUpdate()
     {
-        if (Registries.WindowRegistry.Size == 0)
-        {
-            Quit();
-            return;
-        }
-        
         foreach (var window in Registries.WindowRegistry.Values)
         {
             window.PreUpdate();
