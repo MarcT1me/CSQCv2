@@ -4,6 +4,7 @@ using Data;
 using Data.Meta;
 using Failures;
 using Logging;
+using Extensions;
 
 /// <summary>
 /// Класс потоков с авторской реализацией, внедрённый в системы движка
@@ -132,10 +133,10 @@ public class QuantumThread : MetaObject<QThreadMeta>, IDisposable, IFailureHandl
                 Roster.Worked[Id] = this;
             }
 
-            using (new Catch(failureLevel: MetaData.FailureLevel, handler: this))
-            {
-                Action();
-            }
+            With.Handle(
+                new Catch(failureLevel: MetaData.FailureLevel, handler: this),
+                _ => Action()
+            );
         }
         finally
         {
@@ -169,7 +170,7 @@ public class QuantumThread : MetaObject<QThreadMeta>, IDisposable, IFailureHandl
             $"Thread {Id} catch got {failure.Level} level error:\n" +
             $"{failure.GetType().Name}: {failure.Message}"
         );
-        
+
         failure.Handle();
     }
 

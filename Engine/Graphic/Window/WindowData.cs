@@ -9,7 +9,7 @@ public class WindowData(
     WinData winData,
     GlData glData,
     // MetaData
-    string identifier
+    string? identifier
 ) : MetaData(identifier)
 {
     public WinData WinData { get; } = winData;

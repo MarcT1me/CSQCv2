@@ -24,4 +24,15 @@ internal sealed class AssetTypeRegistryManager : IRegistryManager<AssetType>
             return AssetTypes.GetValueOrDefault(str);
         return null;
     }
+
+    public AssetType? Pop(object id)
+    {
+        if (id is not string str) return null;
+
+        AssetTypes.TryRemove(str, out var container);
+        return container;
+    }
+
+    public int Size => AssetTypes.Count;
+    public ICollection<AssetType> Values => AssetTypes.Values;
 }

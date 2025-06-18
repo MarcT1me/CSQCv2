@@ -6,6 +6,8 @@ using Configuration;
 using Extensions.Tracer;
 using Failures;
 using Logging;
+using Graphic.Window;
+using Extensions;
 
 /// <summary>
 /// Стандартный обработчик ошибок
@@ -46,8 +48,8 @@ public static class EngineCore
     public static void Initialize(Assembly? appLibAssembly)
     {
         Console.WriteLine("Initialize EngineCore");
-        
-        using (new Catch("Main EngineCore Catch"))
+
+        With.Handle(new Catch("Main EngineCore Catch"), _ =>
         {
             AppLibAssembly = appLibAssembly;
             DefaultFailureHandler = new ConsoleFailureHandler();
@@ -59,7 +61,7 @@ public static class EngineCore
 #pragma warning disable CS0618 // Type or member is obsolete
             InitializeCore();
 #pragma warning restore CS0618 // Type or member is obsolete
-        }
+        });
     }
 
     [Obsolete("Use only one times after game initialization")]
@@ -75,7 +77,7 @@ public static class EngineCore
                     $"Asset path: {BaseConfig.AssetPath}"
         );
         Logger.Separator();
-        
+
         QuantumTracer.HandleAssembly(
             [
                 Assembly.GetExecutingAssembly(),
@@ -83,6 +85,8 @@ public static class EngineCore
             ]
         );
         Logger.Separator();
+
+        Window.InitialiseSdl();
 
         if (BaseConfig.DebugMode)
         {

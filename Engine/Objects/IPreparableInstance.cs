@@ -8,5 +8,16 @@ public interface IPreparableInstance
     /// <remarks>
     /// В основном не вызывается автоматически
     /// </remarks>
-    void PrepareInstance();
+    static abstract void PrepareInstance();
+}
+
+public interface IPreparableInstance<out T> where T : notnull
+{
+    /// <summary>
+    /// Подгатовка, осуществляющаяся до создания инстанса
+    /// </summary>
+    /// <remarks>
+    /// В основном не вызывается автоматически
+    /// </remarks>
+    static abstract T PrepareInstance();
 }

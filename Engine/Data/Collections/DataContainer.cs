@@ -4,7 +4,7 @@ using RegistryManagers;
 using Meta;
 
 [Obsolete("The class is mainly used in the engine, you should not use it in the game.")]
-public abstract class DataContainer<T> : MetaObject<MetaData>, IDataContainer
+public abstract class DataContainer<T> : MetaObject<MetaData>, IDataContainer, IDisposable
 {
     public ConcurrentIdentifierMap<object> Data { get; init; }
 
@@ -77,4 +77,12 @@ public abstract class DataContainer<T> : MetaObject<MetaData>, IDataContainer
     public void Clear() => Data.Clear();
 
     #endregion
+
+    public void Dispose()
+    {
+        Registries.DataContainerRegistry.Pop(Id);
+        GC.SuppressFinalize(this);
+    }
+    
+    ~DataContainer() => Dispose();
 }

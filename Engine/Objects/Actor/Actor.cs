@@ -6,7 +6,7 @@ public abstract class Actor<T>(T nodeData)
     : SceneNode<T>(nodeData), IPreparableInstance
     where T : ActorData
 {
-    public virtual void PrepareInstance()
+    public static void PrepareInstance()
     {
     }
 }

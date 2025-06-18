@@ -5,7 +5,7 @@ using RegistryManagers;
 /// <summary>
 /// Уникальный идентификатор объекта движка в системе реестров, может инициализироваться из object?
 /// </summary>
-public sealed class Identifier
+public sealed class Identifier : IDisposable
 {
     public string? Name { get; }
     public Guid Uuid { get; } = Guid.NewGuid();
@@ -42,4 +42,12 @@ public sealed class Identifier
         Registries.IdentifierRegistry.Get(value);
 
     public override string ToString() => Name ?? Uuid.ToString();
+    
+    public void Dispose()
+    {
+        Registries.IdentifierRegistry.Pop(this);
+        GC.SuppressFinalize(this);
+    }
+    
+    ~Identifier() => Dispose();
 }

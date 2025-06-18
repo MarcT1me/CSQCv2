@@ -1,18 +1,18 @@
-﻿using Engine.Events.QuantumEvents;
-using Engine.Threading;
+﻿namespace Engine.Base;
 
-namespace Engine.App;
-
+using Events.QuantumEvents;
+using Threading;
 using Data.Meta;
 using Objects;
 using Time;
 using Events;
 using Failures;
 using Logging;
+using Extensions;
 
 public abstract class App
     : MetaObject<AppData>,
-        IPreparableInstance, IExitHandler, IDisposable, // lifetime methods
+        IPreparableInstance<AppData>, IReloadData, IExitHandler, IDisposable, // lifetime methods
         IEventful, IUpdatable, IRenderable // loop methods
 {
     public Clock Clock { get; }
@@ -24,24 +24,26 @@ public abstract class App
 
     #region Initialization
 
-    protected App(AppData appData) : base(appData)
+    protected App() : base(PrepareInstance())
     {
         // ReSharper disable once VirtualMemberCallInConstructor
         PrepareInstance();
-        Clock = new(appData.ClockMeta);
+        Clock = new(MetaData.ClockMeta);
+        QuantumEventHandler.EventHandling += HandleEvent;
         ExitHandling += OnExitHandling;
     }
 
-    public virtual void PrepareInstance()
+    public static AppData PrepareInstance()
     {
+        return null!;
     }
 
-    public abstract object CreateWinData();
-
-    public abstract object CreateGlData();
-
     #endregion
-
+    
+    public virtual void OnReloadData()
+    {
+        HandleReloadDataEvent();
+    }
 
     #region Mainloop methods
 
@@ -51,13 +53,13 @@ public abstract class App
         while (Instance == null || Instance.Running)
         {
             Logger.Debug("Mainloop iteration");
-            using (new Catch())
+            With.Handle(new Catch("Main Mainloop Catch"), _ =>
             {
                 Instance = Activator.CreateInstance<T>();
                 Instance.Run();
-            }
+            });
 
-            Instance.Dispose();
+            Instance?.Dispose();
         }
     }
 
@@ -70,19 +72,33 @@ public abstract class App
         {
             QuantumEventHandler.HandleEvents();
             QuantumThread.WaitAll();
+            if (!Running) break;
+
+            // Update
 
             PreUpdate();
             QuantumThread.WaitAll();
+            if (!Running) break;
+
             Update();
             QuantumThread.WaitAll();
+            if (!Running) break;
+
+            // Render
 
             PreRender();
             QuantumThread.WaitAll();
+            if (!Running) break;
+
             Render();
             QuantumThread.WaitAll();
+            if (!Running) break;
+
             PostRender();
             QuantumThread.WaitAll();
+            if (!Running) break;
 
+            // time updating
             Clock.Tick();
         }
 

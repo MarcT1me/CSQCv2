@@ -4,17 +4,18 @@ using System;
 using Data;
 using Data.Collections;
 using Data.Meta;
+using Extensions;
 
 /// <summary>
 /// Catch с авторской реализацией отлова ошибок
 /// </summary>
-public sealed class Catch : MetaObject<CatchMeta>, IDisposable
+public sealed class Catch : MetaObject<CatchMeta>, IContextManager
 {
     public static readonly WritableTale<Catch> ActiveCatches = new(new MetaData("catchesRoster"));
 
     public bool IsRunning { get; private set; }
 
-    public bool IsSuccess => MetaData.Failures.IsEmpty(); 
+    public bool IsSuccess => MetaData.Failures.IsEmpty();
 
     /// <summary>
     /// Создание Catch
@@ -33,6 +34,7 @@ public sealed class Catch : MetaObject<CatchMeta>, IDisposable
             throw new InvalidOperationException($"Catch with id {Id} already exists");
 
         ActiveCatches[Id] = this;
+        IsRunning = true;
     }
 
     /// <summary>
@@ -53,31 +55,17 @@ public sealed class Catch : MetaObject<CatchMeta>, IDisposable
         }
         catch (Exception ex)
         {
-            HandleException(ex);
+            OnException(ex);
             return defaultValue;
         }
     }
-
-    public void TryAction(Action action)
-    {
-        try
-        {
-            IsRunning = true;
-            action();
-            IsRunning = false;
-        }
-        catch (Exception ex)
-        {
-            HandleException(ex);
-        }
-    }
-
+    
     /// <summary>
     /// Обработка ошибок
     /// </summary>
     /// <param name="ex">Обрабатываемая ошибка</param>
     /// <exception cref="FailureException">Если обрабатываемая ошибка отмечена как критичная</exception>
-    private void HandleException(Exception ex)
+    public void OnException(Exception ex)
     {
         var failure = ex as FailureException ?? new FailureException(ex.Message, ex)
         {
@@ -99,7 +87,12 @@ public sealed class Catch : MetaObject<CatchMeta>, IDisposable
         }
     }
 
-    public void Dispose() => ActiveCatches[Id] = null;
+    public void Dispose()
+    {
+        IsRunning = false;
+        ActiveCatches[Id] = null;
+        GC.SuppressFinalize(this);
+    }
 
     ~Catch() => Dispose();
 }

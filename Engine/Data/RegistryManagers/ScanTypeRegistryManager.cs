@@ -25,4 +25,14 @@ internal sealed class ScanTypeRegistryManager : IRegistryManager<Type>
 
         return null;
     }
+
+    public Type? Pop(object key)
+    {
+        if (key is not string k) return null;
+        ScanTypes.Remove(k, out var type);
+        return type;
+    }
+
+    public int Size => ScanTypes.Count;
+    public ICollection<Type> Values => ScanTypes.Values;
 }

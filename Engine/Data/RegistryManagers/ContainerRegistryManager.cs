@@ -24,4 +24,17 @@ internal sealed class ContainerRegistryManager : IRegistryManager<IDataContainer
         var identifier = Identifier.FromUncertain(id);
         return Objects.GetValueOrDefault(identifier);
     }
+
+    public IDataContainer? Pop(object id)
+    {
+        var identifier = Identifier.GiveFromUncertain(id);
+        if (identifier == null) 
+            return null;
+
+        Objects.TryRemove(identifier, out var container);
+        return container;
+    }
+
+    public int Size => Objects.Count;
+    public ICollection<IDataContainer> Values => Objects.Values;
 }

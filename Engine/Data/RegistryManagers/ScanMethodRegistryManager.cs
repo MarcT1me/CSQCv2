@@ -27,4 +27,14 @@ internal sealed class ScanMethodRegistryManager : IRegistryManager<QuantumMethod
 
         return null;
     }
+
+    public QuantumMethodInfo? Pop(object id)
+    {
+        if (id is not string k) return null;
+        ScanMethods.Remove(k, out var type);
+        return type;
+    }
+
+    public int Size => ScanMethods.Count;
+    public ICollection<QuantumMethodInfo> Values => ScanMethods.Values;
 }
