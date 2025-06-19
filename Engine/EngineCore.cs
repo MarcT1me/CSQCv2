@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
-using SDL2;
+using Engine.Graphic.OpenGl;
+using MirageAPI;
 
 namespace Engine;
 
@@ -45,29 +46,37 @@ public static class EngineCore
     public static Assembly? AppLibAssembly;
     public static IFailureHandler DefaultFailureHandler = new ConsoleFailureHandler();
 
+    [Obsolete("Obsolete")]
     public static void Initialize(Assembly? appLibAssembly)
     {
         With.Handle(new Catch("Main EngineCore Catch"), _ =>
         {
             AppLibAssembly = appLibAssembly;
 
+            Logger.InitLogger();
+
+            Logger.Separator();
+
 #if !DEBUG
         BaseConfig.DebugMode = false;
 #endif
 
-#pragma warning disable CS0618 // Type or member is obsolete
             InitializeCore();
-#pragma warning restore CS0618 // Type or member is obsolete
+
+            Logger.Info("Initialize MirageSystem");
+            if (!MirageSystem.init(GlData.ApiVersions.X, GlData.ApiVersions.Y))
+            {
+                Logger.Error("Failed to initialize MirageSystem");
+            }
+
+            Logger.Info("Initialize All SDL");
+            SDL2.SDL.SDL_Init(SDL2.SDL.SDL_INIT_EVERYTHING);
         });
     }
 
-    [Obsolete("Use only one times after game initialization")]
+    [Obsolete("Obsolete")]
     private static void InitializeCore()
     {
-        Logger.InitLogger();
-
-        Logger.Separator();
-
         Logger.Info(
             "Engine Initialization Started\n" +
             $"Headless: {BaseConfig.Headless}\n" +
@@ -85,10 +94,6 @@ public static class EngineCore
             ]
         );
         Logger.Separator();
-
-        Logger.Info("Initialize SDL");
-        SDL.SDL_SetHint(SDL.SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS, "1");
-        SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING);
 
         Logger.Separator();
 

@@ -59,7 +59,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Natives\MirageAPI\MirageAPI.vcxproj" />
+      <ProjectReference Include="..\Natives\MirageAPI\MirageAPI.vcxproj" />
     </ItemGroup>
 
     <!-- adding engine binary -->

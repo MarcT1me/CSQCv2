@@ -14,7 +14,7 @@ public static class QuantumTracer
     /// <summary>
     /// Метод сканирования домена AppLib на наличие аттрибутов
     /// </summary>
-    [Obsolete("It is used only in the engine, not in game logic.", true)]
+    [Obsolete("It is used only in the engine, not in game logic.")]
     public static void HandleAssembly(Assembly?[] assemblies)
     {
         foreach (var assembly in assemblies)

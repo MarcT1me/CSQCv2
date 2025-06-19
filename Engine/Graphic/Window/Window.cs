@@ -1,5 +1,6 @@
 ﻿using OpenTK.Mathematics;
 using SDL2;
+using MirageAPI.Window;
 
 namespace Engine.Graphic.Window;
 
@@ -13,8 +14,8 @@ using Logging;
 using Data.RegistryManagers;
 
 public class Window
-    : MetaObject<WindowData>, IDisposable,
-        IEventful, IRenderable, IUpdatable
+    : MetaObject<WindowData>,
+        IEventful, IUpdatable, IRenderable
 {
     public const int UndefinedMask = 536805376;
     public const int CenteredMask = 805240832;
@@ -22,7 +23,6 @@ public class Window
     public const int Centered = 805240832;
 
     private readonly IntPtr _window;
-    private readonly IntPtr _glContext;
 
     public ObjectStatusFlags ObjectStatus => MetaData.Status;
     public uint WinId => SDL.SDL_GetWindowID(_window);
@@ -34,27 +34,26 @@ public class Window
     ) : base(new WindowData(winData, glData ?? new GlData(), name))
     {
         Logger.Info(
-            $"Creating window '{name}'\n" +
+            $"Creating window '{MetaData.Identifier}'\n" +
             $"Position: {winData.Position}\n" +
             $"Size: {winData.Size}\n" +
             $"Opacity: {winData.Opacity}"
         );
 
-        _window = SDL.SDL_CreateWindow(
-            name,
-            winData.Position.X, winData.Position.Y,
-            winData.Size.X, winData.Size.Y,
-            (SDL.SDL_WindowFlags)(winData.Flags | WinFlags.Opengl)
+        var nativeWindow = new NativeWindow(
+            winData.Size.X,
+            winData.Size.Y,
+            MetaData.Identifier.GetNameAnyway(),
+            null
         );
+
+        IntPtr nativeHandle = nativeWindow.Handle;
+        _window = SDL.SDL_CreateWindowFrom(nativeHandle);
+        nativeWindow.InitGLContext();
+
         if (_window == IntPtr.Zero)
         {
             throw new Exception("Failed to create window: " + SDL.SDL_GetError());
-        }
-
-        _glContext = SDL.SDL_GL_CreateContext(_window);
-        if (_glContext == IntPtr.Zero)
-        {
-            throw new Exception("Failed to create OpenGL context: " + SDL.SDL_GetError());
         }
 
         Registries.WindowRegistry.Register(this);
@@ -89,10 +88,8 @@ public class Window
         SDL.SDL_SetWindowPosition(_window, MetaData.WinData.Position.X, MetaData.WinData.Position.Y);
     }
 
-    public void SetCurrent() => SDL.SDL_GL_MakeCurrent(_window, _glContext);
     public void SwapBuffers() => SDL.SDL_GL_SwapWindow(_window);
 
-    public void DeleteContext() => SDL.SDL_GL_DeleteContext(_glContext);
     public void Close() => SDL.SDL_DestroyWindow(_window);
 
     public void HandleEvent(QuantumEvent e)
@@ -133,7 +130,6 @@ public class Window
 
     public void PreRender()
     {
-        SetCurrent();
         // GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
     }
 
@@ -148,7 +144,6 @@ public class Window
 
     public void Dispose()
     {
-        DeleteContext();
         Close();
         Registries.WindowRegistry.Pop(Id);
 

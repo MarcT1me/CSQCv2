@@ -1,16 +1,11 @@
 ﻿#pragma once
-#include "NativeMirageAPI.h" // Подключаем нативный заголовок
 
-namespace MirageAPI {
-	public ref class GraphicsWrapper {
-	public:
-		GraphicsWrapper();
-		~GraphicsWrapper();
-        
-		void Initialize();
-		void RenderFrame(float deltaTime);
-        
-	private:
-		NativeRenderer* nativeRenderer; // Указатель на нативный объект
-	};
+namespace MirageAPI
+{
+    public ref class MirageSystem
+    {
+    public:
+        static bool init(int major, int minor);
+        static void shutdown();
+    };
 }
