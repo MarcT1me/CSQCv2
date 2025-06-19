@@ -1,10 +1,9 @@
-﻿using Engine.Events;
-using OpenTK.Graphics.OpenGL;
-using OpenTK.Mathematics;
+﻿using OpenTK.Mathematics;
 using SDL2;
 
 namespace Engine.Graphic.Window;
 
+using Events;
 using Events.QuantumEvents.Window;
 using Events.QuantumEvents;
 using Objects;

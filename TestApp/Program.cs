@@ -8,11 +8,14 @@ public class Program
     {
         // load engine and link to loaded App
         var (app, eng) = QLauncher.InitProject(AppDomain.CurrentDomain);
-        eng.Activate(); // activate Engine
+
+        // Activate Engine
+        eng.Activate();
 
         // activate and start app
         app.Start();
-        
-        eng.Deactivate(); // activate Engine
+
+        // Deactivate Engine
+        eng.Deactivate();
     }
 }

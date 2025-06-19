@@ -1,6 +1,8 @@
 ﻿using System.Reflection;
 using SDL2;
 
+using MirageAPI;
+
 namespace Engine;
 
 using Configuration;
@@ -47,6 +49,9 @@ public static class EngineCore
 
     public static void Initialize(Assembly? appLibAssembly)
     {
+        var v = new MirageAPI.GraphicsWrapper();
+        v.Initialize();
+        
         With.Handle(new Catch("Main EngineCore Catch"), _ =>
         {
             AppLibAssembly = appLibAssembly;

@@ -8,7 +8,12 @@
 
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
         <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
-        <OutDir>bin</OutDir>
+        
+        <OutputPath>bin\$(Configuration)</OutputPath>
+        
+        <Platforms>x64</Platforms>
+        
+        <Configurations>Debug;Release</Configurations>
     </PropertyGroup>
 
 </Project>

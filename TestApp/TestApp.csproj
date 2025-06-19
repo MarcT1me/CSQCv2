@@ -8,68 +8,60 @@
         <Nullable>enable</Nullable>
 
         <OutputPath>bin\$(Configuration)</OutputPath>
-    </PropertyGroup>
 
-    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-      <PlatformTarget>x64</PlatformTarget>
-      <Prefer32bit>false</Prefer32bit>
-      <DebugType>embedded</DebugType>
-    </PropertyGroup>
+        <Platforms>x64</Platforms>
 
-    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-      <PlatformTarget>x64</PlatformTarget>
-      <Prefer32bit>false</Prefer32bit>
-      <DebugSymbols>false</DebugSymbols>
+        <Configurations>Debug;Release</Configurations>
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Launcher\Launcher.csproj"/>
-        <ProjectReference Include="..\AppLib\AppLib.csproj"/>
+        <ProjectReference Include="..\Launcher\Launcher.csproj" />
+        <ProjectReference Include="..\AppLib\AppLib.csproj" />
     </ItemGroup>
 
     <Target Name="CopyRuntimes" AfterTargets="Build">
         <ItemGroup>
-            <RuntimeBinaries Include="$(OutputPath)\**\SDL2.dll"/>
-            <RuntimeBinaries Include="$(OutputPath)\**\freetype6.dll"/>
+            <RuntimeBinaries Include="$(OutputPath)\**\SDL2.dll" />
+            <RuntimeBinaries Include="$(OutputPath)\**\freetype6.dll" />
         </ItemGroup>
 
-        <Move SourceFiles="@(RuntimeBinaries)" DestinationFolder="$(OutputPath)\bin\runtimes"/>
-        <RemoveDir Directories="$(OutputPath)\runtimes"/>
+        <Move SourceFiles="@(RuntimeBinaries)" DestinationFolder="$(OutputPath)\bin\runtimes" />
+        <RemoveDir Directories="$(OutputPath)\runtimes" />
     </Target>
 
     <Target Name="MoveAppBinaries" AfterTargets="CopyRuntimes">
         <ItemGroup>
-            <TempAppBinaries Include="$(OutputPath)\*.dll"/>
+            <TempAppBinaries Include="$(OutputPath)\*.dll" />
         </ItemGroup>
 
         <ItemGroup>
-            <UniqueTempAppBinaries Include="@(TempAppBinaries-&gt;Distinct())"/>
+            <UniqueTempAppBinaries Include="@(TempAppBinaries-&gt;Distinct())" />
         </ItemGroup>
 
-        <Move SourceFiles="@(UniqueTempAppBinaries)" DestinationFolder="$(OutputPath)\bin"/>
+        <Move SourceFiles="@(UniqueTempAppBinaries)" DestinationFolder="$(OutputPath)\bin" />
 
-        <Move SourceFiles="$(OutputPath)\bin\Launcher.dll" DestinationFolder="$(OutputPath)"/>
-        <Move SourceFiles="$(OutputPath)\bin\TestApp.dll" DestinationFolder="$(OutputPath)" Condition="Exists('$(OutputPath)\bin\TestApp.dll')"/>
+        <Move SourceFiles="$(OutputPath)\bin\Launcher.dll" DestinationFolder="$(OutputPath)" />
+        <Move SourceFiles="$(OutputPath)\bin\TestApp.dll" DestinationFolder="$(OutputPath)" Condition="Exists('$(OutputPath)\bin\TestApp.dll')" />
     </Target>
 
     <Target Name="MoveEngineBinaries" AfterTargets="MoveAppBinaries">
         <ItemGroup>
-            <TempEngineBinaries Include="$(OutputPath)\**\Engine.dll"/>
+            <TempEngineBinaries Include="$(OutputPath)\**\Engine.dll" />
         </ItemGroup>
 
         <ItemGroup>
-            <UniqueTempEngineBinaries Include="@(TempEngineBinaries-&gt;Distinct())"/>
+            <UniqueTempEngineBinaries Include="@(TempEngineBinaries-&gt;Distinct())" />
         </ItemGroup>
 
-        <Move SourceFiles="@(UniqueTempEngineBinaries)" DestinationFolder="$(OutputPath)\bin\Engine"/>
+        <Move SourceFiles="@(UniqueTempEngineBinaries)" DestinationFolder="$(OutputPath)\bin\Engine" />
     </Target>
 
     <Target Name="DelTrash" AfterTargets="MoveEngineBinaries">
         <ItemGroup>
-            <TrashFiles Include="$(OutputPath)\**\*.pdb"/>
+            <TrashFiles Include="$(OutputPath)\**\*.pdb" />
         </ItemGroup>
 
-        <Delete Files="@(TrashFiles)"/>
+        <Delete Files="@(TrashFiles)" />
     </Target>
 
 </Project>
