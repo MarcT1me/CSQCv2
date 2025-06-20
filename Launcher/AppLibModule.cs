@@ -9,7 +9,7 @@ public class AppLibModule : QuantumModule
 
     private static readonly HashSet<string> EngineBinaries =
     [
-        "Engine.dll"
+        "EngineCore.dll", "QuantumEngine.dll", "HeadlessQuantumEngine.dll", "MirageAPI.dll"
     ];
 
     public AppLibModule(AppDomain domain, string mainClassName)
@@ -46,7 +46,9 @@ public class AppLibModule : QuantumModule
             $"Load new Assembly: {assemblyName} - {assemblyPath}"
         );
 
-        return File.Exists(fullPath) ? Assembly.LoadFrom(fullPath) : null;
+        return File.Exists(fullPath)
+            ? Assembly.LoadFrom(fullPath)
+            : throw new Exception($"Could not find assembly {assemblyPath}");
     }
 
     private static bool IsEngineBinary(string assemblyName)

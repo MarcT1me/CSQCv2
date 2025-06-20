@@ -2,22 +2,32 @@
 
     <PropertyGroup>
         <TargetFramework>net9.0</TargetFramework>
+        <PlatformTarget>x64</PlatformTarget>
+
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+        <RootNamespace>Engine</RootNamespace>
 
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
         <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
         <OutputPath>bin\$(Configuration)</OutputPath>
 
         <Platforms>x64</Platforms>
-
         <Configurations>Debug;Release</Configurations>
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\QuantumEngine\QuantumEngine.csproj"/>
+        <PackageReference Include="ini-parser" Version="2.5.2"/>
+        <PackageReference Include="OpenTK.Mathematics" Version="4.9.4"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Include="EngineData\**\*">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
     </ItemGroup>
 
 </Project>

@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.12.35527.113 d17.12
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Engine", "Engine\Engine.csproj", "{E414A031-E41C-4DA7-8370-162F040CF9DB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EngineCore", "EngineCore\EngineCore.csproj", "{E414A031-E41C-4DA7-8370-162F040CF9DB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApp", "TestApp\TestApp.csproj", "{D750A299-2419-4C72-B5A0-5D020FBA24DF}"
 EndProject
@@ -17,6 +17,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MirageAPI", "Natives\Mirage
 	ProjectSection(ProjectDependencies) = postProject
 		{9910DD88-64B0-47A0-9BD2-A5C4D2F9C4A4} = {9910DD88-64B0-47A0-9BD2-A5C4D2F9C4A4}
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuantumEngine", "QuantumEngine\QuantumEngine.csproj", "{4EC3B9AC-46BC-4370-9234-A02A4F085900}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -40,6 +42,10 @@ Global
 		{69687DF9-971E-491C-B8FB-016ECC241606}.Debug|x64.Build.0 = Debug|x64
 		{69687DF9-971E-491C-B8FB-016ECC241606}.Release|x64.ActiveCfg = Release|x64
 		{69687DF9-971E-491C-B8FB-016ECC241606}.Release|x64.Build.0 = Release|x64
+		{4EC3B9AC-46BC-4370-9234-A02A4F085900}.Release|x64.ActiveCfg = Release|x64
+		{4EC3B9AC-46BC-4370-9234-A02A4F085900}.Release|x64.Build.0 = Release|x64
+		{4EC3B9AC-46BC-4370-9234-A02A4F085900}.Debug|x64.ActiveCfg = Debug|x64
+		{4EC3B9AC-46BC-4370-9234-A02A4F085900}.Debug|x64.Build.0 = Debug|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

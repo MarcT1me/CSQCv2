@@ -9,6 +9,50 @@
 
 namespace MirageAPI::Window
 {
+    // event handling
+
+    void NativeWindow::GLFW_KeyCallback(
+        GLFWwindow* window,
+        const int key, const int scancode,
+        const int action, const int mods
+    )
+    {
+        void* ptr = glfwGetWindowUserPointer(window);
+        if (!ptr) return;
+
+        GlfwEvent e;
+        e.Type = GlfwEventType::Key;
+        e.Key = key;
+        e.Scancode = scancode;
+        e.Action = action;
+        e.Mods = mods;
+
+        auto handle = System::Runtime::InteropServices::GCHandle::FromIntPtr(System::IntPtr(ptr));
+        auto wrapper = safe_cast<NativeWindow^>(handle.Target);
+
+        wrapper->RaiseEvent(e);
+    }
+
+    void NativeWindow::GLFW_WindowSizeCallback(
+        GLFWwindow* window,
+        const int width, const int height
+    )
+    {
+        void* ptr = glfwGetWindowUserPointer(window);
+        if (!ptr) return;
+
+        GlfwEvent e;
+        e.Type = GlfwEventType::WindowResize;
+        e.Width = width;
+        e.Height = height;
+
+        auto handle = System::Runtime::InteropServices::GCHandle::FromIntPtr(System::IntPtr(ptr));
+        auto wrapper = safe_cast<NativeWindow^>(handle.Target);
+        wrapper->RaiseEvent(e);
+    }
+
+    // creating and deleting
+
     NativeWindow::NativeWindow(
         const int width, const int height,
         System::String^ title,
@@ -18,24 +62,41 @@ namespace MirageAPI::Window
         msclr::interop::marshal_context context;
         std::string nativeTitle = context.marshal_as<std::string>(title);
 
-        window_ptr = glfwCreateWindow(
+        glfw_window = glfwCreateWindow(
             width, height, nativeTitle.c_str(),
-            nullptr, parent ? parent->window_ptr : nullptr
+            nullptr, parent ? parent->glfw_window : nullptr
         );
 
-        if (!window_ptr)
+        if (!glfw_window)
         {
             glfwTerminate();
             throw gcnew System::Exception("Не удалось создать окно GLFW");
         }
+
+        gch = System::Runtime::InteropServices::GCHandle::Alloc(this);
+
+        void* native_ptr = System::Runtime::InteropServices::GCHandle::ToIntPtr(gch).ToPointer();
+        glfwSetWindowUserPointer(glfw_window, native_ptr);
+        glfwSetKeyCallback(
+            glfw_window,
+            reinterpret_cast<GLFWkeyfun>(GLFW_KeyCallback)
+        );
+        glfwSetWindowSizeCallback(
+            glfw_window,
+            reinterpret_cast<GLFWwindowsizefun>(GLFW_WindowSizeCallback)
+        );
     }
 
     NativeWindow::~NativeWindow()
     {
-        if (window_ptr)
+        if (glfw_window)
         {
-            glfwDestroyWindow(window_ptr);
-            window_ptr = nullptr;
+            if (gch.IsAllocated)
+            {
+                gch.Free();
+            }
+            glfwDestroyWindow(glfw_window);
+            glfw_window = nullptr;
         }
     }
 
@@ -43,15 +104,10 @@ namespace MirageAPI::Window
     {
     }
 
-    System::IntPtr NativeWindow::Handle::get()
-    {
-        return System::IntPtr(window_ptr);
-    }
-
     void NativeWindow::InitGLContext()
     {
-        glfwMakeContextCurrent(window_ptr);
-        
+        glfwMakeContextCurrent(glfw_window);
+
         GLenum glewInitStatus = glewInit();
 
         if (glewInitStatus != GLEW_OK)
@@ -66,5 +122,24 @@ namespace MirageAPI::Window
             reinterpret_cast<const char*>(glewGetString(GLEW_VERSION))
         );
         System::Console::WriteLine("Используется GLEW: " + version);
+    }
+
+    // props
+
+    System::IntPtr NativeWindow::Handle::get()
+    {
+        return System::IntPtr(glfw_window);
+    }
+
+    // other methods
+
+    void NativeWindow::RaiseEvent(GlfwEvent e)
+    {
+        OnGlfwEvent(e);
+    }
+
+    void NativeWindow::PollEvents()
+    {
+        glfwPollEvents();
     }
 }

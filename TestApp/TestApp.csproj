@@ -46,7 +46,11 @@
 
     <Target Name="MoveEngineBinaries" AfterTargets="MoveAppBinaries">
         <ItemGroup>
-            <TempEngineBinaries Include="$(OutputPath)\**\Engine.dll" />
+            <TempEngineBinaries Include="$(OutputPath)\**\EngineCore.dll" />
+            <TempEngineBinaries Include="$(OutputPath)\**\QuantumEngine.dll" />
+            <TempEngineBinaries Include="$(OutputPath)\**\Ijwhost.dll" />
+            <TempEngineBinaries Include="$(OutputPath)\**\HeadlessQuantumEngine.dll" />
+            <TempEngineBinaries Include="$(OutputPath)\**\MirageAPI.dll" />
         </ItemGroup>
 
         <ItemGroup>

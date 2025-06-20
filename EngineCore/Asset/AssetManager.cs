@@ -1,0 +1,80 @@
+﻿using Engine.Logging;
+
+namespace Engine.Asset;
+
+using Data.Meta;
+using Data.Collections;
+using Data.RegistryManagers;
+
+/// <summary>
+/// Менеджер, управляющий ассетами
+/// </summary>
+public static class AssetManager
+{
+    public static Roster<AssetData> Storage { get; } = new(new MetaData("assetStorage"));
+
+    /// <summary>
+    /// Регистрация ассета
+    /// </summary>
+    /// <param name="type">Тип ассета</param>
+    /// <exception cref="InvalidAssetTypeError">В случае, если тип ассета уже зарегистрирован</exception>
+    public static void RegisterAssetType(AssetType type)
+    {
+        if (CoreRegistries.AssetTypeRegistry.Get(type.Name) is not null)
+            throw new InvalidAssetTypeError(type.Name);
+        CoreRegistries.AssetTypeRegistry.Register(type);
+    }
+
+    /// <summary>
+    /// Метод загрузки ассета
+    /// </summary>
+    /// <param name="assetFile">Данные о загрузке</param>
+    /// <param name="alreadyLoadedDependencies">Уже загруженные ассеты, если такие есть</param>
+    /// <param name="ct">Остановка задачи</param>
+    /// <returns></returns>
+    /// <exception cref="InvalidAssetTypeError">В случае, если тип ассета был указан не верно</exception>
+    /// <exception cref="AssetError">В любых других случаях, если ассет не был загружен до конца</exception>
+    public static async Task<AssetData> LoadAsync(
+        AssetFile assetFile, 
+        IEnumerable<AssetData>? alreadyLoadedDependencies = null,
+        CancellationToken ct = default
+        )
+    {
+        var assetType = CoreRegistries.AssetTypeRegistry.Get(assetFile.TypeName);
+        if (assetType == null)
+            throw new InvalidAssetTypeError(assetFile.TypeName);
+
+        try
+        {
+            // get or create new asset branch
+            var branch = Storage.GetBranch(
+                assetType.Name
+            ) ?? Storage.NewBranch(
+                new MetaData(
+                    "assetStorage-branch-" + assetType.Name
+                )
+            );
+
+            // resolve dependencies
+            var resolvedDependencies = await DependencyResolver.ResolveAsync(assetFile, ct: ct);
+
+            // load content from file 
+            var loadedContent = await assetType.AssetLoader.LoadFileAsync(assetFile, ct: ct);
+
+            // create asset data instance
+            var finalDependencies = resolvedDependencies.Concat(alreadyLoadedDependencies ?? []);
+            var assetData = await AssetLoader.CreateAsset(assetFile, finalDependencies, loadedContent);
+
+            // save in asset branch
+            branch[assetData.Identifier] = assetData;
+            
+            Logger.Success($"Asset {assetFile.Identifier} loaded");
+
+            return assetData;
+        }
+        catch (Exception e)
+        {
+            throw new AssetError($"Failed to load asset from {assetFile.Path}", e);
+        }
+    }
+}

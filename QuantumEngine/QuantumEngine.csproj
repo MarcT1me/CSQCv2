@@ -1,0 +1,54 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <PlatformTarget>x64</PlatformTarget>
+
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+        <RootNamespace>Engine</RootNamespace>
+
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+
+        <OutputPath>bin\$(Configuration)</OutputPath>
+
+        <Platforms>x64</Platforms>
+        <Configurations>Debug;Release</Configurations>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="SpaceWizards.SharpFont" Version="1.0.2"/>
+        <PackageReference Include="StbImageSharp" Version="2.30.15"/>
+    </ItemGroup>
+
+    <!-- adding engine binary and assets -->
+    <ItemGroup>
+        <Content Include="freetype6.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <Link>freetype6.dll</Link>
+        </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Folder Include="Asset\"/>
+        <Folder Include="Graphic\OpenGl\Buffers\"/>
+        <Folder Include="Graphic\OpenGl\GlObject\"/>
+        <Folder Include="Graphic\OpenGl\Shader\"/>
+        <Folder Include="Graphic\OpenGl\Texture\"/>
+        <Folder Include="Graphic\OpenGl\Vertex\"/>
+        <Folder Include="Graphic\Interface\"/>
+        <Folder Include="Graphic\Model\"/>
+        <Folder Include="Graphic\Renderer\"/>
+        <Folder Include="Graphic\Surface\"/>
+    </ItemGroup>
+
+
+    <ItemGroup>
+        <ProjectReference Include="..\Natives\MirageAPI\MirageAPI.vcxproj"/>
+        <ProjectReference Include="..\EngineCore\EngineCore.csproj"/>
+    </ItemGroup>
+
+</Project>

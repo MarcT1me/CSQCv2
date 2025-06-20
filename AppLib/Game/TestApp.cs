@@ -1,6 +1,5 @@
 ﻿using Engine.Base;
-using Engine.Events.QuantumEvents;
-using Engine.Logging;
+// using Engine.Events.QuantumEvents;
 
 namespace AppLib.Game;
 
@@ -13,12 +12,13 @@ public class TestApp : Game<TestAppData, GameWindow>
 
     protected override GameWindow CreateMainWindow()
     {
-        return new GameWindow(MetaData.WinData, MetaData.GlData, name: MetaData.Identifier.GetNameAnyway());
+        var n = MetaData.Identifier.GetNameAnyway();
+        return new GameWindow(MetaData.WinData, MetaData.GlData, n);
     }
 
-    public override void HandleEvent(QuantumEvent e)
-    {
-        base.HandleEvent(e);
-        Logger.Debug($"event type {e.Type}");
-    }
+    // public override void HandleEvent(QuantumEvent e)
+    // {
+    //     base.HandleEvent(e);
+    //     Logger.Debug($"event type {e.Type}");
+    // }
 }
