@@ -8,7 +8,7 @@
 
 namespace MirageAPI
 {
-    bool MirageSystem::init(int major, int minor)
+    bool MirageSystem::Init(int major, int minor)
     {
         if (!glfwInit())
         {
@@ -21,7 +21,8 @@ namespace MirageAPI
         return true;
     }
 
-    void MirageSystem::shutdown()
+    void MirageSystem::Shutdown()
     {
+        glfwTerminate();
     }
 }

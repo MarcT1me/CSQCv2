@@ -1,4 +1,5 @@
 ﻿using OpenTK.Mathematics;
+// engine sub-systems
 using MirageAPI.Window;
 
 namespace Engine.Graphic.Window;
@@ -16,6 +17,7 @@ public class Window
         IEventful, IUpdatable, IRenderable
 {
     private readonly NativeWindow _nativeWindow;
+    public IntPtr Handle => _nativeWindow.Handle;
 
     public ObjectStatusFlags ObjectStatus => MetaData.Status;
 
@@ -39,11 +41,11 @@ public class Window
             null
         );
         _nativeWindow.InitGLContext();
-        
+
         QEventSystem.RegisterWindow(_nativeWindow);
+        QEventSystem.EventHandling += HandleEvent;
 
         Registries.WindowRegistry.Register(this);
-        // QuantumEventHandler.EventHandling += HandleEvent;
     }
 
     public void UpdateOpacity(float? opacity = null)
@@ -64,12 +66,9 @@ public class Window
             MetaData.WinData.Position = position.Value;
     }
 
-    public virtual void HandleEvent()
-    {
-    }
-
     public virtual void HandleEvent(QuantumEvent e)
     {
+        if (e is { Type: EventType.WindowClose }) Dispose();
     }
 
     public virtual void PreUpdate()
@@ -98,9 +97,11 @@ public class Window
 
     public void Dispose()
     {
-        Registries.WindowRegistry.Pop(Id);
-        
+        Registries.WindowRegistry.Pop(Handle);
+
         QEventSystem.UnregisterWindow(_nativeWindow);
+        QEventSystem.EventHandling -= HandleEvent;
+
         _nativeWindow.Dispose();
 
         Logger.Info($"Window '{Id}' disposed");

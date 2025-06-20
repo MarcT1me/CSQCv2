@@ -12,6 +12,8 @@
         <Platforms>x64</Platforms>
 
         <Configurations>Debug;Release</Configurations>
+
+        <ApplicationIcon>Logo.ico</ApplicationIcon>
     </PropertyGroup>
 
     <ItemGroup>

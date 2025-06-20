@@ -1,48 +1,50 @@
 ﻿#pragma once
 
+#include "NativeEvents.h"
+
 struct GLFWwindow;
 
 namespace MirageAPI::Window
 {
-    public enum class GlfwEventType
-    {
-        Key, Char, MouseButton, Scroll, CursorPos,
-        WindowClose, WindowFocus, WindowResize
-    };
-
-    public value struct GlfwEvent
-    {
-        GlfwEventType Type;
-        int Key;
-        int Scancode;
-        int Action;
-        int Mods;
-        double X;
-        double Y;
-        int Width;
-        int Height;
-        int Focus;
-    };
-
     public ref class NativeWindow
     {
         GLFWwindow* glfw_window;
         System::Runtime::InteropServices::GCHandle gch;
 
-        static void GLFW_KeyCallback(
-            GLFWwindow* window,
-            int key, int scancode,
-            int action, int mods
-        );
-
-        static void GLFW_WindowSizeCallback(
-            GLFWwindow* window,
-            int width, int height
-        );
-
     public:
-        delegate void GlfwEventDelegate(GlfwEvent e);
-        event GlfwEventDelegate^ OnGlfwEvent;
+        // rise methods (overhead...)
+        void RaiseKeyEvent(Events::NativeKeyEvent event);
+        void RaiseMouseEvent(Events::NativeMouseEvent event);
+        void RaiseWindowEvent(Events::NativeWindowEvent event);
+        void RaiseCharEvent(Events::NativeCharEvent event);
+        void RaiseDropEvent(Events::NativeDropEvent event);
+        
+        // Keyboard
+
+        delegate void KeyDelegate(Events::NativeKeyEvent event);
+        event KeyDelegate^ OnKey;
+
+        // Mouse
+
+        delegate void MouseEventDelegate(Events::NativeMouseEvent event);
+        event MouseEventDelegate^ OnMouse;
+
+        // Window events
+
+        delegate void WindowEventDelegate(Events::NativeWindowEvent event);
+        event WindowEventDelegate^ OnWindow;
+
+        // other
+
+        delegate void CharDelegate(Events::NativeCharEvent event);
+        // GLFWwindow* window, unsigned int codepoint
+        event CharDelegate^ OnChar;
+
+        delegate void DropDelegate(Events::NativeDropEvent event);
+        // GLFWwindow* window, int count, const char** paths
+        event DropDelegate^ OnDrop;
+
+        // initializations and property
 
         NativeWindow(
             int width, int height,
@@ -62,10 +64,5 @@ namespace MirageAPI::Window
         // other methods
         // void SwapBuffers();
         // void MakeCurrent();
-
-        static void PollEvents();
-
-    internal:
-        void RaiseEvent(GlfwEvent e);
     };
 }

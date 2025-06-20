@@ -24,11 +24,13 @@ public class QEngineCore(Assembly? appLibAssembly) : EngineCore(appLibAssembly)
 
     protected override void InitializeModeSpecific()
     {
-        Logger.Info("Initialize MirageSystem");
-        if (!MirageSystem.init(GlData.ApiVersions.X, GlData.ApiVersions.Y))
+        Logger.Info("Initialize MirageAPI");
+        if (!MirageSystem.Init(GlData.ApiVersions.X, GlData.ApiVersions.Y))
         {
-            Logger.Error("Failed to initialize MirageSystem");
+            Logger.Error("Failed to initialize MirageAPI");
         }
+        
+        MirageAPI.Events.NativeEventManager.Initialize();
     }
 
     protected override void EnableDebugFeatures()
@@ -41,7 +43,8 @@ public class QEngineCore(Assembly? appLibAssembly) : EngineCore(appLibAssembly)
     {
         Logger.Info("Uninitialize EngineCore");
 
-        Logger.Info("Initialize SDL");
+        Logger.Info("Uninitialize MirageAPI");
+        MirageSystem.Shutdown();
 
         Logger.Success("EngineCore uninitialized");
     }

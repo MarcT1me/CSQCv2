@@ -31,7 +31,7 @@ public abstract class App<TData>
     {
         MetaData = PrepareInstance();
         Clock = new(MetaData.Tps, MetaData.SpeedRoster);
-        // QuantumEventHandler.EventHandling += HandleEvent;
+        QEventSystem.EventHandling += HandleEvent;
         ExitHandling += OnExitHandling;
     }
 
@@ -128,12 +128,12 @@ public abstract class App<TData>
         HandleExitEvent();
     }
 
-    public virtual void HandleEvent()
-    {
-    }
-
     public virtual void HandleEvent(QuantumEvent e)
     {
+        if (e is { Type: EventType.Quit })
+        {
+            Quit();
+        }
     }
 
     public abstract void PreUpdate();
@@ -149,8 +149,7 @@ public abstract class App<TData>
     public abstract void PostRender();
 
     #endregion
-
-
+    
     #region Exiting from App
 
     public virtual void OnExitHandling()

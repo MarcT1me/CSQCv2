@@ -1,0 +1,311 @@
+﻿#include "pch.h"
+#include "NativeEventManager.h"
+
+#include "GLFW/glfw3.h"
+
+#include "NativeWindow.h"
+
+namespace MirageAPI::Events
+{
+    Window::NativeWindow^ NativeEventManager::PrepareWindow(void* ptr)
+    {
+        auto handle = System::Runtime::InteropServices::GCHandle::FromIntPtr(System::IntPtr(ptr));
+        return safe_cast<Window::NativeWindow^>(handle.Target);
+    }
+
+    // key
+
+    void NativeEventManager::GLFW_KeyCallback(
+        GLFWwindow* window,
+        const int key,
+        const int scancode,
+        const int action, const int mods
+    )
+    {
+        // getting window ptr
+        void* ptr = glfwGetWindowUserPointer(window);
+        if (!ptr) return;
+
+        // format event
+        NativeKeyEvent e;
+
+        e.Key = key;
+        e.Scancode = scancode;
+        e.Action = action;
+        e.Mods = mods;
+
+        // raise event
+        auto wrapper = PrepareWindow(ptr);
+        e.windowID = wrapper->Handle;
+        wrapper->RaiseKeyEvent(e);
+    }
+
+    // mouse
+
+    void NativeEventManager::GLFW_MouseButtonCallback(
+        GLFWwindow* window,
+        const int button,
+        const int action, const int mode
+    )
+    {
+        // getting window ptr
+        void* ptr = glfwGetWindowUserPointer(window);
+        if (!ptr) return;
+
+        // format event
+        NativeMouseEvent e;
+        e.Type = NativeMouseEventType::Button;
+
+        e.Button = button;
+        e.Action = action;
+        e.Mode = mode;
+
+        // raise event
+        auto wrapper = PrepareWindow(ptr);
+        e.windowID = wrapper->Handle;
+        wrapper->RaiseMouseEvent(e);
+    }
+
+    void NativeEventManager::GLFW_ScrollCallback(GLFWwindow* window, double xOffset, double yOffset)
+    {
+        // getting window ptr
+        void* ptr = glfwGetWindowUserPointer(window);
+        if (!ptr) return;
+
+        // format event
+        NativeMouseEvent e;
+        e.Type = NativeMouseEventType::Scroll;
+
+        e.X = xOffset;
+        e.Y = yOffset;
+
+        // raise event
+        auto wrapper = PrepareWindow(ptr);
+        e.windowID = wrapper->Handle;
+        wrapper->RaiseMouseEvent(e);
+    }
+
+    void NativeEventManager::GLFW_CursorPositionCallback(GLFWwindow* window, double xPos, double yPos)
+    {
+        // getting window ptr
+        void* ptr = glfwGetWindowUserPointer(window);
+        if (!ptr) return;
+
+        // format event
+        NativeMouseEvent e;
+        e.Type = NativeMouseEventType::Move;
+
+        e.X = xPos;
+        e.Y = yPos;
+
+        // raise event
+        auto wrapper = PrepareWindow(ptr);
+        e.windowID = wrapper->Handle;
+        wrapper->RaiseMouseEvent(e);
+    }
+
+    // window
+
+    void NativeEventManager::GLFW_WindowFocusedCallback(GLFWwindow* window, int focused)
+    {
+        // getting window ptr
+        void* ptr = glfwGetWindowUserPointer(window);
+        if (!ptr) return;
+
+        // format event
+        NativeWindowEvent e;
+        e.Type = NativeWindowEventType::Focus;
+
+        e.X = focused;
+
+        // raise event
+        auto wrapper = PrepareWindow(ptr);
+        e.windowID = wrapper->Handle;
+        wrapper->RaiseWindowEvent(e);
+    }
+
+    void NativeEventManager::GLFW_WindowMaximizeCallback(GLFWwindow* window, int maximize)
+    {
+        // getting window ptr
+        void* ptr = glfwGetWindowUserPointer(window);
+        if (!ptr) return;
+
+        // format event
+        NativeWindowEvent e;
+        e.Type = NativeWindowEventType::Maximize;
+
+        e.X = maximize;
+
+        // raise event
+        auto wrapper = PrepareWindow(ptr);
+
+        wrapper->RaiseWindowEvent(e);
+    }
+
+    void NativeEventManager::GLFW_WindowIconifyCallback(GLFWwindow* window, int iconify)
+    {
+        // getting window ptr
+        void* ptr = glfwGetWindowUserPointer(window);
+        if (!ptr) return;
+
+        // format event
+        NativeWindowEvent e;
+        e.Type = NativeWindowEventType::Iconify;
+
+        e.X = iconify;
+
+        // raise event
+        auto wrapper = PrepareWindow(ptr);
+        e.windowID = wrapper->Handle;
+        wrapper->RaiseWindowEvent(e);
+    }
+
+    void NativeEventManager::GLFW_WindowResizeCallback(GLFWwindow* window, const int width, const int height)
+    {
+        // getting window ptr
+        void* ptr = glfwGetWindowUserPointer(window);
+        if (!ptr) return;
+
+        // format event
+        NativeWindowEvent e;
+        e.Type = NativeWindowEventType::Resize;
+
+        e.X = width;
+        e.Y = height;
+
+        // raise event
+        auto wrapper = PrepareWindow(ptr);
+        e.windowID = wrapper->Handle;
+        wrapper->RaiseWindowEvent(e);
+    }
+
+    void NativeEventManager::GLFW_WindowMoveCallback(GLFWwindow* window, int x, int y)
+    {
+        // getting window ptr
+        void* ptr = glfwGetWindowUserPointer(window);
+        if (!ptr) return;
+
+        // format event
+        NativeWindowEvent e;
+        e.Type = NativeWindowEventType::Move;
+
+        e.X = x;
+        e.Y = y;
+
+        // raise event
+        auto wrapper = PrepareWindow(ptr);
+        e.windowID = wrapper->Handle;
+        wrapper->RaiseWindowEvent(e);
+    }
+
+    void NativeEventManager::GLFW_WindowCloseCallback(GLFWwindow* window)
+    {
+        // getting window ptr
+        void* ptr = glfwGetWindowUserPointer(window);
+        if (!ptr) return;
+
+        // format event
+        NativeWindowEvent e;
+        e.Type = NativeWindowEventType::Close;
+
+        // raise event
+        auto wrapper = PrepareWindow(ptr);
+        e.windowID = wrapper->Handle;
+        wrapper->RaiseWindowEvent(e);
+    }
+
+    // other
+
+    void NativeEventManager::GLFW_CharCallback(GLFWwindow* window, unsigned int codepoint)
+    {
+        // getting window ptr
+        void* ptr = glfwGetWindowUserPointer(window);
+        if (!ptr) return;
+
+        // format event
+        NativeCharEvent e;
+
+        e.codepoint = codepoint;
+
+        // raise event
+        auto wrapper = PrepareWindow(ptr);
+        e.windowID = wrapper->Handle;
+        wrapper->RaiseCharEvent(e);
+    }
+
+    void NativeEventManager::GLFW_DropCallback(GLFWwindow* window, int count, const char** paths)
+    {
+        // getting window ptr
+        void* ptr = glfwGetWindowUserPointer(window);
+        if (!ptr) return;
+
+        // format event
+        NativeDropEvent e;
+
+        e.count = count;
+        e.paths = paths;
+
+        // raise event
+        auto wrapper = PrepareWindow(ptr);
+        e.windowID = wrapper->Handle;
+        wrapper->RaiseDropEvent(e);
+    }
+
+    // other global
+
+    void NativeEventManager::GLFW_JoystickCallback(int joystick, int event)
+    {
+        NativeEvent e;
+        e.Type = NativeEventType::Joystick;
+        e.data = joystick;
+        e.event = event;
+        OnJoystick(e);
+    }
+
+    void NativeEventManager::GLFW_MonitorCallback(GLFWmonitor* monitor, int event)
+    {
+        NativeEvent e;
+        e.Type = NativeEventType::Monitor;
+        e.data = reinterpret_cast<int>(monitor);
+        e.event = event;
+        OnMonitor(e);
+    }
+
+    // initialize
+
+    void NativeEventManager::Initialize()
+    {
+        glfwSetJoystickCallback(reinterpret_cast<GLFWjoystickfun>(GLFW_JoystickCallback));
+        glfwSetMonitorCallback(reinterpret_cast<GLFWmonitorfun>(GLFW_MonitorCallback));
+    }
+
+    void NativeEventManager::InitializeCallbacks(GLFWwindow* window)
+    {
+        // keyboard
+        glfwSetKeyCallback(window, reinterpret_cast<GLFWkeyfun>(GLFW_KeyCallback));
+
+        // mouse
+        glfwSetMouseButtonCallback(window, reinterpret_cast<GLFWmousebuttonfun>(GLFW_MouseButtonCallback));
+        glfwSetScrollCallback(window, reinterpret_cast<GLFWscrollfun>(GLFW_ScrollCallback));
+        glfwSetCursorPosCallback(window, reinterpret_cast<GLFWcursorposfun>(GLFW_CursorPositionCallback));
+
+        // window
+        glfwSetWindowFocusCallback(window, reinterpret_cast<GLFWwindowfocusfun>(GLFW_WindowFocusedCallback));
+        glfwSetWindowMaximizeCallback(window, reinterpret_cast<GLFWwindowmaximizefun>(GLFW_WindowMaximizeCallback));
+        glfwSetWindowIconifyCallback(window, reinterpret_cast<GLFWwindowiconifyfun>(GLFW_WindowIconifyCallback));
+        glfwSetWindowSizeCallback(window, reinterpret_cast<GLFWwindowsizefun>(GLFW_WindowResizeCallback));
+        glfwSetWindowPosCallback(window, reinterpret_cast<GLFWwindowposfun>(GLFW_WindowMoveCallback));
+        glfwSetWindowCloseCallback(window, reinterpret_cast<GLFWwindowclosefun>(GLFW_WindowCloseCallback));
+
+        // other
+        glfwSetCharCallback(window, reinterpret_cast<GLFWcharfun>(GLFW_CharCallback));
+        glfwSetDropCallback(window, reinterpret_cast<GLFWdropfun>(GLFW_DropCallback));
+    }
+
+    // other methods
+
+    void NativeEventManager::PollEvents()
+    {
+        glfwPollEvents();
+    }
+}

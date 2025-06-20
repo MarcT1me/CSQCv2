@@ -79,5 +79,14 @@ public abstract class Game<TData, TWindow> : App<TData>
         }
     }
 
+    public override void OnExitHandling()
+    {
+        base.OnExitHandling();
+        foreach (var window in Registries.WindowRegistry.Values)
+        {
+            window.Dispose();
+        }
+    }
+
     #endregion
 }

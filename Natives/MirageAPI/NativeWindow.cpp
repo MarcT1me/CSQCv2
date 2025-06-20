@@ -7,51 +7,37 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include "NativeEventManager.h"
+
 namespace MirageAPI::Window
 {
-    // event handling
-
-    void NativeWindow::GLFW_KeyCallback(
-        GLFWwindow* window,
-        const int key, const int scancode,
-        const int action, const int mods
-    )
+    // event rises
+    void NativeWindow::RaiseKeyEvent(Events::NativeKeyEvent event)
     {
-        void* ptr = glfwGetWindowUserPointer(window);
-        if (!ptr) return;
-
-        GlfwEvent e;
-        e.Type = GlfwEventType::Key;
-        e.Key = key;
-        e.Scancode = scancode;
-        e.Action = action;
-        e.Mods = mods;
-
-        auto handle = System::Runtime::InteropServices::GCHandle::FromIntPtr(System::IntPtr(ptr));
-        auto wrapper = safe_cast<NativeWindow^>(handle.Target);
-
-        wrapper->RaiseEvent(e);
+        OnKey(event);
     }
 
-    void NativeWindow::GLFW_WindowSizeCallback(
-        GLFWwindow* window,
-        const int width, const int height
-    )
+    void NativeWindow::RaiseMouseEvent(Events::NativeMouseEvent event)
     {
-        void* ptr = glfwGetWindowUserPointer(window);
-        if (!ptr) return;
-
-        GlfwEvent e;
-        e.Type = GlfwEventType::WindowResize;
-        e.Width = width;
-        e.Height = height;
-
-        auto handle = System::Runtime::InteropServices::GCHandle::FromIntPtr(System::IntPtr(ptr));
-        auto wrapper = safe_cast<NativeWindow^>(handle.Target);
-        wrapper->RaiseEvent(e);
+        OnMouse(event);
     }
 
-    // creating and deleting
+    void NativeWindow::RaiseWindowEvent(Events::NativeWindowEvent event)
+    {
+        OnWindow(event);
+    }
+
+    void NativeWindow::RaiseCharEvent(Events::NativeCharEvent event)
+    {
+        OnChar(event);
+    }
+
+    void NativeWindow::RaiseDropEvent(Events::NativeDropEvent event)
+    {
+        OnDrop(event);
+    }
+
+    // initializations and property
 
     NativeWindow::NativeWindow(
         const int width, const int height,
@@ -69,22 +55,15 @@ namespace MirageAPI::Window
 
         if (!glfw_window)
         {
-            glfwTerminate();
             throw gcnew System::Exception("Не удалось создать окно GLFW");
         }
 
         gch = System::Runtime::InteropServices::GCHandle::Alloc(this);
-
         void* native_ptr = System::Runtime::InteropServices::GCHandle::ToIntPtr(gch).ToPointer();
+
         glfwSetWindowUserPointer(glfw_window, native_ptr);
-        glfwSetKeyCallback(
-            glfw_window,
-            reinterpret_cast<GLFWkeyfun>(GLFW_KeyCallback)
-        );
-        glfwSetWindowSizeCallback(
-            glfw_window,
-            reinterpret_cast<GLFWwindowsizefun>(GLFW_WindowSizeCallback)
-        );
+
+        Events::NativeEventManager::InitializeCallbacks(glfw_window);
     }
 
     NativeWindow::~NativeWindow()
@@ -124,22 +103,8 @@ namespace MirageAPI::Window
         System::Console::WriteLine("Используется GLEW: " + version);
     }
 
-    // props
-
     System::IntPtr NativeWindow::Handle::get()
     {
         return System::IntPtr(glfw_window);
-    }
-
-    // other methods
-
-    void NativeWindow::RaiseEvent(GlfwEvent e)
-    {
-        OnGlfwEvent(e);
-    }
-
-    void NativeWindow::PollEvents()
-    {
-        glfwPollEvents();
     }
 }

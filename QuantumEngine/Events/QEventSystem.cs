@@ -1,6 +1,9 @@
 ﻿using System.Collections.Concurrent;
+using Engine.Data.RegistryManagers;
 using Engine.Logging;
+// engine sub-systems
 using MirageAPI.Window;
+using MirageAPI.Events;
 
 namespace Engine.Events;
 
@@ -48,22 +51,52 @@ public class QEventSystem
 
     public static void RegisterWindow(NativeWindow window)
     {
-        window.OnGlfwEvent += HandleGlfwEvent;
+        window.OnKey += HandleKeyEvent;
+        window.OnMouse += HandleMouseEvent;
+        window.OnWindow += HandleWindowEvent;
+        window.OnChar += HandleCharEvent;
+        window.OnDrop += HandleDropEvent;
     }
 
     public static void UnregisterWindow(NativeWindow window)
     {
-        window.OnGlfwEvent -= HandleGlfwEvent;
+        window.OnKey -= HandleKeyEvent;
+        window.OnMouse -= HandleMouseEvent;
+        window.OnWindow += HandleWindowEvent;
+        window.OnChar -= HandleCharEvent;
+        window.OnDrop -= HandleDropEvent;
     }
 
-    private static void HandleGlfwEvent(GlfwEvent glfwEvent)
+    private static void HandleKeyEvent(NativeKeyEvent glfwEvent)
     {
-        Logger.Debug($"Event: {glfwEvent}");
+        EnqueueEvent(ConvertEvent(glfwEvent));
+    }
+
+    private static void HandleMouseEvent(NativeMouseEvent glfwEvent)
+    {
+        EnqueueEvent(ConvertEvent(glfwEvent));
+    }
+
+    private static void HandleWindowEvent(NativeWindowEvent glfwEvent)
+    {
+        EnqueueEvent(ConvertEvent(glfwEvent));
+    }
+
+    private static void HandleCharEvent(NativeCharEvent glfwEvent)
+    {
+        EnqueueEvent(ConvertEvent(glfwEvent));
+    }
+
+    private static void HandleDropEvent(NativeDropEvent glfwEvent)
+    {
+        EnqueueEvent(ConvertEvent(glfwEvent));
+    }
+
+    public static void EnqueueEvent(QuantumEvent qEvent)
+    {
         lock (Lock)
         {
-            EventQueue.Enqueue(
-                ConvertEvent(glfwEvent)
-            );
+            EventQueue.Enqueue(qEvent);
         }
     }
 
@@ -72,9 +105,9 @@ public class QEventSystem
         lock (Lock)
         {
             var handler = new EventBatchHandler();
-            
+
             // Опрашиваем все окна
-            NativeWindow.PollEvents();
+            NativeEventManager.PollEvents();
 
             // Обрабатываем накопленные события
             while (EventQueue.TryDequeue(out var qEvent))
@@ -82,6 +115,7 @@ public class QEventSystem
                 UpdateInputState(qEvent);
                 handler.Handle(qEvent);
             }
+
             handler.Dispose();
         }
     }
@@ -90,7 +124,34 @@ public class QEventSystem
     {
     }
 
-    private static QuantumEvent ConvertEvent(GlfwEvent e)
+    private static QuantumEvent ConvertEvent(NativeWindowEvent e)
+    {
+        if (e.Type == NativeWindowEventType.Close)
+        {
+            if (Registries.WindowRegistry.Size == 1)
+                EnqueueEvent(new QuantumEvent(EventType.Quit));
+            return new QuantumEvent(EventType.WindowClose);
+        }
+
+        return null!;
+    }
+
+    private static QuantumEvent ConvertEvent(NativeKeyEvent e)
+    {
+        return null!;
+    }
+
+    private static QuantumEvent ConvertEvent(NativeMouseEvent e)
+    {
+        return null!;
+    }
+
+    private static QuantumEvent ConvertEvent(NativeCharEvent e)
+    {
+        return null!;
+    }
+
+    private static QuantumEvent ConvertEvent(NativeDropEvent e)
     {
         return null!;
     }
