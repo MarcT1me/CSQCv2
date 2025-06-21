@@ -173,6 +173,8 @@ public abstract class App<TData>
 
     protected void Quit()
     {
+        Logger.Separator();
+        
         if (!MetaData.ObjectStatus.HasFlag(ObjectStatusFlags.Active)) return;
         MetaData.ObjectStatus &= ~ObjectStatusFlags.Active;
 

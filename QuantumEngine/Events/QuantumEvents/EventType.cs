@@ -2,7 +2,7 @@
 
 public enum EventType : uint
 {
-    Simple,
+    Unknown,
 
     KeyDown,
     KeyUp,
@@ -10,8 +10,8 @@ public enum EventType : uint
     MouseButtonDown,
     MouseButtonUp,
     MouseMove,
-    MouseRel,
-
+    MouseScroll,
+    
     WindowFocusGained,
     WindowFocusLost,
     WindowMaximize,
@@ -19,7 +19,7 @@ public enum EventType : uint
     WindowRestore,
     WindowIconify,
     WindowResize,
-    WindoweMove,
+    WindowMove,
     WindowClose,
 
     Char,

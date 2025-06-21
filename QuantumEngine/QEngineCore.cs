@@ -1,15 +1,18 @@
 ﻿using System.Reflection;
 using MirageAPI;
+using MirageAPI.Events;
+using MirageAPI.Vulkan;
 
 namespace Engine;
 
 using Extensions;
 using Failures;
-using Graphic.OpenGl;
 using Logging;
 
 public class QEngineCore(Assembly? appLibAssembly) : EngineCore(appLibAssembly)
 {
+    public static VulkanPipeline VulkanPipeline;
+
     [Obsolete("ENGINE ONLY USAGE")]
     public static void Initialize(Assembly? appLibAssembly)
     {
@@ -25,12 +28,39 @@ public class QEngineCore(Assembly? appLibAssembly) : EngineCore(appLibAssembly)
     protected override void InitializeModeSpecific()
     {
         Logger.Info("Initialize MirageAPI");
-        if (!MirageSystem.Init(GlData.ApiVersions.X, GlData.ApiVersions.Y))
-        {
-            Logger.Error("Failed to initialize MirageAPI");
-        }
+        MirageSystem.Initialize(initVulkan: false);
         
+        Logger.Info("Initialize MirageAPI::Events");
+        NativeEventManager.Initialize();
+
+        Logger.Info("Initialize MirageAPI::Vulkan");
+        MirageSystem.InitVulkan();
+
+        Logger.Separator();
+
+        Logger.Info("Initialize MirageAPI::Vulkan::VulkanPipeline");
+        VulkanPipeline = new VulkanPipeline(MirageSystem.CurrentContext);
+        if (MirageSystem.CurrentContext.IsRTXSupported)
+        {
+            Logger.Info(
+                "PIPELINE:\n" +
+                "Mode: RTX"
+            );
+            VulkanPipeline.CreateRTXPipeline();
+        }
+        else
+        {
+            Logger.Info(
+                "PIPELINE:\n" +
+                "Mode: Simple"
+            );
+            VulkanPipeline.CreateGraphicsPipeline();
+        }
+
         MirageAPI.Events.NativeEventManager.Initialize();
+        Logger.Success("MirageAPI - Initialized");
+        
+        Logger.Separator();
     }
 
     protected override void EnableDebugFeatures()
@@ -39,13 +69,15 @@ public class QEngineCore(Assembly? appLibAssembly) : EngineCore(appLibAssembly)
     }
 
     [Obsolete("ENGINE ONLY USAGE")]
-    public void Uninitialize()
+    public static void Uninitialize()
     {
-        Logger.Info("Uninitialize EngineCore");
+        Logger.Info("Uninitialize MirageAPI::Vulkan");
+        MirageSystem.DeinitializeVulkan();
 
         Logger.Info("Uninitialize MirageAPI");
-        MirageSystem.Shutdown();
+        MirageSystem.Deinitialize();
 
-        Logger.Success("EngineCore uninitialized");
+        Logger.Separator();
+        Logger.Success("QuantumEngine uninitialized");
     }
 }

@@ -257,7 +257,7 @@ namespace MirageAPI::Events
     {
         NativeEvent e;
         e.Type = NativeEventType::Joystick;
-        e.data = joystick;
+        e.data = System::IntPtr(joystick);
         e.event = event;
         OnJoystick(e);
     }
@@ -266,7 +266,7 @@ namespace MirageAPI::Events
     {
         NativeEvent e;
         e.Type = NativeEventType::Monitor;
-        e.data = reinterpret_cast<int>(monitor);
+        e.data = System::IntPtr(monitor); // Безопасное приведение
         e.event = event;
         OnMonitor(e);
     }

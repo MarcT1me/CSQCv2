@@ -2,6 +2,8 @@
 
 #include "NativeEvents.h"
 
+#include <vulkan/vulkan.h>
+
 struct GLFWwindow;
 
 namespace MirageAPI::Window
@@ -10,15 +12,17 @@ namespace MirageAPI::Window
     {
         GLFWwindow* glfw_window;
         System::Runtime::InteropServices::GCHandle gch;
+        VkSurfaceKHR surface = VK_NULL_HANDLE;
 
-    public:
+    internal:
         // rise methods (overhead...)
         void RaiseKeyEvent(Events::NativeKeyEvent event);
         void RaiseMouseEvent(Events::NativeMouseEvent event);
         void RaiseWindowEvent(Events::NativeWindowEvent event);
         void RaiseCharEvent(Events::NativeCharEvent event);
         void RaiseDropEvent(Events::NativeDropEvent event);
-        
+
+    public:
         // Keyboard
 
         delegate void KeyDelegate(Events::NativeKeyEvent event);
@@ -59,10 +63,28 @@ namespace MirageAPI::Window
             System::IntPtr get();
         }
 
-        void InitGLContext();
+        property VkSurfaceKHR VulkanSurface
+        {
+            VkSurfaceKHR get() { return surface; }
+        }
+
+        void CreateVulkanSurface(VkInstance instance);
+        void CleanupVulkanSurface(VkInstance instance);
 
         // other methods
-        // void SwapBuffers();
-        // void MakeCurrent();
+        void MakeCurrent();
+        void SwapBuffers();
+        bool ShouldClose();
+
+        void SetSize(int width, int height);
+        void SetSizeLimit(int minWidth, int minHeight, int maxWidth, int maxHeight);
+        void SetPos(int xPos, int yPos);
+        void SetOpacity(float opacity);
+
+        void Focus();
+        void Show();
+        void Hide();
+        void Maximize();
+        void Restore();
     };
 }

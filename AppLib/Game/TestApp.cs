@@ -22,7 +22,6 @@ public class TestApp : Game<TestAppData, GameWindow>
     public override void HandleEvent(QuantumEvent e)
     {
         base.HandleEvent(e);
-        if (e != null)
-            Logger.Info($"Got event: {e.Type}");
+        Logger.Info($"Got event: {e.Type}");
     }
 }

@@ -5,7 +5,7 @@ namespace MirageAPI::Events
     public value struct NativeKeyEvent
     {
         System::IntPtr windowID;
-        
+
         int Key;
         int Scancode;
 
@@ -22,7 +22,7 @@ namespace MirageAPI::Events
     {
         NativeMouseEventType Type;
         System::IntPtr windowID;
-        
+
         int Button;
 
         double X;
@@ -41,7 +41,7 @@ namespace MirageAPI::Events
     {
         NativeWindowEventType Type;
         System::IntPtr windowID;
-        
+
         int X;
         int Y;
     };
@@ -49,14 +49,14 @@ namespace MirageAPI::Events
     public value struct NativeCharEvent
     {
         System::IntPtr windowID;
-        
+
         unsigned int codepoint;
     };
 
     public value struct NativeDropEvent
     {
         System::IntPtr windowID;
-        
+
         int count;
         const char** paths;
     };
@@ -70,6 +70,6 @@ namespace MirageAPI::Events
     {
         NativeEventType Type;
         int event;
-        int data;
+        System::IntPtr data;
     };
 }

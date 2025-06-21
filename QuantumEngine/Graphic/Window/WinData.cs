@@ -29,22 +29,26 @@ public sealed class WinData
     }
 
     public Vector2i Position;
-    public WinFlags Flags;
     public float Opacity;
+
+    public Vector2i MinSize;
+    public Vector2i MaxSize;
 
     public WinData(
         Vector2i size,
-        WinFlags flags = 0,
         Vector2i? position = null,
         Vector2? resolutionScaling = null,
-        float opacity = 1.0f
+        float opacity = 1.0f,
+        Vector2i? minSize = null,
+        Vector2i? maxSize = null
     )
     {
         _resolutionScaling = resolutionScaling ?? Vector2.One;
 
         Size = size;
-        Flags = flags;
-        Position = position ?? new(100);
         Opacity = opacity;
+        Position = position ?? new(100);
+        MinSize = minSize ?? Vector2i.Zero;
+        MaxSize = maxSize ?? size;
     }
 }

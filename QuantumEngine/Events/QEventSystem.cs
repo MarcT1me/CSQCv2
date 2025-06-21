@@ -1,12 +1,11 @@
 ﻿using System.Collections.Concurrent;
-using Engine.Data.RegistryManagers;
-using Engine.Logging;
 // engine sub-systems
 using MirageAPI.Window;
 using MirageAPI.Events;
 
 namespace Engine.Events;
 
+using Data.RegistryManagers;
 using QuantumEvents;
 using Configuration;
 using Threading;
@@ -124,35 +123,54 @@ public class QEventSystem
     {
     }
 
+    private static QuantumEvent ConvertEvent(NativeKeyEvent e) => new KeyEvent(e);
+
+    private static QuantumEvent ConvertEvent(NativeMouseEvent e) => e.Type switch
+    {
+        NativeMouseEventType.Button => new QuantumEvents.Mouse.ButtonEvent(e),
+        NativeMouseEventType.Move => new QuantumEvents.Mouse.MoveEvent(e),
+        NativeMouseEventType.Scroll => new QuantumEvents.Mouse.ScrollEvent(e),
+        _ => new QuantumEvent(EventType.Unknown)
+    };
+
     private static QuantumEvent ConvertEvent(NativeWindowEvent e)
     {
-        if (e.Type == NativeWindowEventType.Close)
+        switch (e.Type)
         {
-            if (Registries.WindowRegistry.Size == 1)
-                EnqueueEvent(new QuantumEvent(EventType.Quit));
-            return new QuantumEvent(EventType.WindowClose);
+            case NativeWindowEventType.Close:
+            {
+                if (Registries.WindowRegistry.Size == 1)
+                    EnqueueEvent(new WindowedQuantumEvent(
+                        EventType.Quit,
+                        e.windowID
+                    ));
+                return new WindowedQuantumEvent(
+                    EventType.WindowClose,
+                    e.windowID
+                );
+            }
+            case NativeWindowEventType.Focus:
+                return new WindowedQuantumEvent(
+                    e.X == 1 ? EventType.WindowFocusGained : EventType.WindowFocusLost,
+                    e.windowID
+                );
+            case NativeWindowEventType.Maximize:
+                return new WindowedQuantumEvent(
+                    e.X == 1 ? EventType.WindowMaximize : EventType.WindowMinimize,
+                    e.windowID
+                );
+            case NativeWindowEventType.Resize:
+                return new QuantumEvents.Window.ResizeEvent(e);
+            case NativeWindowEventType.Move:
+                return new QuantumEvents.Window.MoveEvent(e);
+            case NativeWindowEventType.Iconify:
+                return new QuantumEvents.Window.IconifyEvent(e);
+            default:
+                return new QuantumEvent(EventType.Unknown);
         }
-
-        return null!;
     }
 
-    private static QuantumEvent ConvertEvent(NativeKeyEvent e)
-    {
-        return null!;
-    }
+    private static QuantumEvent ConvertEvent(NativeCharEvent e) => new CharEvent(e);
 
-    private static QuantumEvent ConvertEvent(NativeMouseEvent e)
-    {
-        return null!;
-    }
-
-    private static QuantumEvent ConvertEvent(NativeCharEvent e)
-    {
-        return null!;
-    }
-
-    private static QuantumEvent ConvertEvent(NativeDropEvent e)
-    {
-        return null!;
-    }
+    private static QuantumEvent ConvertEvent(NativeDropEvent e) => new DropEvent(e);
 }

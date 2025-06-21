@@ -17,6 +17,7 @@ public abstract class QuantumModule
         {
             return GetAssemblyProp(t, name);
         }
+
         return null;
     }
 
@@ -28,7 +29,9 @@ public abstract class QuantumModule
     public void InvokeAssemblyMethod(string type, string name, params object?[] args)
     {
         if (GetAssemblyType(type) is { } t)
+        {
             InvokeAssemblyMethod(t, name, args);
+        }
     }
 
     public void InvokeAssemblyMethod(Type type, string name, params object?[] args)

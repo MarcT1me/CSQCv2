@@ -1,8 +1,7 @@
-﻿using Engine.Graphic.OpenGl;
-using Engine.Objects;
-
+﻿
 namespace Engine.Graphic.Window;
 
+using Objects;
 using Data.Meta;
 
 public class WindowData(

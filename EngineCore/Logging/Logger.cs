@@ -68,7 +68,7 @@ public sealed class Logger(
     /// <returns>Логер, если такой нашёлся</returns>
     public static ILogger? PopLogger(object identifier)
     {
-        return Loggers.Pop(identifier) as ILogger;
+        return Loggers.Pop(identifier);
     }
 
     /// <summary>

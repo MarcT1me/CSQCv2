@@ -1,28 +1,51 @@
 #include "pch.h"
 #include "MirageAPI.h"
 
-#include <iostream>
-
-#include <GL/glew.h>
 #include <GLFW/glfw3.h>
+
+#include "VulkanContext.h"
 
 namespace MirageAPI
 {
-    bool MirageSystem::Init(int major, int minor)
+    void MirageSystem::Initialize(bool initVulkan)
     {
         if (!glfwInit())
         {
-            std::cerr << "Failed to initialize GLFW" << std::endl;
-            return false;
+            throw gcnew System::Exception("GLFW not initialized");
         }
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, major);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, minor);
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-        return true;
+        
+        if (!glfwVulkanSupported())
+        {
+            throw gcnew System::Exception("Vulkan not supported");
+        }
+        
+        if (initVulkan) {
+            InitVulkan();
+        }
+        
+        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     }
 
-    void MirageSystem::Shutdown()
+    void MirageSystem::Deinitialize()
     {
+        DeinitializeVulkan();
         glfwTerminate();
+    }
+    
+    void MirageSystem::InitVulkan()
+    {
+        if (s_vulkanContext == nullptr)
+        {
+            s_vulkanContext = gcnew Vulkan::VulkanContext();
+        }
+    }
+    
+    void MirageSystem::DeinitializeVulkan()
+    {
+        if (s_vulkanContext != nullptr)
+        {
+            delete s_vulkanContext;
+            s_vulkanContext = nullptr;
+        }
     }
 }

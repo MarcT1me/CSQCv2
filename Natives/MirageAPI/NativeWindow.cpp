@@ -1,10 +1,8 @@
 ﻿#include "pch.h"
 #include "NativeWindow.h"
 
-#include <iostream>
 #include <msclr/marshal_cppstd.h>
 
-#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
 #include "NativeEventManager.h"
@@ -83,28 +81,87 @@ namespace MirageAPI::Window
     {
     }
 
-    void NativeWindow::InitGLContext()
-    {
-        glfwMakeContextCurrent(glfw_window);
-
-        GLenum glewInitStatus = glewInit();
-
-        if (glewInitStatus != GLEW_OK)
-        {
-            System::String^ error = gcnew System::String(
-                reinterpret_cast<const char*>(glewGetErrorString(glewInitStatus))
-            );
-            throw gcnew System::Exception("Ошибка GLEW: " + error);
-        }
-
-        System::String^ version = gcnew System::String(
-            reinterpret_cast<const char*>(glewGetString(GLEW_VERSION))
-        );
-        System::Console::WriteLine("Используется GLEW: " + version);
-    }
-
     System::IntPtr NativeWindow::Handle::get()
     {
         return System::IntPtr(glfw_window);
+    }
+
+    void NativeWindow::CreateVulkanSurface(VkInstance instance)
+    {
+        VkSurfaceKHR surf;
+        if (glfwCreateWindowSurface(instance, glfw_window, nullptr, &surf) != VK_SUCCESS)
+        {
+            throw gcnew System::Exception("Failed to create window surface!");
+        }
+        surface = surf;
+    }
+
+    void NativeWindow::CleanupVulkanSurface(VkInstance instance)
+    {
+        if (surface != VK_NULL_HANDLE)
+        {
+            vkDestroySurfaceKHR(instance, surface, nullptr);
+            surface = VK_NULL_HANDLE;
+        }
+    }
+
+    void NativeWindow::MakeCurrent()
+    {
+        glfwMakeContextCurrent(glfw_window);
+    }
+
+    void NativeWindow::SwapBuffers()
+    {
+        glfwSwapBuffers(glfw_window);
+    }
+
+    bool NativeWindow::ShouldClose()
+    {
+        return glfwWindowShouldClose(glfw_window) == GLFW_TRUE;
+    }
+
+    void NativeWindow::SetSize(int width, int height)
+    {
+        glfwSetWindowSize(glfw_window, width, height);
+    }
+
+    void NativeWindow::SetSizeLimit(int minWidth, int minHeight, int maxWidth, int maxHeight)
+    {
+        glfwSetWindowSizeLimits(glfw_window, minWidth, minHeight, maxWidth, maxHeight);
+    }
+
+    void NativeWindow::SetPos(int xPos, int yPos)
+    {
+        glfwSetWindowPos(glfw_window, xPos, yPos);
+    }
+
+    void NativeWindow::SetOpacity(float opacity)
+    {
+        glfwSetWindowOpacity(glfw_window, opacity);
+    }
+
+    void NativeWindow::Focus()
+    {
+        glfwFocusWindow(glfw_window);
+    }
+
+    void NativeWindow::Show()
+    {
+        glfwShowWindow(glfw_window);
+    }
+
+    void NativeWindow::Hide()
+    {
+        glfwHideWindow(glfw_window);
+    }
+
+    void NativeWindow::Maximize()
+    {
+        glfwMaximizeWindow(glfw_window);
+    }
+
+    void NativeWindow::Restore()
+    {
+        glfwRestoreWindow(glfw_window);
     }
 }

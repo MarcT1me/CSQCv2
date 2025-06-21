@@ -1,5 +1,4 @@
-﻿using Engine.Graphic.OpenGl;
-using Engine.Graphic.Window;
+﻿using Engine.Graphic.Window;
 
 namespace AppLib.Game;
 
