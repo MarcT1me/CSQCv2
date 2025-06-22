@@ -7,10 +7,12 @@ using Events.QuantumEvents;
 using Events.QuantumEvents.Mouse;
 using Graphic.Window;
 
-public class Mouse
+public class Mouse(IntPtr windowHandle)
 {
-    private static readonly ConcurrentDictionary<IntPtr, Mouse> Windows = new();
+    internal static readonly ConcurrentDictionary<IntPtr, Mouse> List = new();
 
+    // static (last updated window -> PyGame and SDL format)
+    
     public static bool GetButton(MouseButton button) => Get(LastActiveWindowId).IsButtonDown(button);
     public static bool GetButton(byte button) => Get(LastActiveWindowId).IsButtonDown(button);
 
@@ -19,15 +21,17 @@ public class Mouse
 
     public static Mouse Get(IntPtr windowId)
     {
-        return Windows[windowId];
+        return List[windowId];
     }
+    
+    public readonly IntPtr WindowHandle = windowHandle;
 
     public static IntPtr LastActiveWindowId { get; private set; }
 
+    // buttons
+    
     public bool IsButtonDown(MouseButton button) => IsButtonDown((byte)button);
     public bool IsButtonDown(byte button) => (_pressedButtons & (1U << button)) != 0;
-    public Vector2i ScrollPos { get; private set; } = Vector2i.Zero;
-    public Vector2i Pos { get; private set; } = Vector2i.Zero;
 
     private void SetButton(int button, bool value)
     {
@@ -39,10 +43,17 @@ public class Mouse
     }
 
     private UInt16 _pressedButtons;
+    
+    // vec sroll and pos
+    
+    public Vector2i ScrollPos { get; private set; } = Vector2i.Zero;
+    public Vector2i Pos { get; private set; } = Vector2i.Zero;
 
+    // updating
+    
     internal static void Update(MouseEvent e)
     {
-        if (!Windows.TryGetValue(e.WindowId, out var mouse)) return;
+        if (!List.TryGetValue(e.WindowId, out var mouse)) return;
         
         mouse.UpdateMouse(e);
         LastActiveWindowId = e.WindowId;
@@ -67,13 +78,15 @@ public class Mouse
         }
     }
 
+    // registration
+    
     public static void RegisterWindow(Window window)
     {
-        Windows[window.Handle] = new Mouse();
+        List[window.Handle] = new Mouse(window.Handle);
     }
 
     public static void UnregisterWindow(Window window)
     {
-        Windows.Remove(window.Handle, out _);
+        List.Remove(window.Handle, out _);
     }
 }

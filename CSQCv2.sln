@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35527.113 d17.12
+VisualStudioVersion = 17.12.35527.113
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EngineCore", "EngineCore\EngineCore.csproj", "{E414A031-E41C-4DA7-8370-162F040CF9DB}"
 EndProject
@@ -14,9 +14,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Natives", "Natives", "{304E64FF-6C8C-494E-A0A4-DDBDB4AE76A3}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MirageAPI", "Natives\MirageAPI\MirageAPI.vcxproj", "{69687DF9-971E-491C-B8FB-016ECC241606}"
-	ProjectSection(ProjectDependencies) = postProject
-		{9910DD88-64B0-47A0-9BD2-A5C4D2F9C4A4} = {9910DD88-64B0-47A0-9BD2-A5C4D2F9C4A4}
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuantumEngine", "QuantumEngine\QuantumEngine.csproj", "{4EC3B9AC-46BC-4370-9234-A02A4F085900}"
 EndProject
@@ -27,28 +24,27 @@ Global
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{E414A031-E41C-4DA7-8370-162F040CF9DB}.Debug|x64.ActiveCfg = Debug|x64
-		{E414A031-E41C-4DA7-8370-162F040CF9DB}.Release|x64.ActiveCfg = Release|x64
 		{E414A031-E41C-4DA7-8370-162F040CF9DB}.Debug|x64.Build.0 = Debug|x64
+		{E414A031-E41C-4DA7-8370-162F040CF9DB}.Release|x64.ActiveCfg = Release|x64
 		{E414A031-E41C-4DA7-8370-162F040CF9DB}.Release|x64.Build.0 = Release|x64
 		{D750A299-2419-4C72-B5A0-5D020FBA24DF}.Debug|x64.ActiveCfg = Debug|x64
 		{D750A299-2419-4C72-B5A0-5D020FBA24DF}.Release|x64.ActiveCfg = Release|x64
-		{D750A299-2419-4C72-B5A0-5D020FBA24DF}.Debug|x64.Build.0 = Debug|x64
 		{D750A299-2419-4C72-B5A0-5D020FBA24DF}.Release|x64.Build.0 = Release|x64
+		{D750A299-2419-4C72-B5A0-5D020FBA24DF}.Debug|x64.Build.0 = Debug|x64
 		{F2BBF5FF-86C2-4A15-AF68-9A8B3CFCA101}.Debug|x64.ActiveCfg = Debug|x64
-		{F2BBF5FF-86C2-4A15-AF68-9A8B3CFCA101}.Release|x64.ActiveCfg = Release|x64
 		{F2BBF5FF-86C2-4A15-AF68-9A8B3CFCA101}.Debug|x64.Build.0 = Debug|x64
+		{F2BBF5FF-86C2-4A15-AF68-9A8B3CFCA101}.Release|x64.ActiveCfg = Release|x64
 		{F2BBF5FF-86C2-4A15-AF68-9A8B3CFCA101}.Release|x64.Build.0 = Release|x64
 		{C814A43B-3D51-47DE-9472-A655EF6FEA10}.Debug|x64.ActiveCfg = Debug|x64
 		{C814A43B-3D51-47DE-9472-A655EF6FEA10}.Release|x64.ActiveCfg = Release|x64
-		{C814A43B-3D51-47DE-9472-A655EF6FEA10}.Debug|x64.Build.0 = Debug|x64
 		{C814A43B-3D51-47DE-9472-A655EF6FEA10}.Release|x64.Build.0 = Release|x64
 		{69687DF9-971E-491C-B8FB-016ECC241606}.Debug|x64.ActiveCfg = Debug|x64
 		{69687DF9-971E-491C-B8FB-016ECC241606}.Release|x64.ActiveCfg = Release|x64
 		{69687DF9-971E-491C-B8FB-016ECC241606}.Release|x64.Build.0 = Release|x64
-		{4EC3B9AC-46BC-4370-9234-A02A4F085900}.Release|x64.ActiveCfg = Release|x64
-		{4EC3B9AC-46BC-4370-9234-A02A4F085900}.Release|x64.Build.0 = Release|x64
 		{4EC3B9AC-46BC-4370-9234-A02A4F085900}.Debug|x64.ActiveCfg = Debug|x64
 		{4EC3B9AC-46BC-4370-9234-A02A4F085900}.Debug|x64.Build.0 = Debug|x64
+		{4EC3B9AC-46BC-4370-9234-A02A4F085900}.Release|x64.ActiveCfg = Release|x64
+		{4EC3B9AC-46BC-4370-9234-A02A4F085900}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

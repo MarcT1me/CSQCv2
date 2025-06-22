@@ -25,7 +25,7 @@ public sealed class ClockMeta : TimedMetaData
         }
     }
 
-    public double CurrentTps => 1000 / DeltaTime;
+    public double ActualTps => 1000 / DeltaTime;
 
     public ClockMeta(uint tickRate, WritableTale<float> speedTable)
         : base($"ClockDat<{tickRate}>")

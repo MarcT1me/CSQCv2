@@ -30,7 +30,7 @@ public sealed class Logger(
 
     static Logger()
     {
-        Loggers = new(new("logger-table"));
+        Loggers = new(new("Engine.Logging Logger-table"));
         Console.OutputEncoding = System.Text.Encoding.UTF8;
         Console.Title = "Quantum console";
         Console.Out.Flush();

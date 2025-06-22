@@ -126,11 +126,10 @@ public class QuantumThread : MetaObject<QThreadMeta>, IDisposable, IFailureHandl
             // move to working threads
             lock (GlobalLock)
             {
-                if (!Roster.Pending.Contains(Id))
+                var t = Roster.Pending.Pop(Id);
+                if (t == null)
                     throw new PendingThreadNotExistException(Id.ToString());
-
-                Roster.Pending[Id] = null;
-                Roster.Worked[Id] = this;
+                Roster.Worked[Id] = t;
             }
 
             With.Handle(
@@ -273,10 +272,10 @@ public class QuantumThread : MetaObject<QThreadMeta>, IDisposable, IFailureHandl
             try
             {
                 if (Roster.Pending.Contains(Id))
-                    Roster.Pending[Id] = null;
+                    Roster.Pending.Pop(Id);
 
                 if (Roster.Worked.Contains(Id))
-                    Roster.Worked[Id] = null;
+                    Roster.Worked.Pop(Id);
             }
             catch (Exception e)
             {

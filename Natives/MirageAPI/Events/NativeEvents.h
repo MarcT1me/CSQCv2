@@ -82,6 +82,9 @@ namespace MirageAPI::Events
         
         int ButtonCount;
         const unsigned char* Buttons;
+        
+        int HatCount;
+        const unsigned char* Hats;
     };
 
     public value struct NativeEvent

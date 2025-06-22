@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "NativeEvents.h"
-#include "../NativeWindow.h"
+#include "../Window/NativeWindow.h"
 
 struct GLFWwindow;
 struct GLFWmonitor;
@@ -68,6 +68,10 @@ namespace MirageAPI::Events
         static void InitializeJoysticks();
         static int GetJoystickMaxCount();
         static bool IsJoystickPresent(int jid);
+
+        static System::String^ GetJoystickName(int jid);
+        static bool JoystickIsGamepad(int jid);
+        static System::String^ GetJoystickGuid(int jid);
         
     internal:
         static void InitializeCallbacks(GLFWwindow* window);

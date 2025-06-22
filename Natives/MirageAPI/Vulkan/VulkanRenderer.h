@@ -2,7 +2,7 @@
 
 #include "VulkanContext.h"
 #include "VulkanPipeline.h"
-#include "../NativeWindow.h"
+#include "../Window/NativeWindow.h"
 #include <vector>
 
 namespace MirageAPI::Vulkan

@@ -11,6 +11,9 @@ using Configuration;
 using Threading;
 using QuantumEvents.Joystick;
 using QuantumEvents.Mouse;
+using Input.Joystick;
+using Input.Keyboard;
+using Input.Mouse;
 
 public delegate void EventHandlingEvent(QuantumEvent e);
 
@@ -52,25 +55,18 @@ public class QEventSystem
 
     internal static void Initialize()
     {
+        InitializeConnectedJoysticks();
         NativeEventManager.OnJoystick += HandleJoystickEvent;
         NativeEventManager.OnJoystickState += HandleJoystickState;
-
-        InitializeConnectedJoysticks();
     }
 
     private static void InitializeConnectedJoysticks()
     {
-        for (int jid = 0; jid < NativeEventManager.GetJoystickMaxCount(); jid++)
+        for (int jid = 0; jid < Joy.GetJoystickMaxCount(); jid++)
         {
             if (NativeEventManager.IsJoystickPresent(jid))
             {
-                HandleJoystickEvent(
-                    new NativeJoystickEvent
-                    {
-                        JoystickID = jid,
-                        Connected = true
-                    }
-                );
+                Joy.List[jid] = new Joy(jid);
             }
         }
     }
@@ -80,14 +76,33 @@ public class QEventSystem
 
     private static unsafe void HandleJoystickState(NativeJoystickState state)
     {
-        for (int i = 0; i < state.AxesCount; i++)
+        for (byte i = 0; i < state.AxesCount; i++)
         {
+            if (
+                Math.Abs(
+                    Joy.Get(state.JoystickID)
+                        .GetAxis(i) - state.Axes[i]
+                ) < 0.000001f
+            ) continue;
             EnqueueEvent(new JoyAxisEvent(state.JoystickID, i, state.Axes[i]));
         }
 
-        for (int i = 0; i < state.ButtonCount; i++)
+        for (byte i = 0; i < state.ButtonCount; i++)
         {
+            if (
+                Joy.Get(state.JoystickID)
+                    .IsButtonDown(i) == (state.Buttons[i] == 1)
+            ) continue;
             EnqueueEvent(new JoyButtonEvent(state.JoystickID, i, state.Buttons[i] == 1));
+        }
+
+        for (byte i = 0; i < state.HatCount; i++)
+        {
+            if (
+                Joy.Get(state.JoystickID)
+                    .IsHatDown(i) == (state.Hats[i] == 1)
+            ) continue;
+            EnqueueEvent(new JoyHatEvent(state.JoystickID, i, state.Hats[i] == 1));
         }
     }
 
@@ -155,13 +170,13 @@ public class QEventSystem
         switch (qEvent)
         {
             case MouseEvent mouseEvent:
-                Input.Mouse.Mouse.Update(mouseEvent);
+                Mouse.Update(mouseEvent);
                 break;
             case KeyEvent keyEvent:
-                Input.Keyboard.Keyboard.Update(keyEvent);
+                Keyboard.Update(keyEvent);
                 break;
             case JoyEvent joyEvent:
-                Input.Joystick.Joy.Update(joyEvent);
+                Joy.Update(joyEvent);
                 break;
         }
     }

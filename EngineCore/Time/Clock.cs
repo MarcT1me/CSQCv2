@@ -11,7 +11,6 @@ public sealed class Clock(ClockMeta metaData) : MetaObject<ClockMeta>(metaData)
 {
     private readonly Stopwatch _stopwatch = new();
     private TimeSpan _lastTime;
-    private SpinWait _spin;
 
     public Clock(uint tps, WritableTale<float> speedRoster)
         : this(new(tps, speedRoster))
@@ -35,10 +34,10 @@ public sealed class Clock(ClockMeta metaData) : MetaObject<ClockMeta>(metaData)
 
     private void UpdateDeltaTime()
     {
+        MetaData.FrameCount++;
         TimeSpan currentTime = _stopwatch.Elapsed;
         MetaData.DeltaTime = (currentTime - _lastTime).TotalMilliseconds;
         _lastTime = currentTime;
-        MetaData.FrameCount++;
     }
 
     private void ProcessDefers()
@@ -53,14 +52,7 @@ public sealed class Clock(ClockMeta metaData) : MetaObject<ClockMeta>(metaData)
     {
         if (MetaData.Tps == 0) return;
 
-        double remaining = MetaData.TickDelay - MetaData.DeltaTime;
-
-        if (remaining <= 0) return;
-
-        while ((_stopwatch.Elapsed - _lastTime).TotalMilliseconds < MetaData.TickDelay)
-        {
-            _spin.SpinOnce();
-        }
+        while ((_stopwatch.Elapsed - _lastTime).TotalMilliseconds < MetaData.TickDelay) ;
     }
 
     public void StartDeffer(Defer defer) => MetaData.DeferTable[defer.Id] = defer;

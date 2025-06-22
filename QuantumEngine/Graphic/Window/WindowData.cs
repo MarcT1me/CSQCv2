@@ -1,15 +1,15 @@
-﻿
-namespace Engine.Graphic.Window;
+﻿namespace Engine.Graphic.Window;
 
-using Objects;
+using Data;
 using Data.Meta;
+using Objects;
 
 public class WindowData(
     WinData winData,
     GlData glData,
     // MetaData
     string? identifier
-) : MetaData(identifier)
+) : MetaData(Identifier.FromUncertain(identifier))
 {
     public WinData WinData { get; } = winData;
     public GlData GlData { get; } = glData;

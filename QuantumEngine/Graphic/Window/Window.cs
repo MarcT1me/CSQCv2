@@ -47,9 +47,16 @@ public class Window
         SetOpacity(winData.Opacity);
         SetPosition(winData.Position);
 
-        unsafe
+        if (MirageSystem.initVulkan)
         {
-            _nativeWindow.CreateVulkanSurface(MirageSystem.CurrentContext.Instance);
+            unsafe
+            {
+                _nativeWindow.CreateVulkanSurface(MirageSystem.CurrentContext.Instance);
+            }
+        }
+        else if (MirageSystem.initOpenGl)
+        {
+            SetViewport(winData.Size);
         }
 
         // _vulkanRenderer = new VulkanRenderer(
@@ -107,7 +114,20 @@ public class Window
     public void UpdateSizeWithChain(Vector2i size)
     {
         UpdateSize(size);
-        // _vulkanRenderer.RecreateSwapChain();
+        if (MirageSystem.initVulkan)
+        {
+            // _vulkanRenderer.RecreateSwapChain();
+        }
+        else if (MirageSystem.initOpenGl)
+        {
+            SetViewport(size);
+        }
+    }
+
+    public void SetViewport(Vector2i size)
+    {
+        MakeCurrent();
+        NativeWindow.SetViewport(0, 0, size.X, size.Y);
     }
 
     public void SetPosition(Vector2i? position = null)
@@ -122,6 +142,12 @@ public class Window
         MetaData.WinData.Position = position;
     }
 
+    public void Clear(Vector4 clearColor)
+    {
+        MakeCurrent();
+        NativeWindow.Clear(clearColor.X, clearColor.Y, clearColor.Z, clearColor.W);
+    }
+
     public void Focus() => _nativeWindow.Focus();
     public void Show() => _nativeWindow.Show();
     public void Hide() => _nativeWindow.Hide();
@@ -130,11 +156,11 @@ public class Window
 
     public void SwapBuffers() => _nativeWindow.SwapBuffers();
     public void MakeCurrent() => _nativeWindow.MakeCurrent();
-    public void ShouldClose() => _nativeWindow.ShouldClose();
+    public bool ShouldClose() => _nativeWindow.ShouldClose();
 
     public virtual void HandleEvent(QuantumEvent e)
     {
-        if (e is { Type: EventType.WindowClose })
+        if (e is { Type: EventType.WindowClose } || ShouldClose())
             Dispose();
         else if (e is WinResizeEvent resize)
             UpdateSizeWithChain(resize.Size);
@@ -158,9 +184,8 @@ public class Window
 
     public virtual void PreRender()
     {
-        _nativeWindow.MakeCurrent();
+        Clear(MetaData.GlData.ClearColor);
 
-        // var clearColor = MetaData.GlData.ClearColor;
         // _vulkanRenderer.DrawFrame(
         //     clearColor.X,
         //     clearColor.Y,
@@ -175,7 +200,7 @@ public class Window
 
     public virtual void PostRender()
     {
-        _nativeWindow.SwapBuffers();
+        SwapBuffers();
     }
 
     public void Dispose()
@@ -190,9 +215,12 @@ public class Window
 
         // _vulkanRenderer.Dispose();
 
-        unsafe
+        if (MirageSystem.initVulkan)
         {
-            _nativeWindow.CleanupVulkanSurface(MirageSystem.CurrentContext.Instance);
+            unsafe
+            {
+                _nativeWindow.CleanupVulkanSurface(MirageSystem.CurrentContext.Instance);
+            }
         }
 
         _nativeWindow.Dispose();

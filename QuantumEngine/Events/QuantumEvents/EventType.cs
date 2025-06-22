@@ -29,6 +29,8 @@ public enum EventType : uint
     JoyAxisMotion,
     JoyButtonDown,
     JoyButtonUp,
+    JoyHatDown,
+    JoyHatUp,
 
     Monitor,
     

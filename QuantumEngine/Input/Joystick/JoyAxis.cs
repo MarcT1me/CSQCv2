@@ -1,12 +1,12 @@
 ﻿namespace Engine.Input.Joystick;
 
-public enum JoyAxis
+public enum JoyAxis : byte
 {
-    LeftX = 0,
-    LeftY = 1,
-    RightX = 2,
-    RightY = 3,
+    LeftX,
+    LeftY,
+    RightX,
+    RightY,
     
-    LeftTrigger = 4,
-    RightTrigger = 5
+    LeftTrigger,
+    RightTrigger,
 }

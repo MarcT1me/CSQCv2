@@ -1,5 +1,4 @@
-﻿using System.Collections.Concurrent;
-using Engine.Data.Collections;
+﻿using Engine.Data.Collections;
 
 namespace Engine.Asset;
 
@@ -34,7 +33,7 @@ public static class DependencyResolver
             var loadTasks = assetFile.Dependencies
                 .Select(dep => AssetManager.LoadAsync(dep, ct: ct))
                 .ToList();
-            
+
             await Task.WhenAll(loadTasks);
             foreach (var task in loadTasks) dependencies.AddLast(task.Result);
 

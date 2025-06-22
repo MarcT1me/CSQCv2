@@ -5,26 +5,32 @@ namespace Engine.Input.Keyboard;
 using Events.QuantumEvents;
 using Graphic.Window;
 
-public class Keyboard
+public class Keyboard(IntPtr windowHandle)
 {
-    private static readonly ConcurrentDictionary<IntPtr, Keyboard> Windows = new();
+    internal static readonly ConcurrentDictionary<IntPtr, Keyboard> List = new();
 
-    public static bool GetKey(int button) => Get(LastActiveWindowId).IsKeyDown(button);
+    // static (last updated window -> PyGame and SDL format)
+
+    public static bool GetKey(int key) => Get(LastActiveWindowId).PressedKeys[key];
 
     public static Keyboard Get(IntPtr windowId)
     {
-        return Windows[windowId];
+        return List[windowId];
     }
+    
+    public readonly IntPtr WindowHandle = windowHandle;
 
     public static IntPtr LastActiveWindowId { get; private set; }
 
-    public bool IsKeyDown(int key) => _pressedKeys[key];
+    // keys
 
-    private readonly bool[] _pressedKeys = new bool[512];
+    public readonly bool[] PressedKeys = new bool[512];
+
+    // updating
 
     internal static void Update(KeyEvent e)
     {
-        if (!Windows.TryGetValue(e.WindowId, out var keyboard)) return;
+        if (!List.TryGetValue(e.WindowId, out var keyboard)) return;
 
         keyboard.UpdateKey(e);
         LastActiveWindowId = e.WindowId;
@@ -32,16 +38,18 @@ public class Keyboard
 
     private void UpdateKey(KeyEvent e)
     {
-        _pressedKeys[e.Key] = e.Type == EventType.KeyDown;
+        PressedKeys[e.Key] = e.Type == EventType.KeyDown;
     }
 
-    public static void RegisterWindow(Window window)
+    // registration
+
+    internal static void RegisterWindow(Window window)
     {
-        Windows[window.Handle] = new Keyboard();
+        List[window.Handle] = new Keyboard(window.Handle);
     }
 
-    public static void UnregisterWindow(Window window)
+    internal static void UnregisterWindow(Window window)
     {
-        Windows.Remove(window.Handle, out _);
+        List.Remove(window.Handle, out _);
     }
 }

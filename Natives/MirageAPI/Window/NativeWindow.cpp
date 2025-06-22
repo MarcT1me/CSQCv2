@@ -5,7 +5,9 @@
 
 #include <GLFW/glfw3.h>
 
-#include "Events/NativeEventManager.h"
+#include "../MirageAPI.h"
+#include "../Events/NativeEventManager.h"
+#include "../OpenGl/OpenGLContext.h"
 
 namespace MirageAPI::Window
 {
@@ -43,6 +45,11 @@ namespace MirageAPI::Window
         NativeWindow^ parent
     )
     {
+        if (width <= 0 || height <= 0)
+        {
+            throw gcnew System::ArgumentException("Invalid window size");
+        }
+        
         msclr::interop::marshal_context context;
         std::string nativeTitle = context.marshal_as<std::string>(title);
 
@@ -53,7 +60,9 @@ namespace MirageAPI::Window
 
         if (!glfw_window)
         {
-            throw gcnew System::Exception("Не удалось создать окно GLFW");
+            const char* message;
+            glfwGetError(&message);
+            throw gcnew System::Exception("Не удалось создать окно GLFW" + *message);
         }
 
         gch = System::Runtime::InteropServices::GCHandle::Alloc(this);
@@ -62,6 +71,9 @@ namespace MirageAPI::Window
         glfwSetWindowUserPointer(glfw_window, native_ptr);
 
         Events::NativeEventManager::InitializeCallbacks(glfw_window);
+
+        if (MirageSystem::initOpenGl)
+            OpenGL::OpenGLContext::Initialize(this);
     }
 
     NativeWindow::~NativeWindow()
@@ -105,6 +117,22 @@ namespace MirageAPI::Window
         }
     }
 
+    void NativeWindow::SetVSync(bool enabled)
+    {
+        glfwSwapInterval(enabled ? 1 : 0);
+    }
+
+    void NativeWindow::SetViewport(int x, int y, int width, int height)
+    {
+        OpenGL::OpenGLContext::SetViewport(x, y, width, height);
+    }
+
+    void NativeWindow::Clear(float r, float g, float b, float a)
+    {
+        glClearColor(r, g, b, a);
+        OpenGL::OpenGLContext::ClearBuffers();
+    }
+    
     void NativeWindow::MakeCurrent()
     {
         glfwMakeContextCurrent(glfw_window);
@@ -112,6 +140,7 @@ namespace MirageAPI::Window
 
     void NativeWindow::SwapBuffers()
     {
+        MakeCurrent();
         glfwSwapBuffers(glfw_window);
     }
 

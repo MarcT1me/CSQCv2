@@ -3,7 +3,7 @@
 
 #include "GLFW/glfw3.h"
 
-#include "../NativeWindow.h"
+#include "../Window/NativeWindow.h"
 
 namespace MirageAPI::Events
 {
@@ -310,7 +310,7 @@ namespace MirageAPI::Events
         glfwSetWindowIconifyCallback(window, reinterpret_cast<GLFWwindowiconifyfun>(GLFW_WindowIconifyCallback));
         glfwSetWindowSizeCallback(window, reinterpret_cast<GLFWwindowsizefun>(GLFW_WindowResizeCallback));
         glfwSetWindowPosCallback(window, reinterpret_cast<GLFWwindowposfun>(GLFW_WindowMoveCallback));
-        glfwSetWindowRefreshCallback(window , reinterpret_cast<GLFWwindowrefreshfun>(GLFW_WindowRefreshCallback));
+        glfwSetWindowRefreshCallback(window, reinterpret_cast<GLFWwindowrefreshfun>(GLFW_WindowRefreshCallback));
         glfwSetWindowCloseCallback(window, reinterpret_cast<GLFWwindowclosefun>(GLFW_WindowCloseCallback));
 
         // other
@@ -340,6 +340,9 @@ namespace MirageAPI::Events
                 // Получаем кнопки
                 state.Buttons = glfwGetJoystickButtons(jid, &state.ButtonCount);
 
+                // получаем шляпы
+                state.Hats = glfwGetJoystickHats(jid, &state.HatCount);
+
                 OnJoystickState(state);
             }
         }
@@ -365,5 +368,22 @@ namespace MirageAPI::Events
     bool NativeEventManager::IsJoystickPresent(int jid)
     {
         return glfwJoystickPresent(jid) == GLFW_TRUE;
+    }
+
+    System::String^ NativeEventManager::GetJoystickName(int jid)
+    {
+        const char* name = glfwGetJoystickName(jid);
+        return gcnew System::String(name ? name : "Unknown");
+    }
+
+    bool NativeEventManager::JoystickIsGamepad(int jid)
+    {
+        return glfwJoystickIsGamepad(jid) == 1;
+    }
+
+    System::String^ NativeEventManager::GetJoystickGuid(int jid)
+    {
+        const char* name = glfwGetJoystickGUID(jid);
+        return gcnew System::String(name ? name : "");
     }
 }

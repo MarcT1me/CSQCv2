@@ -1,18 +1,28 @@
 ﻿using System.Collections.Concurrent;
+using MirageAPI.Events;
 
 namespace Engine.Input.Joystick;
 
 using Events.QuantumEvents;
 using Events.QuantumEvents.Joystick;
 
-public class Joy
+public class Joy(int jid)
 {
     internal static readonly ConcurrentDictionary<int, Joy> List = new();
+
+    public static int GetJoystickMaxCount() => NativeEventManager.GetJoystickMaxCount();
 
     public static Joy Get(int joyId)
     {
         return List[joyId];
     }
+
+    public readonly int Jid = jid;
+    public readonly string Name = NativeEventManager.GetJoystickName(jid);
+    public readonly bool IsGamepad = NativeEventManager.JoystickIsGamepad(jid);
+    public readonly string Guid = NativeEventManager.GetJoystickGuid(jid);
+
+    // buttons
 
     public bool IsButtonDown(JoyButton button) => IsButtonDown((byte)button);
     public bool IsButtonDown(byte button) => (_pressedButtons & (1U << button)) != 0;
@@ -28,6 +38,23 @@ public class Joy
 
     private UInt32 _pressedButtons;
 
+    // hats
+
+    public bool IsHatDown(byte hat) => (_pressedHats & (1U << hat)) != 0;
+
+    private void SetHat(int hat, bool value)
+    {
+        var mask = 1U << hat;
+        if (value)
+            _pressedHats |= (ushort)mask;
+        else
+            _pressedHats &= (ushort)~mask;
+    }
+
+    private UInt32 _pressedHats;
+
+    // axes
+
     public float GetAxis(JoyAxis joyAxis) => GetAxis((uint)joyAxis);
     public float GetAxis(uint axis) => _axes[axis];
 
@@ -35,12 +62,14 @@ public class Joy
 
     private readonly float[] _axes = new float[16];
 
+    // updating
+
     internal static void Update(JoyEvent e)
     {
         if (e is JoyDeviceEvent jd)
         {
             if (jd.Connected)
-                List[jd.JoystickId] = new Joy();
+                List[jd.JoystickId] = new Joy(e.JoystickId);
             else
                 List.Remove(jd.JoystickId, out _);
             return;
@@ -60,6 +89,12 @@ public class Joy
                 break;
             case JoyButtonEvent { Type: EventType.JoyButtonUp } jbu:
                 SetButton(jbu.Button, false);
+                break;
+            case JoyHatEvent { Type: EventType.JoyHatDown } jhd:
+                SetHat(jhd.Hat, true);
+                break;
+            case JoyHatEvent { Type: EventType.JoyHatUp } jhu:
+                SetHat(jhu.Hat, false);
                 break;
             case JoyAxisEvent { Type: EventType.JoyAxisMotion } ja:
                 SetAxis(ja.Axis, ja.Value);

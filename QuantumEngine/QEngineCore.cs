@@ -1,11 +1,12 @@
 ﻿using System.Reflection;
-using Engine.Events;
 using MirageAPI;
 using MirageAPI.Events;
 using MirageAPI.Vulkan;
 
 namespace Engine;
 
+using Events;
+using Extensions.Tracer;
 using Extensions;
 using Failures;
 using Logging;
@@ -19,6 +20,12 @@ public class QEngineCore(Assembly? appLibAssembly) : EngineCore(appLibAssembly)
     {
         With.Handle(new Catch("Main EngineCore Catch"), _ =>
         {
+            QuantumTracer.HandleAssembly(
+                [
+                    Assembly.GetExecutingAssembly()
+                ]
+            );
+
             var core = new QEngineCore(appLibAssembly);
 
             // initialize core
@@ -29,7 +36,7 @@ public class QEngineCore(Assembly? appLibAssembly) : EngineCore(appLibAssembly)
     protected override void InitializeModeSpecific()
     {
         Logger.Info("Initialize MirageAPI");
-        MirageSystem.Initialize(initVulkan: false);
+        MirageSystem.Initialize(initVulkan: false, initOpenGl: true);
 
         Logger.Info("Initialize MirageAPI::Events");
         NativeEventManager.Initialize();
@@ -37,28 +44,31 @@ public class QEngineCore(Assembly? appLibAssembly) : EngineCore(appLibAssembly)
         Logger.Info("Initialize Engine.Events");
         QEventSystem.Initialize();
 
-        Logger.Info("Initialize MirageAPI::Vulkan");
-        MirageSystem.InitVulkan();
-
-        Logger.Separator();
-
-        Logger.Info("Initialize MirageAPI::Vulkan::VulkanPipeline");
-        VulkanPipeline = new VulkanPipeline(MirageSystem.CurrentContext);
-        if (MirageSystem.CurrentContext.IsRTXSupported)
+        if (MirageSystem.initVulkan)
         {
-            Logger.Info(
-                "PIPELINE:\n" +
-                "Mode: RTX"
-            );
-            VulkanPipeline.CreateRTXPipeline();
-        }
-        else
-        {
-            Logger.Info(
-                "PIPELINE:\n" +
-                "Mode: Simple"
-            );
-            VulkanPipeline.CreateGraphicsPipeline();
+            Logger.Info("Initialize MirageAPI::Vulkan");
+            MirageSystem.InitVulkan();
+
+            Logger.Separator();
+
+            Logger.Info("Initialize MirageAPI::Vulkan::VulkanPipeline");
+            VulkanPipeline = new VulkanPipeline(MirageSystem.CurrentContext);
+            if (MirageSystem.CurrentContext.IsRTXSupported)
+            {
+                Logger.Info(
+                    "PIPELINE:\n" +
+                    "Mode: RTX"
+                );
+                VulkanPipeline.CreateRTXPipeline();
+            }
+            else
+            {
+                Logger.Info(
+                    "PIPELINE:\n" +
+                    "Mode: Simple"
+                );
+                VulkanPipeline.CreateGraphicsPipeline();
+            }
         }
 
         NativeEventManager.Initialize();
@@ -75,8 +85,11 @@ public class QEngineCore(Assembly? appLibAssembly) : EngineCore(appLibAssembly)
     [Obsolete("ENGINE ONLY USAGE")]
     public static void Uninitialize()
     {
-        Logger.Info("Uninitialize MirageAPI::Vulkan");
-        MirageSystem.DeinitializeVulkan();
+        if (MirageSystem.initVulkan)
+        {
+            Logger.Info("Uninitialize MirageAPI::Vulkan");
+            MirageSystem.DeinitializeVulkan();
+        }
 
         Logger.Info("Uninitialize MirageAPI");
         MirageSystem.Deinitialize();

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Events/NativeEvents.h"
+#include "../Events/NativeEvents.h"
 
 #include <vulkan/vulkan.h>
 
@@ -68,6 +68,11 @@ namespace MirageAPI::Window
 
         void CreateVulkanSurface(VkInstance instance);
         void CleanupVulkanSurface(VkInstance instance);
+
+
+        static void SetVSync(bool enabled);
+        static void SetViewport(int x, int y, int width, int height);
+        static void Clear(float r, float g, float b, float a);
 
         // other methods
         void MakeCurrent();
