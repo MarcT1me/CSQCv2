@@ -1,4 +1,6 @@
 ﻿using System.Collections.Concurrent;
+using Engine.Events.QuantumEvents.Joystick;
+using Engine.Events.QuantumEvents.Mouse;
 // engine sub-systems
 using MirageAPI.Window;
 using MirageAPI.Events;
@@ -48,6 +50,27 @@ public class QEventSystem
         }
     }
 
+    internal static void Initialize()
+    {
+        NativeEventManager.OnJoystick += HandleJoystickEvent;
+        NativeEventManager.OnJoystickState += HandleJoystickState;
+    }
+
+    private static void HandleJoystickEvent(NativeJoystickEvent e) => EnqueueEvent(new JoyDeviceEvent(e));
+
+    private static unsafe void HandleJoystickState(NativeJoystickState state)
+    {
+        for (int i = 0; i < state.AxesCount; i++)
+        {
+            EnqueueEvent(new JoyAxisEvent(state.JoystickID, i, state.Axes[i]));
+        }
+
+        for (int i = 0; i < state.ButtonCount; i++)
+        {
+            EnqueueEvent(new JoyButtonEvent(state.JoystickID, i, state.Buttons[i] == 1));
+        }
+    }
+
     public static void RegisterWindow(NativeWindow window)
     {
         window.OnKey += HandleKeyEvent;
@@ -66,30 +89,15 @@ public class QEventSystem
         window.OnDrop -= HandleDropEvent;
     }
 
-    private static void HandleKeyEvent(NativeKeyEvent glfwEvent)
-    {
-        EnqueueEvent(ConvertEvent(glfwEvent));
-    }
+    private static void HandleKeyEvent(NativeKeyEvent glfwEvent) => EnqueueEvent(ConvertEvent(glfwEvent));
 
-    private static void HandleMouseEvent(NativeMouseEvent glfwEvent)
-    {
-        EnqueueEvent(ConvertEvent(glfwEvent));
-    }
+    private static void HandleMouseEvent(NativeMouseEvent glfwEvent) => EnqueueEvent(ConvertEvent(glfwEvent));
 
-    private static void HandleWindowEvent(NativeWindowEvent glfwEvent)
-    {
-        EnqueueEvent(ConvertEvent(glfwEvent));
-    }
+    private static void HandleWindowEvent(NativeWindowEvent glfwEvent) => EnqueueEvent(ConvertEvent(glfwEvent));
 
-    private static void HandleCharEvent(NativeCharEvent glfwEvent)
-    {
-        EnqueueEvent(ConvertEvent(glfwEvent));
-    }
+    private static void HandleCharEvent(NativeCharEvent glfwEvent) => EnqueueEvent(ConvertEvent(glfwEvent));
 
-    private static void HandleDropEvent(NativeDropEvent glfwEvent)
-    {
-        EnqueueEvent(ConvertEvent(glfwEvent));
-    }
+    private static void HandleDropEvent(NativeDropEvent glfwEvent) => EnqueueEvent(ConvertEvent(glfwEvent));
 
     public static void EnqueueEvent(QuantumEvent qEvent)
     {
@@ -108,11 +116,14 @@ public class QEventSystem
             // Опрашиваем все окна
             NativeEventManager.PollEvents();
 
+            // Опрашиваем все геймпады
+            NativeEventManager.PollJoystickStates();
+
             // Обрабатываем накопленные события
             while (EventQueue.TryDequeue(out var qEvent))
             {
-                UpdateInputState(qEvent);
                 handler.Handle(qEvent);
+                UpdateInputState(qEvent);
             }
 
             handler.Dispose();
@@ -121,15 +132,27 @@ public class QEventSystem
 
     private static void UpdateInputState(QuantumEvent qEvent)
     {
+        switch (qEvent)
+        {
+            case MouseEvent mouseEvent:
+                Input.Mouse.Mouse.Update(mouseEvent);
+                break;
+            case KeyEvent keyEvent:
+                Input.Keyboard.Keyboard.Update(keyEvent);
+                break;
+            case JoyEvent joyEvent:
+                Input.Joystick.Joy.Update(joyEvent);
+                break;
+        }
     }
 
     private static QuantumEvent ConvertEvent(NativeKeyEvent e) => new KeyEvent(e);
 
     private static QuantumEvent ConvertEvent(NativeMouseEvent e) => e.Type switch
     {
-        NativeMouseEventType.Button => new QuantumEvents.Mouse.ButtonEvent(e),
-        NativeMouseEventType.Move => new QuantumEvents.Mouse.MoveEvent(e),
-        NativeMouseEventType.Scroll => new QuantumEvents.Mouse.ScrollEvent(e),
+        NativeMouseEventType.Button => new QuantumEvents.Mouse.MouseButtonEvent(e),
+        NativeMouseEventType.Move => new QuantumEvents.Mouse.MouseMoveEvent(e),
+        NativeMouseEventType.Scroll => new QuantumEvents.Mouse.MouseScrollEvent(e),
         _ => new QuantumEvent(EventType.Unknown)
     };
 
@@ -160,11 +183,11 @@ public class QEventSystem
                     e.windowID
                 );
             case NativeWindowEventType.Resize:
-                return new QuantumEvents.Window.ResizeEvent(e);
+                return new QuantumEvents.Window.WinResizeEvent(e);
             case NativeWindowEventType.Move:
-                return new QuantumEvents.Window.MoveEvent(e);
+                return new QuantumEvents.Window.WinMoveEvent(e);
             case NativeWindowEventType.Iconify:
-                return new QuantumEvents.Window.IconifyEvent(e);
+                return new QuantumEvents.Window.WinIconifyEvent(e);
             default:
                 return new QuantumEvent(EventType.Unknown);
         }

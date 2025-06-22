@@ -1,5 +1,6 @@
 ﻿using Engine.Base;
 using Engine.Events.QuantumEvents;
+using Engine.Events.QuantumEvents.Joystick;
 using Engine.Logging;
 
 // using Engine.Events.QuantumEvents;
@@ -17,11 +18,5 @@ public class TestApp : Game<TestAppData, GameWindow>
     {
         var n = MetaData.Identifier.GetNameAnyway();
         return new GameWindow(MetaData.WinData, MetaData.GlData, n);
-    }
-
-    public override void HandleEvent(QuantumEvent e)
-    {
-        base.HandleEvent(e);
-        Logger.Info($"Got event: {e.Type}");
     }
 }

@@ -48,12 +48,13 @@ namespace MirageAPI::Events
         static void GLFW_MonitorCallback(GLFWmonitor* monitor, int event);
 
     public:
-        delegate void JoystickDelegate(NativeEvent event);
-        // int jid, int event
+        delegate void JoystickDelegate(NativeJoystickEvent  event);
         static event JoystickDelegate^ OnJoystick;
+        
+        delegate void JoystickStateDelegate(NativeJoystickState state);
+        static event JoystickStateDelegate^ OnJoystickState;
 
         delegate void MonitorDelegate(NativeEvent event);
-        // GLFWmonitor* monitor, int event
         static event MonitorDelegate^ OnMonitor;
 
         // Инициализация системы событий
@@ -61,6 +62,7 @@ namespace MirageAPI::Events
         static void Initialize();
 
         static void PollEvents();
+        static void PollJoystickStates();
 
     internal:
         static void InitializeCallbacks(GLFWwindow* window);

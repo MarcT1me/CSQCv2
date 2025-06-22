@@ -2,7 +2,7 @@
 
 namespace Engine.Events.QuantumEvents.Mouse;
 
-public class ButtonEvent(NativeMouseEvent e)
+public class MouseButtonEvent(NativeMouseEvent e)
     : MouseEvent(e.Action == 1 ? EventType.MouseButtonDown : EventType.MouseButtonUp, e.windowID)
 {
     public int Button = e.Button;

@@ -3,7 +3,8 @@ using MirageAPI.Events;
 
 namespace Engine.Events.QuantumEvents;
 
-public class DropEvent : WindowedQuantumEvent
+public class DropEvent 
+    : WindowedQuantumEvent
 {
     public string? Paths;
 

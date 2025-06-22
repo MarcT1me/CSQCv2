@@ -2,7 +2,7 @@
 
 namespace Engine.Events.QuantumEvents.Window;
 
-public class IconifyEvent(NativeWindowEvent e)
+public class WinIconifyEvent(NativeWindowEvent e)
     : WindowedQuantumEvent(EventType.WindowIconify, e.windowID)
 {
     public readonly int Iconify = e.X;

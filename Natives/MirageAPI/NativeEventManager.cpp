@@ -255,10 +255,9 @@ namespace MirageAPI::Events
 
     void NativeEventManager::GLFW_JoystickCallback(int joystick, int event)
     {
-        NativeEvent e;
-        e.Type = NativeEventType::Joystick;
-        e.data = System::IntPtr(joystick);
-        e.event = event;
+        NativeJoystickEvent e;
+        e.JoystickID = joystick;
+        e.Connected = event == GLFW_CONNECTED;
         OnJoystick(e);
     }
 
@@ -307,5 +306,25 @@ namespace MirageAPI::Events
     void NativeEventManager::PollEvents()
     {
         glfwPollEvents();
+    }
+
+    void NativeEventManager::PollJoystickStates()
+    {
+        for (int jid = GLFW_JOYSTICK_1; jid <= GLFW_JOYSTICK_LAST; ++jid)
+        {
+            if (glfwJoystickPresent(jid))
+            {
+                NativeJoystickState state;
+                state.JoystickID = jid;
+
+                // Получаем оси
+                state.Axes = glfwGetJoystickAxes(jid, &state.AxesCount);
+
+                // Получаем кнопки
+                state.Buttons = glfwGetJoystickButtons(jid, &state.ButtonCount);
+
+                OnJoystickState(state);
+            }
+        }
     }
 }

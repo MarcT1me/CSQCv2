@@ -66,6 +66,24 @@ namespace MirageAPI::Events
         Joystick, Monitor
     };
 
+    public value struct NativeJoystickEvent
+    {
+        int JoystickID;
+        
+        bool Connected; // GLFW_CONNECTED или GLFW_DISCONNECTED
+    };
+
+    public value struct NativeJoystickState
+    {
+        int JoystickID;
+        
+        int AxesCount;
+        const float* Axes;
+        
+        int ButtonCount;
+        const unsigned char* Buttons;
+    };
+
     public value struct NativeEvent
     {
         NativeEventType Type;

@@ -119,8 +119,6 @@ public abstract class App<TData>
 
             // time updating
             Clock.Tick();
-        
-            Console.Write($"\rApp FPS: {Clock.MetaData.CurrentTps}");
         }
 
         Logger.Separator();

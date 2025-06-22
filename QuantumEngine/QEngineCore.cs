@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Engine.Events;
 using MirageAPI;
 using MirageAPI.Events;
 using MirageAPI.Vulkan;
@@ -11,7 +12,7 @@ using Logging;
 
 public class QEngineCore(Assembly? appLibAssembly) : EngineCore(appLibAssembly)
 {
-    public static VulkanPipeline VulkanPipeline;
+    public static VulkanPipeline? VulkanPipeline;
 
     [Obsolete("ENGINE ONLY USAGE")]
     public static void Initialize(Assembly? appLibAssembly)
@@ -29,9 +30,12 @@ public class QEngineCore(Assembly? appLibAssembly) : EngineCore(appLibAssembly)
     {
         Logger.Info("Initialize MirageAPI");
         MirageSystem.Initialize(initVulkan: false);
-        
+
         Logger.Info("Initialize MirageAPI::Events");
         NativeEventManager.Initialize();
+
+        Logger.Info("Initialize Engine.Events");
+        QEventSystem.Initialize();
 
         Logger.Info("Initialize MirageAPI::Vulkan");
         MirageSystem.InitVulkan();
@@ -57,9 +61,9 @@ public class QEngineCore(Assembly? appLibAssembly) : EngineCore(appLibAssembly)
             VulkanPipeline.CreateGraphicsPipeline();
         }
 
-        MirageAPI.Events.NativeEventManager.Initialize();
+        NativeEventManager.Initialize();
         Logger.Success("MirageAPI - Initialized");
-        
+
         Logger.Separator();
     }
 

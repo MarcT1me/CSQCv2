@@ -21,10 +21,15 @@ public enum EventType : uint
     WindowResize,
     WindowMove,
     WindowClose,
-
+    
     Char,
     Drop,
-    Joystick,
+    
+    JoyDevice,
+    JoyAxisMotion,
+    JoyButtonDown,
+    JoyButtonUp,
+
     Monitor,
     
     Quit,

@@ -2,7 +2,7 @@
 
 namespace Engine.Events.QuantumEvents.Mouse;
 
-public class MoveEvent(NativeMouseEvent e)
+public class MouseMoveEvent(NativeMouseEvent e)
     : MouseEvent(EventType.MouseMove, e.windowID)
 {
     public double X = e.X;

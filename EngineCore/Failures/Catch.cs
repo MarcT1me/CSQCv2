@@ -32,9 +32,6 @@ public sealed class Catch : MetaObject<CatchMeta>, IContextManager
         IFailureHandler? handler = null
     ) : base(new CatchMeta(identifier, failureLevel, handler))
     {
-        if (ActiveCatches[Id] != null)
-            throw new InvalidOperationException($"Catch with id '{Id}' already exists");
-
         ActiveCatches[Id] = this;
         IsRunning = true;
     }
@@ -96,7 +93,7 @@ public sealed class Catch : MetaObject<CatchMeta>, IContextManager
     public void Dispose()
     {
         IsRunning = false;
-        ActiveCatches[Id] = null;
+        ActiveCatches.Pop(Id);
         GC.SuppressFinalize(this);
     }
 

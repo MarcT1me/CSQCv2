@@ -41,11 +41,9 @@ namespace MirageAPI::Window
         // other
 
         delegate void CharDelegate(Events::NativeCharEvent event);
-        // GLFWwindow* window, unsigned int codepoint
         event CharDelegate^ OnChar;
 
         delegate void DropDelegate(Events::NativeDropEvent event);
-        // GLFWwindow* window, int count, const char** paths
         event DropDelegate^ OnDrop;
 
         // initializations and property

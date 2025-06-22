@@ -59,6 +59,9 @@ public class Window
 
         QEventSystem.RegisterWindow(_nativeWindow);
         QEventSystem.EventHandling += HandleEvent;
+        
+        Input.Mouse.Mouse.RegisterWindow(this);
+        Input.Keyboard.Keyboard.RegisterWindow(this);
 
         Registries.WindowRegistry.Register(this);
     }
@@ -132,7 +135,7 @@ public class Window
     {
         if (e is { Type: EventType.WindowClose })
             Dispose();
-        else if (e is ResizeEvent resize)
+        else if (e is WinResizeEvent resize)
             UpdateSizeWithChain(resize.Size);
     }
 
@@ -176,6 +179,9 @@ public class Window
 
         QEventSystem.UnregisterWindow(_nativeWindow);
         QEventSystem.EventHandling -= HandleEvent;
+        
+        Input.Mouse.Mouse.UnregisterWindow(this);
+        Input.Keyboard.Keyboard.UnregisterWindow(this);
 
         // _vulkanRenderer.Dispose();
 

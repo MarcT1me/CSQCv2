@@ -30,9 +30,9 @@ public abstract class DataContainer<T> : MetaObject<MetaData>, IDataContainer, I
 
     #region Item support
 
-    public T? this[object key]
+    public T this[object key]
     {
-        get => (T)Get(key)!;
+        get => (T)Get(key)! ?? throw new KeyNotFoundException();
         set => Set(key, value);
     }
 
@@ -75,6 +75,8 @@ public abstract class DataContainer<T> : MetaObject<MetaData>, IDataContainer, I
     public ICollection<object> Values => Data.Values;
     
     public void Clear() => Data.Clear();
+    
+    public bool ContainsKey(Identifier key) => Data.ContainsKey(key);
 
     #endregion
 

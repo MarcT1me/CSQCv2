@@ -2,7 +2,7 @@
 
 namespace Engine.Events.QuantumEvents.Mouse;
 
-public class ScrollEvent(NativeMouseEvent e)
+public class MouseScrollEvent(NativeMouseEvent e)
     : MouseEvent(EventType.MouseScroll, e.windowID)
 {
     public double X = e.X;
