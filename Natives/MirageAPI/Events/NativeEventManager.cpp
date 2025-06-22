@@ -3,7 +3,7 @@
 
 #include "GLFW/glfw3.h"
 
-#include "NativeWindow.h"
+#include "../NativeWindow.h"
 
 namespace MirageAPI::Events
 {
@@ -198,6 +198,22 @@ namespace MirageAPI::Events
         wrapper->RaiseWindowEvent(e);
     }
 
+    void NativeEventManager::GLFW_WindowRefreshCallback(GLFWwindow* window)
+    {
+        // getting window ptr
+        void* ptr = glfwGetWindowUserPointer(window);
+        if (!ptr) return;
+
+        // format event
+        NativeWindowEvent e;
+        e.Type = NativeWindowEventType::Refresh;
+
+        // raise event
+        auto wrapper = PrepareWindow(ptr);
+        e.windowID = wrapper->Handle;
+        wrapper->RaiseWindowEvent(e);
+    }
+
     void NativeEventManager::GLFW_WindowCloseCallback(GLFWwindow* window)
     {
         // getting window ptr
@@ -294,6 +310,7 @@ namespace MirageAPI::Events
         glfwSetWindowIconifyCallback(window, reinterpret_cast<GLFWwindowiconifyfun>(GLFW_WindowIconifyCallback));
         glfwSetWindowSizeCallback(window, reinterpret_cast<GLFWwindowsizefun>(GLFW_WindowResizeCallback));
         glfwSetWindowPosCallback(window, reinterpret_cast<GLFWwindowposfun>(GLFW_WindowMoveCallback));
+        glfwSetWindowRefreshCallback(window , reinterpret_cast<GLFWwindowrefreshfun>(GLFW_WindowRefreshCallback));
         glfwSetWindowCloseCallback(window, reinterpret_cast<GLFWwindowclosefun>(GLFW_WindowCloseCallback));
 
         // other
@@ -326,5 +343,27 @@ namespace MirageAPI::Events
                 OnJoystickState(state);
             }
         }
+    }
+
+    void NativeEventManager::InitializeJoysticks()
+    {
+        for (int jid = GLFW_JOYSTICK_1; jid <= GLFW_JOYSTICK_LAST; jid++)
+        {
+            if (glfwJoystickPresent(jid))
+            {
+                // Генерируем событие подключения
+                GLFW_JoystickCallback(jid, GLFW_CONNECTED);
+            }
+        }
+    }
+
+    int NativeEventManager::GetJoystickMaxCount()
+    {
+        return GLFW_JOYSTICK_LAST + 1;
+    }
+
+    bool NativeEventManager::IsJoystickPresent(int jid)
+    {
+        return glfwJoystickPresent(jid) == GLFW_TRUE;
     }
 }

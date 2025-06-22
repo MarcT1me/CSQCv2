@@ -3,7 +3,7 @@
 
 #include <GLFW/glfw3.h>
 
-#include "VulkanContext.h"
+#include "Vulkan/VulkanContext.h"
 
 namespace MirageAPI
 {

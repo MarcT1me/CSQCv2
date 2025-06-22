@@ -20,8 +20,9 @@ public class Window
     private readonly NativeWindow _nativeWindow;
     // private readonly VulkanRenderer _vulkanRenderer;
 
-    public IntPtr Handle => _nativeWindow.Handle;
+    public Window? ActiveWindow { get; protected set; }
 
+    public IntPtr Handle => _nativeWindow.Handle;
     public ObjectStatusFlags ObjectStatus => MetaData.Status;
 
     public Window(
@@ -59,7 +60,7 @@ public class Window
 
         QEventSystem.RegisterWindow(_nativeWindow);
         QEventSystem.EventHandling += HandleEvent;
-        
+
         Input.Mouse.Mouse.RegisterWindow(this);
         Input.Keyboard.Keyboard.RegisterWindow(this);
 
@@ -137,6 +138,10 @@ public class Window
             Dispose();
         else if (e is WinResizeEvent resize)
             UpdateSizeWithChain(resize.Size);
+        else if (e.Type == EventType.WindowFocusGained)
+            ActiveWindow = this;
+        else if (e.Type == EventType.WindowFocusLost && ActiveWindow == this)
+            ActiveWindow = null;
     }
 
     public virtual void PreUpdate()
@@ -179,7 +184,7 @@ public class Window
 
         QEventSystem.UnregisterWindow(_nativeWindow);
         QEventSystem.EventHandling -= HandleEvent;
-        
+
         Input.Mouse.Mouse.UnregisterWindow(this);
         Input.Keyboard.Keyboard.UnregisterWindow(this);
 

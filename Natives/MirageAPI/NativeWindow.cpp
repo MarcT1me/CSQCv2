@@ -5,7 +5,7 @@
 
 #include <GLFW/glfw3.h>
 
-#include "NativeEventManager.h"
+#include "Events/NativeEventManager.h"
 
 namespace MirageAPI::Window
 {

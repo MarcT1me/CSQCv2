@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "NativeEvents.h"
+#include "Events/NativeEvents.h"
 
 #include <vulkan/vulkan.h>
 

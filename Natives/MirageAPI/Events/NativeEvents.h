@@ -34,7 +34,7 @@ namespace MirageAPI::Events
 
     public enum class NativeWindowEventType
     {
-        Focus, Maximize, Iconify, Resize, Move, Close,
+        Focus, Maximize, Iconify, Resize, Move, Refresh, Close,
     };
 
     public value struct NativeWindowEvent

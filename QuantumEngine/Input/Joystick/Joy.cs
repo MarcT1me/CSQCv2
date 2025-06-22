@@ -7,7 +7,7 @@ using Events.QuantumEvents.Joystick;
 
 public class Joy
 {
-    private static readonly ConcurrentDictionary<int, Joy> List = new();
+    internal static readonly ConcurrentDictionary<int, Joy> List = new();
 
     public static Joy Get(int joyId)
     {

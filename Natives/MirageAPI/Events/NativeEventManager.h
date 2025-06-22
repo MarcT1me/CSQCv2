@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "NativeEvents.h"
-#include "NativeWindow.h"
+#include "../NativeWindow.h"
 
 struct GLFWwindow;
 struct GLFWmonitor;
@@ -35,6 +35,7 @@ namespace MirageAPI::Events
         static void GLFW_WindowIconifyCallback(GLFWwindow* window, int iconify);
         static void GLFW_WindowResizeCallback(GLFWwindow* window, int width, int height);
         static void GLFW_WindowMoveCallback(GLFWwindow* window, int x, int y);
+        static void GLFW_WindowRefreshCallback(GLFWwindow* window);
         static void GLFW_WindowCloseCallback(GLFWwindow* window);
 
         // other
@@ -64,6 +65,10 @@ namespace MirageAPI::Events
         static void PollEvents();
         static void PollJoystickStates();
 
+        static void InitializeJoysticks();
+        static int GetJoystickMaxCount();
+        static bool IsJoystickPresent(int jid);
+        
     internal:
         static void InitializeCallbacks(GLFWwindow* window);
     };

@@ -1,6 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using Engine.Events.QuantumEvents.Joystick;
-using Engine.Events.QuantumEvents.Mouse;
 // engine sub-systems
 using MirageAPI.Window;
 using MirageAPI.Events;
@@ -11,6 +9,8 @@ using Data.RegistryManagers;
 using QuantumEvents;
 using Configuration;
 using Threading;
+using QuantumEvents.Joystick;
+using QuantumEvents.Mouse;
 
 public delegate void EventHandlingEvent(QuantumEvent e);
 
@@ -54,9 +54,29 @@ public class QEventSystem
     {
         NativeEventManager.OnJoystick += HandleJoystickEvent;
         NativeEventManager.OnJoystickState += HandleJoystickState;
+
+        InitializeConnectedJoysticks();
     }
 
-    private static void HandleJoystickEvent(NativeJoystickEvent e) => EnqueueEvent(new JoyDeviceEvent(e));
+    private static void InitializeConnectedJoysticks()
+    {
+        for (int jid = 0; jid < NativeEventManager.GetJoystickMaxCount(); jid++)
+        {
+            if (NativeEventManager.IsJoystickPresent(jid))
+            {
+                HandleJoystickEvent(
+                    new NativeJoystickEvent
+                    {
+                        JoystickID = jid,
+                        Connected = true
+                    }
+                );
+            }
+        }
+    }
+
+    private static void HandleJoystickEvent(NativeJoystickEvent e) =>
+        EnqueueEvent(new JoyDeviceEvent(e.JoystickID, e.Connected));
 
     private static unsafe void HandleJoystickState(NativeJoystickState state)
     {
@@ -150,9 +170,9 @@ public class QEventSystem
 
     private static QuantumEvent ConvertEvent(NativeMouseEvent e) => e.Type switch
     {
-        NativeMouseEventType.Button => new QuantumEvents.Mouse.MouseButtonEvent(e),
-        NativeMouseEventType.Move => new QuantumEvents.Mouse.MouseMoveEvent(e),
-        NativeMouseEventType.Scroll => new QuantumEvents.Mouse.MouseScrollEvent(e),
+        NativeMouseEventType.Button => new MouseButtonEvent(e),
+        NativeMouseEventType.Move => new MouseMoveEvent(e),
+        NativeMouseEventType.Scroll => new MouseScrollEvent(e),
         _ => new QuantumEvent(EventType.Unknown)
     };
 
@@ -180,6 +200,11 @@ public class QEventSystem
             case NativeWindowEventType.Maximize:
                 return new WindowedQuantumEvent(
                     e.X == 1 ? EventType.WindowMaximize : EventType.WindowMinimize,
+                    e.windowID
+                );
+            case NativeWindowEventType.Refresh:
+                return new WindowedQuantumEvent(
+                    EventType.WindowRestore,
                     e.windowID
                 );
             case NativeWindowEventType.Resize:

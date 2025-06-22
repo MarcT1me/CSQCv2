@@ -1,9 +1,7 @@
-﻿using MirageAPI.Events;
+﻿namespace Engine.Events.QuantumEvents.Joystick;
 
-namespace Engine.Events.QuantumEvents.Joystick;
-
-public class JoyDeviceEvent(NativeJoystickEvent e)
-    : JoyEvent(EventType.JoyDevice, e.JoystickID)
+public class JoyDeviceEvent(int joystickId, bool connected)
+    : JoyEvent(EventType.JoyDevice, joystickId)
 {
-    public bool Connected { get; } = e.Connected;
+    public bool Connected { get; } = connected;
 }
