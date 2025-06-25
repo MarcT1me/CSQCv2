@@ -10,17 +10,12 @@ public class Joy(int jid)
 {
     internal static readonly ConcurrentDictionary<int, Joy> List = new();
 
-    public static int GetJoystickMaxCount() => NativeEventManager.GetJoystickMaxCount();
-
     public static Joy Get(int joyId)
     {
         return List[joyId];
     }
 
     public readonly int Jid = jid;
-    public readonly string Name = NativeEventManager.GetJoystickName(jid);
-    public readonly bool IsGamepad = NativeEventManager.JoystickIsGamepad(jid);
-    public readonly string Guid = NativeEventManager.GetJoystickGuid(jid);
 
     // buttons
 

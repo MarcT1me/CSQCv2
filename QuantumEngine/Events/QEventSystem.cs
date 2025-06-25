@@ -53,59 +53,6 @@ public class QEventSystem
         }
     }
 
-    internal static void Initialize()
-    {
-        InitializeConnectedJoysticks();
-        NativeEventManager.OnJoystick += HandleJoystickEvent;
-        NativeEventManager.OnJoystickState += HandleJoystickState;
-    }
-
-    private static void InitializeConnectedJoysticks()
-    {
-        for (int jid = 0; jid < Joy.GetJoystickMaxCount(); jid++)
-        {
-            if (NativeEventManager.IsJoystickPresent(jid))
-            {
-                Joy.List[jid] = new Joy(jid);
-            }
-        }
-    }
-
-    private static void HandleJoystickEvent(NativeJoystickEvent e) =>
-        EnqueueEvent(new JoyDeviceEvent(e.JoystickID, e.Connected));
-
-    private static unsafe void HandleJoystickState(NativeJoystickState state)
-    {
-        for (byte i = 0; i < state.AxesCount; i++)
-        {
-            if (
-                Math.Abs(
-                    Joy.Get(state.JoystickID)
-                        .GetAxis(i) - state.Axes[i]
-                ) < 0.000001f
-            ) continue;
-            EnqueueEvent(new JoyAxisEvent(state.JoystickID, i, state.Axes[i]));
-        }
-
-        for (byte i = 0; i < state.ButtonCount; i++)
-        {
-            if (
-                Joy.Get(state.JoystickID)
-                    .IsButtonDown(i) == (state.Buttons[i] == 1)
-            ) continue;
-            EnqueueEvent(new JoyButtonEvent(state.JoystickID, i, state.Buttons[i] == 1));
-        }
-
-        for (byte i = 0; i < state.HatCount; i++)
-        {
-            if (
-                Joy.Get(state.JoystickID)
-                    .IsHatDown(i) == (state.Hats[i] == 1)
-            ) continue;
-            EnqueueEvent(new JoyHatEvent(state.JoystickID, i, state.Hats[i] == 1));
-        }
-    }
-
     public static void RegisterWindow(NativeWindow window)
     {
         window.OnKey += HandleKeyEvent;
@@ -149,10 +96,7 @@ public class QEventSystem
             var handler = new EventBatchHandler();
 
             // Опрашиваем все окна
-            NativeEventManager.PollEvents();
-
-            // Опрашиваем все геймпады
-            NativeEventManager.PollJoystickStates();
+            NativeEventManager.ProcessEvents();
 
             // Обрабатываем накопленные события
             while (EventQueue.TryDequeue(out var qEvent))

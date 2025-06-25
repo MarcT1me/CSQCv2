@@ -1,18 +1,20 @@
 ﻿#pragma once
 
+#include <Windows.h>
+
 #include "../Events/NativeEvents.h"
+#include "../DerectX/DX12WindowContext.h"
 
-#include <vulkan/vulkan.h>
-
-struct GLFWwindow;
 
 namespace MirageAPI::Window
 {
     public ref class NativeWindow
     {
-        GLFWwindow* glfw_window;
+        HWND hwnd;
+        HINSTANCE hInstance = nullptr;
         System::Runtime::InteropServices::GCHandle gch;
-        VkSurfaceKHR surface = VK_NULL_HANDLE;
+
+        DirectX::DX12WindowContext^ dxContext;
 
     internal:
         // rise methods (overhead...)
@@ -48,6 +50,8 @@ namespace MirageAPI::Window
 
         // initializations and property
 
+        static NativeWindow();
+
         NativeWindow(
             int width, int height,
             System::String^ title,
@@ -56,38 +60,16 @@ namespace MirageAPI::Window
         ~NativeWindow();
         !NativeWindow();
 
-        property System::IntPtr Handle
-        {
-            System::IntPtr get();
-        }
+        property System::IntPtr Handle { System::IntPtr get(); }
+        property DirectX::DX12WindowContext^ DXContext { DirectX::DX12WindowContext^ get() { return dxContext; } }
 
-        property VkSurfaceKHR VulkanSurface
-        {
-            VkSurfaceKHR get() { return surface; }
-        }
-
-        void CreateVulkanSurface(VkInstance instance);
-        void CleanupVulkanSurface(VkInstance instance);
-
-
-        static void SetVSync(bool enabled);
-        static void SetViewport(int x, int y, int width, int height);
-        static void Clear(float r, float g, float b, float a);
+        void HandleResize(int width, int height);
+        void SetVSync(bool enabled);
+        void Clear(float r, float g, float b, float a);
 
         // other methods
-        void MakeCurrent();
+        void BeginFrame();
+        void EndFrame();
         void SwapBuffers();
-        bool ShouldClose();
-
-        void SetSize(int width, int height);
-        void SetSizeLimit(int minWidth, int minHeight, int maxWidth, int maxHeight);
-        void SetPos(int xPos, int yPos);
-        void SetOpacity(float opacity);
-
-        void Focus();
-        void Show();
-        void Hide();
-        void Maximize();
-        void Restore();
     };
 }

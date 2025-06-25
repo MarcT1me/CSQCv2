@@ -1,11 +1,7 @@
 ﻿using System.Reflection;
-using MirageAPI;
-using MirageAPI.Events;
-using MirageAPI.Vulkan;
 
 namespace Engine;
 
-using Events;
 using Extensions.Tracer;
 using Extensions;
 using Failures;
@@ -13,8 +9,6 @@ using Logging;
 
 public class QEngineCore(Assembly? appLibAssembly) : EngineCore(appLibAssembly)
 {
-    public static VulkanPipeline? VulkanPipeline;
-
     [Obsolete("ENGINE ONLY USAGE")]
     public static void Initialize(Assembly? appLibAssembly)
     {
@@ -35,46 +29,8 @@ public class QEngineCore(Assembly? appLibAssembly) : EngineCore(appLibAssembly)
 
     protected override void InitializeModeSpecific()
     {
-        Logger.Info("Initialize MirageAPI");
-        MirageSystem.Initialize(initVulkan: false, initOpenGl: true);
-
-        Logger.Info("Initialize MirageAPI::Events");
-        NativeEventManager.Initialize();
-
-        Logger.Info("Initialize Engine.Events");
-        QEventSystem.Initialize();
-
-        if (MirageSystem.initVulkan)
-        {
-            Logger.Info("Initialize MirageAPI::Vulkan");
-            MirageSystem.InitVulkan();
-
-            Logger.Separator();
-
-            Logger.Info("Initialize MirageAPI::Vulkan::VulkanPipeline");
-            VulkanPipeline = new VulkanPipeline(MirageSystem.CurrentContext);
-            if (MirageSystem.CurrentContext.IsRTXSupported)
-            {
-                Logger.Info(
-                    "PIPELINE:\n" +
-                    "Mode: RTX"
-                );
-                VulkanPipeline.CreateRTXPipeline();
-            }
-            else
-            {
-                Logger.Info(
-                    "PIPELINE:\n" +
-                    "Mode: Simple"
-                );
-                VulkanPipeline.CreateGraphicsPipeline();
-            }
-        }
-
-        NativeEventManager.Initialize();
-        Logger.Success("MirageAPI - Initialized");
-
-        Logger.Separator();
+        Logger.Info("Initialize MirageAPI::DirectX12");
+        MirageAPI.DirectX.DX12Context.Initialize();
     }
 
     protected override void EnableDebugFeatures()
@@ -85,15 +41,9 @@ public class QEngineCore(Assembly? appLibAssembly) : EngineCore(appLibAssembly)
     [Obsolete("ENGINE ONLY USAGE")]
     public static void Uninitialize()
     {
-        if (MirageSystem.initVulkan)
-        {
-            Logger.Info("Uninitialize MirageAPI::Vulkan");
-            MirageSystem.DeinitializeVulkan();
-        }
-
-        Logger.Info("Uninitialize MirageAPI");
-        MirageSystem.Deinitialize();
-
+        Logger.Info("Deinitialize MirageAPI::DirectX12");
+        MirageAPI.DirectX.DX12Context.Deinitialize();
+        
         Logger.Separator();
         Logger.Success("QuantumEngine uninitialized");
     }

@@ -7,6 +7,10 @@
 #ifndef PCH_H
 #define PCH_H
 
-// Добавьте сюда заголовочные файлы для предварительной компиляции
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+
+#pragma comment(lib, "d3d12.lib")
+#pragma comment(lib, "dxgi.lib")
 
 #endif //PCH_H

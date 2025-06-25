@@ -6,16 +6,31 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        // load engine and link to loaded App
-        var (app, eng) = QLauncher.InitProject(AppDomain.CurrentDomain);
+        AppLibModule? app;
+        EngineModule? eng;
+        
+        try
+        {
+            // load engine and link to loaded App
+            (app, eng) = QLauncher.InitProject(AppDomain.CurrentDomain);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"QLauncher.InitProject Failure:\n{ex}");
+            return;
+        }
 
-        // Activate EngineCore
-        eng.Activate();
-
-        // activate and start app
-        app.Start();
-
-        // Deactivate EngineCore
-        eng.Deactivate();
+        try
+        {
+            // Activate EngineCore
+            eng.Activate();
+            // activate and start app
+            app.Start();
+        }
+        finally
+        {
+            // Deactivate EngineCore
+            eng.Deactivate();
+        }
     }
 }
