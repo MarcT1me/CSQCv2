@@ -5,16 +5,20 @@
 #include <GLFW/glfw3.h>
 #include <vector>
 #include <stdexcept>
+#include <msclr/marshal.h>
 
 namespace MirageAPI::Vulkan
 {
-    VulkanContext::VulkanContext()
+    VulkanContext::VulkanContext(System::String^ appName, int appVersion[3])
     {
-        Initialize();
+        deviceProperties = new VkPhysicalDeviceProperties();
+        std::string nativeAppName = msclr::interop::marshal_as<std::string>(appName);
+        Initialize(nativeAppName, appVersion);
     }
 
     VulkanContext::~VulkanContext()
     {
+        delete deviceProperties;
         Cleanup();
     }
 
@@ -23,9 +27,9 @@ namespace MirageAPI::Vulkan
         Cleanup();
     }
 
-    void VulkanContext::Initialize()
+    void VulkanContext::Initialize(const std::string& nativeAppName, int appVersion[3])
     {
-        CreateInstance();
+        CreateInstance(nativeAppName.c_str(), appVersion);
         SelectPhysicalDevice();
         CreateLogicalDevice();
     }
@@ -45,12 +49,14 @@ namespace MirageAPI::Vulkan
         }
     }
 
-    void VulkanContext::CreateInstance()
+    void VulkanContext::CreateInstance(const char* nativeAppName, int appVersion[3])
     {
         VkApplicationInfo appInfo{};
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-        appInfo.pApplicationName = "Mirage Application";
-        appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
+
+        appInfo.pApplicationName = nativeAppName;
+        appInfo.applicationVersion = VK_MAKE_VERSION(appVersion[0], appVersion[1], appVersion[2]);
+
         appInfo.pEngineName = "Mirage Engine";
         appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
         appInfo.apiVersion = VK_API_VERSION_1_2;
@@ -60,7 +66,7 @@ namespace MirageAPI::Vulkan
         createInfo.pApplicationInfo = &appInfo;
 
         // Получаем необходимые расширения
-        uint32_t glfwExtensionCount = 0;
+        uint32_t glfwExtensionCount;
         const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
         createInfo.enabledExtensionCount = glfwExtensionCount;
@@ -77,7 +83,7 @@ namespace MirageAPI::Vulkan
 
     void VulkanContext::SelectPhysicalDevice()
     {
-        uint32_t deviceCount = 0;
+        uint32_t deviceCount;
         vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
 
         if (deviceCount == 0)
@@ -101,16 +107,31 @@ namespace MirageAPI::Vulkan
 
         if (physicalDevice == VK_NULL_HANDLE)
         {
-            physicalDevice = devices[0]; // Используем первое доступное устройство
+            physicalDevice = devices[0];
         }
+
+        uint32_t queueFamilyCount;
+        vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, nullptr);
+
+        std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+        vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, queueFamilies.data());
+
+        for (uint32_t i = 0; i < queueFamilyCount; i++)
+        {
+            if (queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
+            {
+                graphicsQueueFamilyIndex = i;
+                break;
+            }
+        }
+        vkGetPhysicalDeviceProperties(physicalDevice, deviceProperties);
     }
 
     bool VulkanContext::CheckRTXSupport(VkPhysicalDevice device)
     {
-        // Проверяем поддержку расширений RTX
         uint32_t extensionCount;
         vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
-        
+
         std::vector<VkExtensionProperties> availableExtensions(extensionCount);
         vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
 
@@ -130,37 +151,14 @@ namespace MirageAPI::Vulkan
 
     void VulkanContext::CreateLogicalDevice()
     {
-        // Находим семейства очередей
-        uint32_t queueFamilyCount = 0;
-        vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, nullptr);
-        std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
-        vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, queueFamilies.data());
-
-        int graphicsQueueFamily = -1;
-        for (int i = 0; i < queueFamilies.size(); i++)
-        {
-            if (queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
-            {
-                graphicsQueueFamily = i;
-                break;
-            }
-        }
-
-        if (graphicsQueueFamily == -1)
-        {
-            throw gcnew System::Exception("Failed to find graphics queue family!");
-        }
-
-        // Приоритет для очереди
         float queuePriority = 1.0f;
         VkDeviceQueueCreateInfo queueCreateInfo{};
         queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-        queueCreateInfo.queueFamilyIndex = graphicsQueueFamily;
+        queueCreateInfo.queueFamilyIndex = graphicsQueueFamilyIndex;
         queueCreateInfo.queueCount = 1;
         queueCreateInfo.pQueuePriorities = &queuePriority;
 
-        // Включаем расширения RTX
-        std::vector<const char*> deviceExtensions = {
+        std::vector deviceExtensions = {
             VK_KHR_SWAPCHAIN_EXTENSION_NAME
         };
 
@@ -189,7 +187,26 @@ namespace MirageAPI::Vulkan
         device = dev;
 
         VkQueue queue;
-        vkGetDeviceQueue(device, graphicsQueueFamily, 0, &queue);
+        vkGetDeviceQueue(device, graphicsQueueFamilyIndex, 0, &queue);
         graphicsQueue = queue;
+
+        VkQueue pQueue;
+        vkGetDeviceQueue(device, graphicsQueueFamilyIndex, 0, &pQueue);
+        presentQueue = pQueue;
+    }
+
+    uint32_t VulkanContext::FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
+    {
+        VkPhysicalDeviceMemoryProperties memProperties;
+        vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);
+
+        for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
+            if (typeFilter & 1 << i && 
+                (memProperties.memoryTypes[i].propertyFlags & properties) == properties) {
+                return i;
+                }
+        }
+
+        throw gcnew System::Exception("Failed to find suitable memory type!");
     }
 }

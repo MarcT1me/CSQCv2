@@ -3,6 +3,7 @@
 #include "../Events/NativeEvents.h"
 
 #include <vulkan/vulkan.h>
+#include "../Vulkan/VulkanContext.h"
 
 struct GLFWwindow;
 
@@ -66,9 +67,8 @@ namespace MirageAPI::Window
             VkSurfaceKHR get() { return surface; }
         }
 
-        void CreateVulkanSurface(VkInstance instance);
-        void CleanupVulkanSurface(VkInstance instance);
-
+        void CreateVulkanSurface(Vulkan::VulkanContext^ context);
+        void CleanupVulkanSurface(Vulkan::VulkanContext^ context);
 
         static void SetVSync(bool enabled);
         static void SetViewport(int x, int y, int width, int height);

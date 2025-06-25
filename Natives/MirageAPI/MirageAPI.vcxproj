@@ -138,6 +138,10 @@
         <ClInclude Include="Events\NativeEvents.h"/>
         <ClInclude Include="MirageAPI.h"/>
         <ClInclude Include="OpenGl\OpenGLContext.h" />
+        <ClInclude Include="Vulkan\VulkanEnums.h" />
+        <ClInclude Include="Vulkan\VulkanShader.h" />
+        <ClInclude Include="Vulkan\VulkanSurface.h" />
+        <ClInclude Include="Vulkan\VulkanTexture.h" />
         <ClInclude Include="Window\NativeWindow.h"/>
         <ClInclude Include="pch.h"/>
         <ClInclude Include="Resource.h"/>
@@ -154,6 +158,9 @@
             <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
         </ClCompile>
         <ClCompile Include="MirageAPI.cpp"/>
+        <ClCompile Include="Vulkan\VulkanShader.cpp" />
+        <ClCompile Include="Vulkan\VulkanSurface.cpp" />
+        <ClCompile Include="Vulkan\VulkanTexture.cpp" />
         <ClCompile Include="Window/NativeWindow.cpp"/>
         <ClCompile Include="Vulkan/VulkanRenderer.cpp"/>
         <ClCompile Include="Vulkan/VulkanPipeline.cpp"/>

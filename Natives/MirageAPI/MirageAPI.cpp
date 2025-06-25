@@ -3,8 +3,6 @@
 
 #include <GLFW/glfw3.h>
 
-#include "Vulkan/VulkanContext.h"
-
 namespace MirageAPI
 {
     void MirageSystem::Initialize(bool initVulkan, bool initOpenGl)
@@ -29,7 +27,6 @@ namespace MirageAPI
                 throw gcnew System::Exception("Vulkan not supported");
             }
             glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-            InitVulkan();
             System::Console::WriteLine("Vulkan initialized");
         }
         else if (initOpenGl)
@@ -60,24 +57,6 @@ namespace MirageAPI
 
     void MirageSystem::Deinitialize()
     {
-        DeinitializeVulkan();
         glfwTerminate();
-    }
-
-    void MirageSystem::InitVulkan()
-    {
-        if (s_vulkanContext == nullptr)
-        {
-            s_vulkanContext = gcnew Vulkan::VulkanContext();
-        }
-    }
-
-    void MirageSystem::DeinitializeVulkan()
-    {
-        if (s_vulkanContext != nullptr)
-        {
-            delete s_vulkanContext;
-            s_vulkanContext = nullptr;
-        }
     }
 }

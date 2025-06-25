@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include <string>
 #include <vulkan/vulkan.h>
 
 namespace MirageAPI::Vulkan
@@ -7,18 +8,26 @@ namespace MirageAPI::Vulkan
     public ref class VulkanContext
     {
         VkInstance instance = VK_NULL_HANDLE;
-        VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
         VkDevice device = VK_NULL_HANDLE;
-        VkQueue graphicsQueue = VK_NULL_HANDLE;
-        bool rtxSupported = false;
+        VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+        VkPhysicalDeviceProperties* deviceProperties;
 
-        void CreateInstance();
+        VkQueue graphicsQueue = VK_NULL_HANDLE;
+        VkQueue presentQueue = VK_NULL_HANDLE;
+
+        bool rtxSupported = false;
+        uint32_t graphicsQueueFamilyIndex;
+
+        void CreateInstance(const char* nativeAppName, int appVersion[3]);
         void SelectPhysicalDevice();
         void CreateLogicalDevice();
-        bool CheckRTXSupport(VkPhysicalDevice device);
+        static bool CheckRTXSupport(VkPhysicalDevice device);
+
+        void Initialize(const std::string& nativeAppName, int appVersion[3]);
+        void Cleanup();
 
     public:
-        VulkanContext();
+        VulkanContext(System::String^ appName, int appVersion[3]);
         ~VulkanContext();
         !VulkanContext();
 
@@ -30,12 +39,21 @@ namespace MirageAPI::Vulkan
         {
             VkDevice get() { return device; }
         }
-        property bool IsRTXSupported
+        property VkPhysicalDevice PhysicalDevice
         {
-            bool get() { return rtxSupported; }
+            VkPhysicalDevice get() { return physicalDevice; }
+        }
+        property VkPhysicalDeviceProperties DeviceProperties
+        {
+            VkPhysicalDeviceProperties get() { return *deviceProperties; }
         }
 
-        void Initialize();
-        void Cleanup();
+        property VkQueue GraphicsQueue { VkQueue get() { return graphicsQueue; } }
+        property VkQueue PresentQueue { VkQueue get() { return presentQueue; } }
+
+        property bool IsRTXSupported { bool get() { return rtxSupported; } }
+        property uint32_t GraphicsQueueFamilyIndex { uint32_t get() { return graphicsQueueFamilyIndex; } }
+        
+        uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
     };
 }

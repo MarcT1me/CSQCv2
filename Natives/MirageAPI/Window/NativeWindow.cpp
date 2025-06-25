@@ -98,21 +98,21 @@ namespace MirageAPI::Window
         return System::IntPtr(glfw_window);
     }
 
-    void NativeWindow::CreateVulkanSurface(VkInstance instance)
+    void NativeWindow::CreateVulkanSurface(Vulkan::VulkanContext^ context)
     {
         VkSurfaceKHR surf;
-        if (glfwCreateWindowSurface(instance, glfw_window, nullptr, &surf) != VK_SUCCESS)
+        if (glfwCreateWindowSurface(context->Instance, glfw_window, nullptr, &surf) != VK_SUCCESS)
         {
             throw gcnew System::Exception("Failed to create window surface!");
         }
         surface = surf;
     }
 
-    void NativeWindow::CleanupVulkanSurface(VkInstance instance)
+    void NativeWindow::CleanupVulkanSurface(Vulkan::VulkanContext^ context)
     {
         if (surface != VK_NULL_HANDLE)
         {
-            vkDestroySurfaceKHR(instance, surface, nullptr);
+            vkDestroySurfaceKHR(context->Instance, surface, nullptr);
             surface = VK_NULL_HANDLE;
         }
     }

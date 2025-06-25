@@ -1,43 +1,35 @@
 ﻿#pragma once
-
 #include "VulkanContext.h"
 #include "VulkanPipeline.h"
-#include "../Window/NativeWindow.h"
-#include <vector>
+#include "VulkanTexture.h"
+#include "VulkanSurface.h"
+
+#include "VulkanEnums.h"
+
 
 namespace MirageAPI::Vulkan
 {
-    // class VulkanRenderer
-    // {
-    //     VulkanContext^ context;
-    //     VulkanPipeline^ pipeline;
-    //     Window::NativeWindow^ window;
-    //
-    //     VkSwapchainKHR swapChain = VK_NULL_HANDLE;
-    //     std::vector<VkImage> swapChainImages;
-    //     std::vector<VkImageView> swapChainImageViews;
-    //     std::vector<VkFramebuffer> swapChainFramebuffers;
-    //     VkFormat swapChainImageFormat;
-    //     VkExtent2D swapChainExtent;
-    //
-    //     VkRenderPass renderPass = VK_NULL_HANDLE;
-    //     VkCommandPool commandPool = VK_NULL_HANDLE;
-    //     std::vector<VkCommandBuffer> commandBuffers;
-    //
-    //     void CreateSwapChain();
-    //     void CreateImageViews();
-    //     void CreateRenderPass();
-    //     void CreateFramebuffers();
-    //     void CreateCommandPool();
-    //     void CreateCommandBuffers();
-    //     void CleanupSwapChain();
-    //
-    // public:
-    //     VulkanRenderer(VulkanPipeline^ pipeline, Window::NativeWindow^ window);
-    //     ~VulkanRenderer();
-    //     !VulkanRenderer();
-    //
-    //     void RecreateSwapChain();
-    //     void DrawFrame(float r, float g, float b, float a);
-    // };
+    public ref class VulkanRenderer
+    {
+        VulkanContext^ context;
+        VulkanSurface^ surface;
+        VulkanPipeline^ pipeline;
+
+        VkCommandPool commandPool = VK_NULL_HANDLE;
+        VkCommandBuffer commandBuffer = VK_NULL_HANDLE;
+
+        void CreateCommandPool();
+        void CreateCommandBuffer();
+
+    public:
+        VulkanRenderer(VulkanContext^ context, VulkanSurface^ surface, VulkanPipeline^ pipeline);
+        ~VulkanRenderer();
+
+        void BeginRenderPass(ClearColor  clearColor);
+        void EndRenderPass();
+        void SubmitCommands();
+
+        void DrawTexture(VulkanTexture^ texture, int x, int y, int width, int height);
+        void DrawRect(int x, int y, int width, int height, ClearColor color);
+    };
 }
