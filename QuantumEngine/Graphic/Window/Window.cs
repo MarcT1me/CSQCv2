@@ -16,7 +16,6 @@ public class Window
         IEventful, IUpdatable, IRenderable
 {
     private readonly NativeWindow _nativeWindow;
-    // private readonly VulkanRenderer _vulkanRenderer;
 
     public Window? ActiveWindow { get; protected set; }
 
@@ -90,18 +89,19 @@ public class Window
         MetaData.WinData.Position = position;
     }
 
-    public void Clear(Vector4 clearColor)
-    {
+    public void BeginFrame() => _nativeWindow.BeginFrame();
+
+    public void Clear(Vector4 clearColor) =>
         _nativeWindow.Clear(clearColor.X, clearColor.Y, clearColor.Z, clearColor.W);
-    }
+
+    public void EndFrame() => _nativeWindow.EndFrame();
+    public void Present() => _nativeWindow.Present();
 
     // public void Focus() => _nativeWindow.Focus();
     // public void Show() => _nativeWindow.Show();
     // public void Hide() => _nativeWindow.Hide();
     // public void Maximize() => _nativeWindow.Maximize();
     // public void Restore() => _nativeWindow.Restore();
-
-    public void SwapBuffers() => _nativeWindow.SwapBuffers();
 
     public virtual void HandleEvent(QuantumEvent e)
     {
@@ -127,16 +127,18 @@ public class Window
 
     public virtual void PreRender()
     {
-        Clear(MetaData.GlData.ClearColor);
+        BeginFrame();
     }
 
     public virtual void Render()
     {
+        Clear(MetaData.GlData.ClearColor);
     }
 
     public virtual void PostRender()
     {
-        SwapBuffers();
+        EndFrame();
+        Present();
     }
 
     public void Dispose()

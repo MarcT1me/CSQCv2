@@ -21,14 +21,34 @@ namespace MirageAPI::DirectX
 
         // Дескрипторы
         ID3D12DescriptorHeap* m_rtvHeap = nullptr;
-        D3D12_CPU_DESCRIPTOR_HANDLE* m_rtvHandle0;
-        D3D12_CPU_DESCRIPTOR_HANDLE* m_rtvHandle1;
+        SIZE_T m_rtvHandle0;
+        SIZE_T m_rtvHandle1;
         UINT m_rtvDescriptorSize;
 
         int m_frameIndex = 0;
         int m_width;
         int m_height;
         int m_vsync = 0;
+
+        static SIZE_T HandleToInt(D3D12_CPU_DESCRIPTOR_HANDLE handle)
+        {
+            return static_cast<SIZE_T>(handle.ptr);
+        }
+
+        static D3D12_CPU_DESCRIPTOR_HANDLE IntToHandle(SIZE_T handle)
+        {
+            return {static_cast<SIZE_T>(handle)};
+        }
+
+        D3D12_CPU_DESCRIPTOR_HANDLE GetCurrentRTV()
+        {
+            return IntToHandle(m_frameIndex == 0 ? m_rtvHandle0 : m_rtvHandle1);
+        }
+
+        ID3D12Resource* GetRenderTarget()
+        {
+            return m_frameIndex == 0 ? m_renderTarget0 : m_renderTarget1;
+        }
 
     public:
         DX12WindowContext(HWND hwnd, int width, int height);

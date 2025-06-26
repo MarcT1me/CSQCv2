@@ -126,7 +126,7 @@ namespace MirageAPI::Window
         dxContext->EndFrame();
     }
 
-    void NativeWindow::SwapBuffers()
+    void NativeWindow::Present()
     {
         dxContext->Present();
     }

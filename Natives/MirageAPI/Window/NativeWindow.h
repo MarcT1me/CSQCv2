@@ -70,6 +70,6 @@ namespace MirageAPI::Window
         // other methods
         void BeginFrame();
         void EndFrame();
-        void SwapBuffers();
+        void Present();
     };
 }
