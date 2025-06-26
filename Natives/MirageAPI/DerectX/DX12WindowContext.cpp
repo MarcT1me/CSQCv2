@@ -1,30 +1,33 @@
 ﻿#include "pch.h"
-#include "DX12WindowContext.h"
 #include "DX12Context.h"
 
-// Исправленная реализация с CD3DX12-классами
+#include "DX12WindowContext.h"
+
 namespace MirageAPI::DirectX
 {
-    DX12WindowContext::DX12WindowContext(HWND hwnd, int width, int height)
+    DX12WindowContext::DX12WindowContext(HWND hwnd, int width, int height,
+                                         DX12WindowContextConfig^ config)
         : m_width(width), m_height(height)
     {
         // 1. Создание фабрики DXGI
         IDXGIFactory4* factory = nullptr;
-        HRESULT hr = CreateDXGIFactory2(0, IID_PPV_ARGS(&factory));
+        UINT factoryFlags = config->EnableDebugLayer ? DXGI_CREATE_FACTORY_DEBUG : 0;
+        HRESULT hr = CreateDXGIFactory2(factoryFlags, IID_PPV_ARGS(&factory));
         if (FAILED(hr))
         {
             throw gcnew System::Exception("CreateDXGIFactory2 failed: " + hr);
         }
 
-        // 2. Создание swap chain
+        // 2. Создание swap chain с учетом настроек
         DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
-        swapChainDesc.BufferCount = 2;
-        swapChainDesc.Width = width;
-        swapChainDesc.Height = height;
-        swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        swapChainDesc.BufferCount = config->BufferCount;
+        swapChainDesc.Width = m_width;
+        swapChainDesc.Height = m_height;
+        swapChainDesc.Format = static_cast<DXGI_FORMAT>(config->Format);
         swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-        swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-        swapChainDesc.SampleDesc.Count = 1;
+        swapChainDesc.SwapEffect = static_cast<DXGI_SWAP_EFFECT>(config->SwapEffect);
+        swapChainDesc.SampleDesc.Count = config->SampleCount;
+        swapChainDesc.Flags = config->AllowTearing ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
 
         IDXGISwapChain1* tempSwapChain;
         hr = factory->CreateSwapChainForHwnd(
@@ -57,7 +60,7 @@ namespace MirageAPI::DirectX
         D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = {};
         rtvHeapDesc.NumDescriptors = 2;
         rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-        rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+        rtvHeapDesc.Flags = static_cast<D3D12_DESCRIPTOR_HEAP_FLAGS>(config->RTVHeapFlags);
 
         ID3D12DescriptorHeap* rtvHeap;
         hr = DX12Context::GetDevice()->CreateDescriptorHeap(
@@ -240,7 +243,7 @@ namespace MirageAPI::DirectX
     void DX12WindowContext::BeginFrame()
     {
         if (m_width == 0 || m_height == 0) return;
-        
+
         // Ждем завершения предыдущего кадра
         const UINT64 fenceValue = m_fenceValue;
         DX12Context::GetCommandQueue()->Signal(m_fence, fenceValue);
@@ -278,7 +281,7 @@ namespace MirageAPI::DirectX
     void DX12WindowContext::EndFrame()
     {
         if (m_width == 0 || m_height == 0) return;
-        
+
         // Получаем текущий RTV
         ID3D12Resource* currentTarget = GetRenderTarget();
 
@@ -306,7 +309,7 @@ namespace MirageAPI::DirectX
     void DX12WindowContext::Present()
     {
         if (m_width == 0 || m_height == 0) return;
-        
+
         m_swapChain->Present(m_vsync, 0);
         m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
 

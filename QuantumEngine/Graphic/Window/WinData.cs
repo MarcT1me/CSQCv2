@@ -28,8 +28,8 @@ public sealed class WinData
         }
     }
 
-    public Vector2i Position;
-    public float Opacity;
+    public Vector2i Position { get; internal set; }
+    public float Opacity { get; internal set; }
 
     public WinData(
         Vector2i size,
@@ -42,6 +42,6 @@ public sealed class WinData
 
         Size = size;
         Opacity = opacity;
-        Position = position ?? new(100);
+        Position = position ?? new(Window.UseDefault);
     }
 }

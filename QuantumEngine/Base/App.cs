@@ -14,7 +14,7 @@ using Extensions;
 
 public abstract class App<TData>
     : MetaObject<TData>,
-        IPreparableInstance<TData>, IReloadData, IExitHandler, // lifetime methods
+        IPreparableInstance<TData>, IPreparable, IReloadData, IExitHandler, // lifetime methods
         IEventful, IUpdatable, IRenderable // loop methods
     where TData : AppData
 {
@@ -37,7 +37,7 @@ public abstract class App<TData>
 
     public abstract TData PrepareInstance();
 
-    public virtual void PostInit()
+    public virtual void Prepare()
     {
     }
 
@@ -76,7 +76,7 @@ public abstract class App<TData>
     public void Run()
     {
         Instance = this;
-        PostInit();
+        Prepare();
 
         Logger.Separator();
         Logger.Info("App Run started");

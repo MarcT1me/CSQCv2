@@ -108,12 +108,14 @@
     <ItemGroup>
         <ClInclude Include="DerectX\DX12Context.h" />
         <ClInclude Include="DerectX\DX12WindowContext.h" />
+        <ClInclude Include="DerectX\DX12ContextConfig.h" />
         <ClInclude Include="Events\NativeEventManager.h"/>
         <ClInclude Include="Events\NativeEventProc.h" />
         <ClInclude Include="Events\NativeEvents.h"/>
         <ClInclude Include="Window\NativeWindow.h"/>
         <ClInclude Include="pch.h"/>
         <ClInclude Include="Resource.h"/>
+        <ClInclude Include="Window\NativeWindowEnums.h" />
     </ItemGroup>
     <!--  Source-->
     <ItemGroup>

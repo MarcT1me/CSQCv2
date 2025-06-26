@@ -66,6 +66,7 @@ public sealed class Catch : MetaObject<CatchMeta>, IContextManager
     /// <exception cref="FailureException">Если обрабатываемая ошибка отмечена как критичная</exception>
     public void OnException(Exception ex)
     {
+        Console.Beep();
         Logger.Warning(
             $"Catch with id '{Id}' got '{MetaData.FailureLevel}' level error:\n" +
             $"{ex.Message}"

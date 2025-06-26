@@ -2,9 +2,10 @@
 
 #include <Windows.h>
 
+#include "NativeWindowEnums.h"
 #include "../Events/NativeEvents.h"
 #include "../DerectX/DX12WindowContext.h"
-
+#include "../DerectX/DX12ContextConfig.h"
 
 namespace MirageAPI::Window
 {
@@ -53,14 +54,43 @@ namespace MirageAPI::Window
         static NativeWindow();
 
         NativeWindow(
-            int width, int height,
+            WindowRect^ rect,
             System::String^ title,
-            NativeWindow^ parent
+            float opacity,
+            NativeWindow^ parent,
+            WindowType wType,
+            DirectX::DX12WindowContextConfig^ dxConfig
         );
         ~NativeWindow();
         !NativeWindow();
 
-        property System::IntPtr Handle { System::IntPtr get(); }
+        void Establish();
+
+        void Show();
+        void Hide();
+
+        void Maximize();
+        void Minimize();
+        void Restore();
+
+        void BringToFront();
+        void FlashWindow();
+        
+        void SetTitle(System::String^ title);
+        void SetPosition(int x, int y);
+        void SetSize(int width, int height);
+        void SetPositionAndSize(int x, int y, int width, int height);
+        void SetOpacity(float opacity);
+
+        void Update();
+
+        property WindowRect Rect { WindowRect get(); }
+        property float Opacity { float get(); }
+
+        property bool IsMinimized { bool get(); }
+        property bool IsMaximized { bool get(); }
+
+        property System::IntPtr Handle { System::IntPtr get() { return System::IntPtr(hwnd); } }
         property DirectX::DX12WindowContext^ DXContext { DirectX::DX12WindowContext^ get() { return dxContext; } }
 
         void HandleResize(int width, int height);

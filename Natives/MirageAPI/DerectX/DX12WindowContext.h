@@ -1,7 +1,6 @@
 ﻿#pragma once
 
-#include <d3d12.h>
-#include <dxgi1_4.h>
+#include "DX12ContextConfig.h"
 
 namespace MirageAPI::DirectX
 {
@@ -51,7 +50,8 @@ namespace MirageAPI::DirectX
         }
 
     public:
-        DX12WindowContext(HWND hwnd, int width, int height);
+        DX12WindowContext(HWND hwnd, int width, int height,
+                          DX12WindowContextConfig^ config);
         ~DX12WindowContext();
 
         void Cleanup();

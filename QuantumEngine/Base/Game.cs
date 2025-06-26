@@ -23,10 +23,12 @@ public abstract class Game<TData, TWindow> : App<TData>
 
     protected abstract TWindow CreateMainWindow();
 
-    public override void PostInit()
+    public override void Prepare()
     {
-        // MainWindow.Show();
-        // MainWindow.Maximize();
+        foreach (var window in Registries.WindowRegistry.Values)
+        {
+            window.Prepare();
+        }
     }
 
     #region override App cycle

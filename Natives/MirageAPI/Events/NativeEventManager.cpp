@@ -1,8 +1,6 @@
 ﻿#include "pch.h"
 #include "NativeEventManager.h"
 
-#include "../Window/NativeWindow.h"
-
 namespace MirageAPI::Events
 {
     // key

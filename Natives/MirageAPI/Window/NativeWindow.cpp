@@ -2,7 +2,6 @@
 #include "NativeWindow.h"
 
 #include <msclr/marshal_cppstd.h>
-#include <d3d12.h>
 
 #include "../Events/NativeEventProc.h"
 
@@ -51,35 +50,31 @@ namespace MirageAPI::Window
     }
 
     NativeWindow::NativeWindow(
-        const int width, const int height,
+        WindowRect^ rect,
         System::String^ title,
-        NativeWindow^ parent
+        float opacity,
+        NativeWindow^ parent,
+        WindowType wType,
+        DirectX::DX12WindowContextConfig^ dxConfig
     )
     {
-        if (width <= 0 || height <= 0)
-        {
-            throw gcnew System::ArgumentException("Invalid window size");
-        }
-
         hwnd = CreateWindowEx(
             0, L"QuantumWindowClass",
             msclr::interop::marshal_as<std::wstring>(title).c_str(),
-            WS_OVERLAPPEDWINDOW,
-            CW_USEDEFAULT, CW_USEDEFAULT,
-            width, height,
+            (parent ? WS_CHILDWINDOW : static_cast<unsigned long>(wType)) | WS_EX_LAYERED,
+            rect->x, rect->y,
+            rect->width, rect->height,
             parent ? parent->hwnd : nullptr,
             nullptr,
             hInstance, nullptr
         );
+        SetOpacity(opacity);
 
         gch = System::Runtime::InteropServices::GCHandle::Alloc(this);
         void* native_ptr = System::Runtime::InteropServices::GCHandle::ToIntPtr(gch).ToPointer();
         SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(native_ptr));
 
-        dxContext = gcnew DirectX::DX12WindowContext(hwnd, width, height);
-
-        ShowWindow(hwnd, SW_SHOW);
-        UpdateWindow(hwnd);
+        dxContext = gcnew DirectX::DX12WindowContext(hwnd, rect->width, rect->height, dxConfig);
     }
 
     NativeWindow::~NativeWindow()
@@ -101,9 +96,128 @@ namespace MirageAPI::Window
     {
     }
 
-    System::IntPtr NativeWindow::Handle::get()
+    void NativeWindow::Establish()
     {
-        return System::IntPtr(hwnd);
+        Show();
+        Update();
+    }
+
+    void NativeWindow::Show()
+    {
+        ShowWindow(hwnd, SW_SHOW);
+    }
+    
+    void NativeWindow::Hide()
+    {
+        ShowWindow(hwnd, SW_HIDE);
+    }
+
+    void NativeWindow::Maximize()
+    {
+        ShowWindow(hwnd, SW_MAXIMIZE);
+    }
+
+    void NativeWindow::Minimize()
+    {
+        ShowWindow(hwnd, SW_MINIMIZE);
+    }
+
+    void NativeWindow::Restore()
+    {
+        ShowWindow(hwnd, SW_RESTORE);
+    }
+
+    void NativeWindow::BringToFront()
+    {
+        SetForegroundWindow(hwnd);
+        SetWindowPos(hwnd, HWND_TOP, 0, 0, 0, 0, 
+            SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+    }
+
+    void NativeWindow::FlashWindow()
+    {
+        FLASHWINFO flashInfo;
+        flashInfo.cbSize = sizeof(FLASHWINFO);
+        flashInfo.hwnd = hwnd;
+        flashInfo.dwFlags = FLASHW_ALL | FLASHW_TIMERNOFG;
+        flashInfo.uCount = 3;
+        flashInfo.dwTimeout = 0;
+        FlashWindowEx(&flashInfo);
+    }
+
+    void NativeWindow::SetTitle(System::String^ title)
+    {
+        SetWindowText(hwnd, msclr::interop::marshal_as<std::wstring>(title).c_str());
+    }
+
+    void NativeWindow::SetPosition(int x, int y)
+    {
+        SetWindowPos(hwnd, nullptr, x, y, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
+    }
+
+    void NativeWindow::SetSize(int width, int height)
+    {
+        SetWindowPos(hwnd, nullptr, 0, 0, width, height, SWP_NOZORDER | SWP_NOMOVE);
+        dxContext->Resize(width, height);
+    }
+
+    void NativeWindow::SetPositionAndSize(int x, int y, int width, int height)
+    {
+        SetWindowPos(hwnd, nullptr, x, y, width, height, SWP_NOZORDER);
+        dxContext->Resize(width, height);
+    }
+
+    void NativeWindow::SetOpacity(float opacity)
+    {
+        opacity = std::min(std::max(opacity, 0.0f), 1.0f);
+    
+        BYTE alpha = static_cast<BYTE>(opacity * 255);
+        SetLayeredWindowAttributes(hwnd, 0, alpha, LWA_ALPHA);
+    }
+
+    void NativeWindow::Update()
+    {
+        UpdateWindow(hwnd);
+    }
+    
+    WindowRect NativeWindow::Rect::get()
+    {
+        RECT winApiRect;
+        GetWindowRect(hwnd, &winApiRect);
+
+        WindowRect rect;
+        rect.left = winApiRect.left;
+        rect.right = winApiRect.right;
+        rect.top = winApiRect.top;
+        rect.bottom = winApiRect.bottom;
+        
+        rect.x = winApiRect.left;
+        rect.y = winApiRect.top;
+        rect.width = winApiRect.right - rect.left;
+        rect.height = winApiRect.bottom - rect.top;
+        return rect;
+    }
+
+    float NativeWindow::Opacity::get()
+    {
+        BYTE alpha = 0;
+        DWORD flags = 0;
+        if (GetLayeredWindowAttributes(hwnd, nullptr, &alpha, &flags) && 
+            (flags & LWA_ALPHA))
+        {
+            return static_cast<float>(alpha) / 255.0f;
+        }
+        return 1.0f; // Полностью непрозрачное по умолчанию
+    }
+
+    bool NativeWindow::IsMinimized::get()
+    {
+        return IsIconic(hwnd) != FALSE;
+    }
+
+    bool NativeWindow::IsMaximized::get()
+    {
+        return IsZoomed(hwnd) != FALSE;
     }
 
     void NativeWindow::HandleResize(int width, int height)
