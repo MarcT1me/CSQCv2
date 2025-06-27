@@ -5,9 +5,12 @@
 
 namespace MirageAPI::DirectX
 {
-    DX12WindowContext::DX12WindowContext(HWND hwnd, int width, int height,
-                                         DX12WindowContextConfig^ config)
-        : m_width(width), m_height(height)
+    DX12WindowContext::DX12WindowContext(
+        HWND hwnd,
+        int width, int height,
+        DX12WindowContextConfig^ config
+    ) : m_width(width),
+        m_height(height)
     {
         // 1. Создание фабрики DXGI
         IDXGIFactory4* factory = nullptr;
@@ -143,13 +146,13 @@ namespace MirageAPI::DirectX
             nullptr,
             IID_PPV_ARGS(&commandList)
         );
-        m_commandList = commandList;
-
         if (FAILED(hr))
         {
             Cleanup();
             throw gcnew System::Exception("CreateCommandList failed: " + hr);
         }
+        m_commandList = commandList;
+        m_windowCommandList = gcnew DX12WindowCommandList(m_commandList, m_commandAllocator);;
         m_commandList->Close();
 
         // 7. Создание fence
@@ -180,29 +183,84 @@ namespace MirageAPI::DirectX
 
     DX12WindowContext::~DX12WindowContext()
     {
-        Cleanup();
+        this->!DX12WindowContext();
+        System::GC::SuppressFinalize(this);
+    }
+
+    DX12WindowContext::!DX12WindowContext()
+    {
+        if (!disposed)
+        {
+            Cleanup();
+            disposed = true;
+        }
     }
 
     void DX12WindowContext::Cleanup()
     {
-        const UINT64 fence = m_fenceValue;
-        DX12Context::GetCommandQueue()->Signal(m_fence, fence);
-        m_fenceValue++;
+        if (disposed) return;
 
-        if (m_fence->GetCompletedValue() < fence)
+        const UINT64 fence = m_fenceValue;
+        if (m_fence && DX12Context::GetCommandQueue())
         {
-            m_fence->SetEventOnCompletion(fence, m_fenceEvent);
-            WaitForSingleObject(m_fenceEvent, INFINITE);
+            DX12Context::GetCommandQueue()->Signal(m_fence, fence);
+            m_fenceValue++;
+
+            if (m_fence->GetCompletedValue() < fence && m_fenceEvent)
+            {
+                m_fence->SetEventOnCompletion(fence, m_fenceEvent);
+                WaitForSingleObject(m_fenceEvent, INFINITE);
+            }
         }
 
-        if (m_renderTarget0) m_renderTarget0->Release();
-        if (m_renderTarget1) m_renderTarget1->Release();
-        if (m_swapChain) m_swapChain->Release();
-        if (m_commandAllocator) m_commandAllocator->Release();
-        if (m_commandList) m_commandList->Release();
-        if (m_rtvHeap) m_rtvHeap->Release();
-        if (m_fence) m_fence->Release();
-        CloseHandle(m_fenceEvent);
+        if (m_renderTarget0)
+        {
+            m_renderTarget0->Release();
+            m_renderTarget0 = nullptr;
+        }
+        if (m_renderTarget1)
+        {
+            m_renderTarget1->Release();
+            m_renderTarget1 = nullptr;
+        }
+
+
+        if (m_swapChain)
+        {
+            m_swapChain->Release();
+            m_swapChain = nullptr;
+        }
+        if (m_commandAllocator)
+        {
+            m_commandAllocator->Release();
+            m_commandAllocator = nullptr;
+        }
+        if (m_commandList)
+        {
+            m_commandList->Release();
+            m_commandList = nullptr;
+        }
+        if (m_rtvHeap)
+        {
+            m_rtvHeap->Release();
+            m_rtvHeap = nullptr;
+        }
+        if (m_fence)
+        {
+            m_fence->Release();
+            m_fence = nullptr;
+        }
+
+
+        if (m_fenceEvent && m_fenceEvent != INVALID_HANDLE_VALUE)
+        {
+            CloseHandle(m_fenceEvent);
+            m_fenceEvent = INVALID_HANDLE_VALUE;
+        }
+
+        m_windowCommandList = nullptr;
+
+        disposed = true;
     }
 
     void DX12WindowContext::Resize(int width, int height)

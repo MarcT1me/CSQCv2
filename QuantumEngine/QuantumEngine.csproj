@@ -34,12 +34,18 @@
 
     <ItemGroup>
         <Folder Include="Asset\"/>
+        <Folder Include="EngineData\Assets\" />
     </ItemGroup>
-
 
     <ItemGroup>
         <ProjectReference Include="..\Natives\MirageAPI\MirageAPI.vcxproj"/>
         <ProjectReference Include="..\EngineCore\EngineCore.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Include="EngineData\**\*">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
     </ItemGroup>
 
 </Project>

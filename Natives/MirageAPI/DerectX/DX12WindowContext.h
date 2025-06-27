@@ -1,6 +1,8 @@
 ﻿#pragma once
 
+#include "DX12CommandList.h"
 #include "DX12ContextConfig.h"
+#include "DX12WindowCommandList.h"
 
 namespace MirageAPI::DirectX
 {
@@ -23,6 +25,9 @@ namespace MirageAPI::DirectX
         SIZE_T m_rtvHandle0;
         SIZE_T m_rtvHandle1;
         UINT m_rtvDescriptorSize;
+        
+        bool disposed = false;
+        DX12WindowCommandList^ m_windowCommandList;
 
         int m_frameIndex = 0;
         int m_width;
@@ -53,6 +58,7 @@ namespace MirageAPI::DirectX
         DX12WindowContext(HWND hwnd, int width, int height,
                           DX12WindowContextConfig^ config);
         ~DX12WindowContext();
+        !DX12WindowContext();
 
         void Cleanup();
 
@@ -61,6 +67,14 @@ namespace MirageAPI::DirectX
         void EndFrame();
         void Present();
         void Clear(float r, float g, float b, float a);
+        
+        property ID3D12GraphicsCommandList* NativeCommandList {
+            ID3D12GraphicsCommandList* get() { return m_commandList; }
+        }
+        
+        property DX12WindowCommandList^ CommandList { 
+            DX12WindowCommandList^ get() { return m_windowCommandList; } 
+        }
 
         property int VSync
         {

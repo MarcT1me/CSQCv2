@@ -14,15 +14,8 @@ public class QEngineCore(Assembly? appLibAssembly) : EngineCore(appLibAssembly)
     {
         With.Handle(new Catch("Main EngineCore Catch"), _ =>
         {
-            QuantumTracer.HandleAssembly(
-                [
-                    Assembly.GetExecutingAssembly()
-                ]
-            );
-
+            QuantumTracer.HandleAssembly([Assembly.GetExecutingAssembly()]);
             var core = new QEngineCore(appLibAssembly);
-
-            // initialize core
             core.InitializeCore();
         });
     }
@@ -43,7 +36,6 @@ public class QEngineCore(Assembly? appLibAssembly) : EngineCore(appLibAssembly)
     {
         Logger.Info("Deinitialize MirageAPI::DirectX12");
         MirageAPI.DirectX.DX12Context.Deinitialize();
-        
         Logger.Separator();
         Logger.Success("QuantumEngine uninitialized");
     }

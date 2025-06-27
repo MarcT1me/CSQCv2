@@ -106,7 +106,16 @@
     </ItemDefinitionGroup>
     <!--  Headers-->
     <ItemGroup>
+        <ClInclude Include="DerectX\DX12Buffer.h" />
+        <ClInclude Include="DerectX\DX12CommandList.h" />
         <ClInclude Include="DerectX\DX12Context.h" />
+        <ClInclude Include="DerectX\DX12Enums.h" />
+        <ClInclude Include="DerectX\DX12Helpers.h" />
+        <ClInclude Include="DerectX\DX12PipelineState.h" />
+        <ClInclude Include="DerectX\DX12Shader.h" />
+        <ClInclude Include="DerectX\DX12Texture.h" />
+        <ClInclude Include="DerectX\DX12VertexBuffer.h" />
+        <ClInclude Include="DerectX\DX12WindowCommandList.h" />
         <ClInclude Include="DerectX\DX12WindowContext.h" />
         <ClInclude Include="DerectX\DX12ContextConfig.h" />
         <ClInclude Include="Events\NativeEventManager.h"/>
@@ -120,7 +129,15 @@
     <!--  Source-->
     <ItemGroup>
         <ClCompile Include="AssemblyInfo.cpp"/>
+        <ClCompile Include="DerectX\DX12Buffer.cpp" />
+        <ClCompile Include="DerectX\DX12CommandList.cpp" />
         <ClCompile Include="DerectX\DX12Context.cpp" />
+        <ClCompile Include="DerectX\DX12Helpers.cpp" />
+        <ClCompile Include="DerectX\DX12PipelineState.cpp" />
+        <ClCompile Include="DerectX\DX12Shader.cpp" />
+        <ClCompile Include="DerectX\DX12Texture.cpp" />
+        <ClCompile Include="DerectX\DX12VertexBuffer.cpp" />
+        <ClCompile Include="DerectX\DX12WindowCommandList.cpp" />
         <ClCompile Include="DerectX\DX12WindowContext.cpp" />
         <ClCompile Include="Events\NativeEventProc.cpp" />
         <ClCompile Include="pch.cpp">

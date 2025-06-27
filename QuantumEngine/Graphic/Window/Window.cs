@@ -187,7 +187,7 @@ public class Window
         Present();
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         Registries.WindowRegistry.Pop(Handle);
 

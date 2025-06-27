@@ -17,7 +17,15 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\Natives\MirageAPI\MirageAPI.vcxproj"/>
         <ProjectReference Include="..\QuantumEngine\QuantumEngine.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Remove="Assets\**\*.*"/>
+        <Content Include="Assets\**\*.*">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
     </ItemGroup>
 
 </Project>

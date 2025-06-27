@@ -93,7 +93,7 @@ namespace MirageAPI::Events
                     int button;
                     int action;
                     matchMouseBtnMsg(msg, &button, &action);
-                    
+
                     NativeEventManager::MouseButtonCallback(
                         window,
                         button,
@@ -126,7 +126,7 @@ namespace MirageAPI::Events
                 {
                     int width = LOWORD(lParam);
                     int height = HIWORD(lParam);
-    
+
                     window->HandleResize(width, height);
                     NativeEventManager::WindowResizeCallback(window, width, height);
                     break;
