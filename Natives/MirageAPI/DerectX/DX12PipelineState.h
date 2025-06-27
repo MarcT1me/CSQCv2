@@ -1,4 +1,5 @@
 ﻿#pragma once
+
 #include "DX12ContextConfig.h"
 #include "DX12Shader.h"
 

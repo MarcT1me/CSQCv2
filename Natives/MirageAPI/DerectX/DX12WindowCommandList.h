@@ -1,4 +1,5 @@
 ﻿#pragma once
+
 #include "DX12CommandList.h"
 
 namespace MirageAPI::DirectX

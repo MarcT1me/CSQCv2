@@ -1,7 +1,5 @@
 ﻿#pragma once
 
-#include <Windows.h>
-
 #include "NativeWindowEnums.h"
 #include "../Events/NativeEvents.h"
 #include "../DerectX/DX12WindowContext.h"
@@ -16,6 +14,10 @@ namespace MirageAPI::Window
         System::Runtime::InteropServices::GCHandle gch;
 
         DirectX::DX12WindowContext^ dxContext;
+        
+        bool isFullscreen;
+        unsigned long savedStyle;
+        WindowRect savedRect;
 
     internal:
         // rise methods (overhead...)
@@ -72,6 +74,7 @@ namespace MirageAPI::Window
         void Maximize();
         void Minimize();
         void Restore();
+        void ToggleFullscreen();
 
         void BringToFront();
         void FlashWindow();

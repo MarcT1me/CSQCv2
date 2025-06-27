@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include <Windows.h>
+
 namespace MirageAPI::Window
 {
     public enum class WindowType : unsigned long

@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "DX12CommandList.h"
 #include "DX12ContextConfig.h"
 #include "DX12WindowCommandList.h"
 

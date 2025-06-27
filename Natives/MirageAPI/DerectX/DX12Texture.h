@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "DX12Context.h"
 #include "DX12CommandList.h"
+#include "DX12Enums.h"
 
 namespace std
 {
@@ -10,21 +10,6 @@ namespace std
 
 namespace MirageAPI::DirectX
 {
-    public enum class DX12TextureType
-    {
-        Texture2D,
-        RenderTarget,
-        DepthStencil,
-        CubeMap
-    };
-
-    public enum class DX12TextureFormat
-    {
-        RGBA8_UNORM = DXGI_FORMAT_R8G8B8A8_UNORM,
-        RGBA16_FLOAT = DXGI_FORMAT_R16G16B16A16_FLOAT,
-        D32_FLOAT = DXGI_FORMAT_D32_FLOAT,
-    };
-
     public ref class DX12Texture
     {
     internal:

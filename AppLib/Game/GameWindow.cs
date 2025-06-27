@@ -1,7 +1,9 @@
 ﻿using System.Runtime.InteropServices;
 using Engine.Asset;
+using Engine.Events.QuantumEvents;
 using OpenTK.Mathematics;
 using Engine.Graphic.Window;
+using Engine.Logging;
 using MirageAPI.DirectX;
 
 namespace AppLib.Game;
@@ -91,6 +93,16 @@ public class GameWindow : Window
         Marshal.FreeHGlobal(ptr);
         
         _vertexBuffer.UploadData(vertexData);
+    }
+
+    public override void HandleEvent(QuantumEvent e)
+    {
+        base.HandleEvent(e);
+        if (e is KeyEvent {Type: EventType.KeyDown, Key: 122})
+        {
+            Logger.Debug("ToggleFullscreen");
+            NativeWindow.ToggleFullscreen();
+        }
     }
 
     public override void Render()

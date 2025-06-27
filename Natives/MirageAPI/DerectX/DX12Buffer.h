@@ -1,19 +1,10 @@
 ﻿#pragma once
 
 #include "DX12Context.h"
+#include "DX12Enums.h"
 
 namespace MirageAPI::DirectX
 {
-    public enum class DX12BufferType
-    {
-        Vertex,
-        Index,
-        Constant,
-        Structured,
-        Readback,
-        Upload
-    };
-
     public ref class DX12Buffer
     {
     internal:

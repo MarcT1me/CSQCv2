@@ -13,4 +13,8 @@
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
 
+#include "Window/NativeWindowEnums.h"
+#include "Events/NativeEvents.h"
+#include "DerectX/DX12Enums.h"
+
 #endif //PCH_H

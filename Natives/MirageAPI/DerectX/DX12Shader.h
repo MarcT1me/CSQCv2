@@ -1,19 +1,10 @@
 ﻿#pragma once
 
 #include <d3d12.h>
+#include "DX12Enums.h"
 
 namespace MirageAPI::DirectX
 {
-    public enum class DX12ShaderType
-    {
-        Vertex,
-        Pixel,
-        Geometry,
-        Compute,
-        Domain,
-        Hull
-    };
-    
     public ref class DX12Shader
     {
         array<System::Byte>^ m_bytecode;

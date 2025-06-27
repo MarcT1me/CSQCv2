@@ -75,6 +75,10 @@ namespace MirageAPI::Window
         SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(native_ptr));
 
         dxContext = gcnew DirectX::DX12WindowContext(hwnd, rect->width, rect->height, dxConfig);
+
+        isFullscreen = false;
+        savedStyle = 0;
+        savedRect = *rect;
     }
 
     NativeWindow::~NativeWindow()
@@ -106,7 +110,7 @@ namespace MirageAPI::Window
     {
         ShowWindow(hwnd, SW_SHOW);
     }
-    
+
     void NativeWindow::Hide()
     {
         ShowWindow(hwnd, SW_HIDE);
@@ -127,11 +131,60 @@ namespace MirageAPI::Window
         ShowWindow(hwnd, SW_RESTORE);
     }
 
+    void NativeWindow::ToggleFullscreen()
+    {
+        if (!isFullscreen)
+        {
+            savedStyle = GetWindowLongPtr(hwnd, GWL_STYLE);
+            savedRect = Rect;
+
+            HMONITOR hMonitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
+            MONITORINFO monitorInfo;
+            monitorInfo.cbSize = sizeof(MONITORINFO);
+            GetMonitorInfo(hMonitor, &monitorInfo);
+            RECT screenRect = monitorInfo.rcMonitor;
+
+            SetWindowLongPtr(
+                hwnd,
+                GWL_STYLE,
+                savedStyle & ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU)
+            );
+            
+            SetWindowPos(
+                hwnd,
+                HWND_TOP,
+                screenRect.left,
+                screenRect.top,
+                screenRect.right - screenRect.left,
+                screenRect.bottom - screenRect.top,
+                SWP_FRAMECHANGED | SWP_SHOWWINDOW
+            );
+
+            isFullscreen = true;
+        }
+        else
+        {
+            SetWindowLongPtr(hwnd, GWL_STYLE, savedStyle);
+
+            SetWindowPos(
+                hwnd,
+                nullptr,
+                savedRect.x,
+                savedRect.y,
+                savedRect.width,
+                savedRect.height,
+                SWP_FRAMECHANGED | SWP_NOZORDER | SWP_SHOWWINDOW
+            );
+
+            isFullscreen = false;
+        }
+    }
+
     void NativeWindow::BringToFront()
     {
         SetForegroundWindow(hwnd);
-        SetWindowPos(hwnd, HWND_TOP, 0, 0, 0, 0, 
-            SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+        SetWindowPos(hwnd, HWND_TOP, 0, 0, 0, 0,
+                     SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
     }
 
     void NativeWindow::FlashWindow()
@@ -170,7 +223,7 @@ namespace MirageAPI::Window
     void NativeWindow::SetOpacity(float opacity)
     {
         opacity = std::min(std::max(opacity, 0.0f), 1.0f);
-    
+
         BYTE alpha = static_cast<BYTE>(opacity * 255);
         SetLayeredWindowAttributes(hwnd, 0, alpha, LWA_ALPHA);
     }
@@ -179,7 +232,7 @@ namespace MirageAPI::Window
     {
         UpdateWindow(hwnd);
     }
-    
+
     WindowRect NativeWindow::Rect::get()
     {
         RECT winApiRect;
@@ -190,7 +243,7 @@ namespace MirageAPI::Window
         rect.right = winApiRect.right;
         rect.top = winApiRect.top;
         rect.bottom = winApiRect.bottom;
-        
+
         rect.x = winApiRect.left;
         rect.y = winApiRect.top;
         rect.width = winApiRect.right - rect.left;
@@ -202,7 +255,7 @@ namespace MirageAPI::Window
     {
         BYTE alpha = 0;
         DWORD flags = 0;
-        if (GetLayeredWindowAttributes(hwnd, nullptr, &alpha, &flags) && 
+        if (GetLayeredWindowAttributes(hwnd, nullptr, &alpha, &flags) &&
             (flags & LWA_ALPHA))
         {
             return static_cast<float>(alpha) / 255.0f;
