@@ -2,7 +2,6 @@
 #include "DX12Context.h"
 
 #include <d3d12.h>
-#include <dxgi1_4.h>
 
 namespace MirageAPI::DirectX
 {
@@ -14,6 +13,10 @@ namespace MirageAPI::DirectX
             D3D_FEATURE_LEVEL_11_0,
             IID_PPV_ARGS(&device)
         );
+        if (hr == DXGI_ERROR_UNSUPPORTED)
+        {
+            throw gcnew System::Exception("DirectX 12 не поддерживается на этой системе");
+        }
         if (FAILED(hr))
         {
             throw gcnew System::Exception("Failed to create D3D12 Device.");
@@ -36,13 +39,22 @@ namespace MirageAPI::DirectX
             throw gcnew System::Exception("Failed to create D3D12 CommandQueue.");
         }
         s_commandQueue = commandQueue;
+
+        HRESULT comHr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+        if (FAILED(comHr))
+        {
+            throw gcnew System::Exception("COM initialization failed: " + hr);
+        }
+        s_comInitialized = comHr == S_OK;
     }
 
     void DX12Context::Deinitialize()
     {
         if (s_commandQueue) s_commandQueue->Release();
         if (s_device) s_device->Release();
+        if (s_comInitialized) CoUninitialize();
         s_commandQueue = nullptr;
         s_device = nullptr;
+        s_comInitialized = false;
     }
 }

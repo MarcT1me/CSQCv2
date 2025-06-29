@@ -16,9 +16,11 @@
         <ProjectGuid>{69687DF9-971E-491C-B8FB-016ECC241606}</ProjectGuid>
         <Keyword>NetCoreCProj</Keyword>
         <RootNamespace>MirageAPI</RootNamespace>
-        <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-        <TargetFramework>net9.0</TargetFramework>
-        <WindowsTargetPlatformMinVersion>10.0</WindowsTargetPlatformMinVersion>
+        <WindowsTargetPlatformVersion>10.0.22621.0</WindowsTargetPlatformVersion>
+        <WindowsTargetPlatformMinVersion>10.0.22621.0</WindowsTargetPlatformMinVersion>
+        <TargetFramework>net9.0-windows10.0.22621.0</TargetFramework>
+        <CharacterSet>Unicode</CharacterSet>
+        <Platform>x64</Platform>
     </PropertyGroup>
     <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props"/>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -26,14 +28,12 @@
         <UseDebugLibraries>true</UseDebugLibraries>
         <PlatformToolset>v143</PlatformToolset>
         <CLRSupport>NetCore</CLRSupport>
-        <CharacterSet>Unicode</CharacterSet>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
         <ConfigurationType>DynamicLibrary</ConfigurationType>
         <UseDebugLibraries>false</UseDebugLibraries>
         <PlatformToolset>v143</PlatformToolset>
         <CLRSupport>NetCore</CLRSupport>
-        <CharacterSet>Unicode</CharacterSet>
     </PropertyGroup>
     <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props"/>
     <ImportGroup Label="ExtensionSettings">
@@ -64,7 +64,7 @@
             <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
             <SupportJustMyCode>false</SupportJustMyCode>
             <CompileAsManaged>NetCore</CompileAsManaged>
-            <LanguageStandard>stdcpp17</LanguageStandard>
+            <LanguageStandard>stdcpp20</LanguageStandard>
         </ClCompile>
         <Link>
             <AdditionalDependencies>
@@ -93,7 +93,7 @@
             <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
             <SupportJustMyCode>false</SupportJustMyCode>
             <CompileAsManaged>NetCore</CompileAsManaged>
-            <LanguageStandard>stdcpp17</LanguageStandard>
+            <LanguageStandard>stdcpp20</LanguageStandard>
         </ClCompile>
         <Link>
             <AdditionalDependencies>
@@ -106,40 +106,118 @@
     </ItemDefinitionGroup>
     <!--  Headers-->
     <ItemGroup>
-        <ClInclude Include="DerectX\DX12Buffer.h" />
-        <ClInclude Include="DerectX\DX12CommandList.h" />
-        <ClInclude Include="DerectX\DX12Context.h" />
-        <ClInclude Include="DerectX\DX12Enums.h" />
-        <ClInclude Include="DerectX\DX12Helpers.h" />
-        <ClInclude Include="DerectX\DX12PipelineState.h" />
-        <ClInclude Include="DerectX\DX12Shader.h" />
-        <ClInclude Include="DerectX\DX12Texture.h" />
-        <ClInclude Include="DerectX\DX12VertexBuffer.h" />
-        <ClInclude Include="DerectX\DX12WindowCommandList.h" />
-        <ClInclude Include="DerectX\DX12WindowContext.h" />
-        <ClInclude Include="DerectX\DX12ContextConfig.h" />
+        <ClInclude Include="DerectX\Buffer\DX12Buffer.h"/>
+        <ClInclude Include="DerectX\Buffer\DX12FrameBuffer.h"/>
+        <ClInclude Include="DerectX\Buffer\DX12Texture.h" />
+        <ClInclude Include="DerectX\Buffer\DX12VertexBuffer.h"/>
+        <ClInclude Include="DerectX\CommandList\DX12CommandList.h"/>
+        <ClInclude Include="DerectX\CommandList\DX12WindowCommandList.h"/>
+        <ClInclude Include="DerectX\DX12Context.h"/>
+        <ClInclude Include="DerectX\DX12Enums.h"/>
+        <ClInclude Include="DerectX\DX12Helpers.h"/>
+        <ClInclude Include="DerectX\DX12PipelineState.h"/>
+        <ClInclude Include="DerectX\DX12WindowContext.h"/>
+        <ClInclude Include="DerectX\DX12ContextConfig.h"/>
+        <ClInclude Include="DerectX\Shader\DX12Shader.h"/>
+        <ClInclude Include="DerectX\Shader\DX12ShaderCompiler.h"/>
         <ClInclude Include="Events\NativeEventManager.h"/>
-        <ClInclude Include="Events\NativeEventProc.h" />
+        <ClInclude Include="Events\NativeEventProc.h"/>
         <ClInclude Include="Events\NativeEvents.h"/>
         <ClInclude Include="Window\NativeWindow.h"/>
         <ClInclude Include="pch.h"/>
         <ClInclude Include="Resource.h"/>
-        <ClInclude Include="Window\NativeWindowEnums.h" />
+        <ClInclude Include="Window\NativeWindowEnums.h"/>
     </ItemGroup>
     <!--  Source-->
     <ItemGroup>
         <ClCompile Include="AssemblyInfo.cpp"/>
-        <ClCompile Include="DerectX\DX12Buffer.cpp" />
-        <ClCompile Include="DerectX\DX12CommandList.cpp" />
-        <ClCompile Include="DerectX\DX12Context.cpp" />
-        <ClCompile Include="DerectX\DX12Helpers.cpp" />
-        <ClCompile Include="DerectX\DX12PipelineState.cpp" />
-        <ClCompile Include="DerectX\DX12Shader.cpp" />
-        <ClCompile Include="DerectX\DX12Texture.cpp" />
-        <ClCompile Include="DerectX\DX12VertexBuffer.cpp" />
-        <ClCompile Include="DerectX\DX12WindowCommandList.cpp" />
-        <ClCompile Include="DerectX\DX12WindowContext.cpp" />
-        <ClCompile Include="Events\NativeEventProc.cpp" />
+        <ClCompile Include="DerectX\Buffer\DX12Buffer.cpp"/>
+        <ClCompile Include="DerectX\Buffer\DX12FrameBuffer.cpp"/>
+        <ClCompile Include="DerectX\Buffer\DX12Texture.cpp">
+          <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>
+          <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+          <Optimization>Disabled</Optimization>
+          <SupportJustMyCode>false</SupportJustMyCode>
+          <AssemblerOutput>NoListing</AssemblerOutput>
+          <AssemblerListingLocation>Debug\</AssemblerListingLocation>
+          <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
+          <BrowseInformation>false</BrowseInformation>
+          <BrowseInformationFile>Debug\</BrowseInformationFile>
+          <CompileAs>Default</CompileAs>
+          <ConformanceMode>Default</ConformanceMode>
+          <DiagnosticsFormat>Column</DiagnosticsFormat>
+          <DisableLanguageExtensions>false</DisableLanguageExtensions>
+          <ErrorReporting>Prompt</ErrorReporting>
+          <ExpandAttributedSource>false</ExpandAttributedSource>
+          <ExceptionHandling>Async</ExceptionHandling>
+          <EnableASAN>false</EnableASAN>
+          <EnableFuzzer>false</EnableFuzzer>
+          <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
+          <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+          <FloatingPointModel>Precise</FloatingPointModel>
+          <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
+          <GenerateModuleDependencies>false</GenerateModuleDependencies>
+          <GenerateSourceDependencies>false</GenerateSourceDependencies>
+          <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
+          <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+          <IntrinsicFunctions>false</IntrinsicFunctions>
+          <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
+          <LanguageStandard>stdcpp20</LanguageStandard>
+          <LanguageStandard_C>Default</LanguageStandard_C>
+          <ModuleDependenciesFile>Debug\</ModuleDependenciesFile>
+          <ModuleOutputFile>Debug\</ModuleOutputFile>
+          <OmitDefaultLibName>false</OmitDefaultLibName>
+          <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+          <WholeProgramOptimization>false</WholeProgramOptimization>
+          <ObjectFileName>Debug\</ObjectFileName>
+          <ProgramDataBaseFileName>Debug\vc143.pdb</ProgramDataBaseFileName>
+          <PrecompiledHeader>Use</PrecompiledHeader>
+          <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+          <PrecompiledHeaderOutputFile>Debug\MirageAPI.pch</PrecompiledHeaderOutputFile>
+          <PreprocessToFile>false</PreprocessToFile>
+          <PreprocessKeepComments>false</PreprocessKeepComments>
+          <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
+          <RemoveUnreferencedCodeData>true</RemoveUnreferencedCodeData>
+          <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+          <ShowIncludes>false</ShowIncludes>
+          <SourceDependenciesFile>Debug\</SourceDependenciesFile>
+          <SuppressStartupBanner>true</SuppressStartupBanner>
+          <BufferSecurityCheck>true</BufferSecurityCheck>
+          <SmallerTypeCheck>false</SmallerTypeCheck>
+          <SpectreMitigation>false</SpectreMitigation>
+          <StructMemberAlignment>Default</StructMemberAlignment>
+          <TrackerLogDirectory>Debug\MirageAPI.tlog\</TrackerLogDirectory>
+          <TranslateIncludes>false</TranslateIncludes>
+          <MinimalRebuildFromTracking>true</MinimalRebuildFromTracking>
+          <TreatWarningAsError>false</TreatWarningAsError>
+          <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+          <UseFullPaths>true</UseFullPaths>
+          <WarningLevel>Level3</WarningLevel>
+          <XMLDocumentationFileName>Debug\</XMLDocumentationFileName>
+          <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+          <IntelJCCErratum>false</IntelJCCErratum>
+          <BuildStlModules>false</BuildStlModules>
+          <TreatAngleIncludeAsExternal>false</TreatAngleIncludeAsExternal>
+          <ExternalWarningLevel>InheritWarningLevel</ExternalWarningLevel>
+          <TreatExternalTemplatesAsInternal>true</TreatExternalTemplatesAsInternal>
+          <DisableAnalyzeExternal>false</DisableAnalyzeExternal>
+          <PreprocessorDefinitions>_DEBUG;_WINDLL;_UNICODE;UNICODE;</PreprocessorDefinitions>
+          <CompileAsManaged>NetCore</CompileAsManaged>
+          <AdditionalIncludeDirectories>
+                
+            </AdditionalIncludeDirectories>
+          <LinkCompiled>true</LinkCompiled>
+        </ClCompile>
+        <ClCompile Include="DerectX\Buffer\DX12VertexBuffer.cpp"/>
+        <ClCompile Include="DerectX\CommandList\DX12CommandList.cpp"/>
+        <ClCompile Include="DerectX\CommandList\DX12WindowCommandList.cpp"/>
+        <ClCompile Include="DerectX\DX12Context.cpp"/>
+        <ClCompile Include="DerectX\DX12Helpers.cpp"/>
+        <ClCompile Include="DerectX\DX12PipelineState.cpp"/>
+        <ClCompile Include="DerectX\DX12WindowContext.cpp"/>
+        <ClCompile Include="DerectX\Shader\DX12Shader.cpp"/>
+        <ClCompile Include="DerectX\Shader\DX12ShaderCompiler.cpp"/>
+        <ClCompile Include="Events\NativeEventProc.cpp"/>
         <ClCompile Include="pch.cpp">
             <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
             <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>

@@ -85,6 +85,7 @@ namespace MirageAPI::Window
         void SetPositionAndSize(int x, int y, int width, int height);
         void SetOpacity(float opacity);
 
+        void HandleResize(int width, int height);
         void Update();
 
         property WindowRect Rect { WindowRect get(); }
@@ -96,7 +97,6 @@ namespace MirageAPI::Window
         property System::IntPtr Handle { System::IntPtr get() { return System::IntPtr(hwnd); } }
         property DirectX::DX12WindowContext^ DXContext { DirectX::DX12WindowContext^ get() { return dxContext; } }
 
-        void HandleResize(int width, int height);
         void SetVSync(bool enabled);
         void Clear(float r, float g, float b, float a);
 

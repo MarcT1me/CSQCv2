@@ -7,8 +7,15 @@ namespace MirageAPI::DirectX
     public ref class DX12VertexBuffer : public DX12Buffer
     {
     public:
-        DX12VertexBuffer(UINT size, UINT stride)
-            : DX12Buffer(size, stride, DX12BufferType::Vertex)
+        DX12VertexBuffer(
+            UINT size,
+            UINT stride
+        ) : DX12Buffer(
+            size,
+            1,
+            stride,
+            DX12BufferType::Vertex
+        )
         {
         }
 

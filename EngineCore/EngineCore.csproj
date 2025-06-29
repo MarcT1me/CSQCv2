@@ -1,26 +1,27 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
+        <TargetFramework>net9.0-windows10.0.22621.0</TargetFramework>
         <PlatformTarget>x64</PlatformTarget>
 
-        <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
         <RootNamespace>Engine</RootNamespace>
 
+        <OutputPath>bin\$(Configuration)</OutputPath>
+
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
         <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
 
-        <OutputPath>bin\$(Configuration)</OutputPath>
-
-        <Platforms>x64</Platforms>
         <Configurations>Debug;Release</Configurations>
+        <Platforms>x64</Platforms>
+        <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     </PropertyGroup>
 
     <ItemGroup>
-        <Folder Include="EngineData\Assets\" />
+        <Folder Include="EngineData\Assets\"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -29,7 +30,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Content Include="EngineData\**\*">
+        <Content Include="EngineData\**\*.*">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
     </ItemGroup>

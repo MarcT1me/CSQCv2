@@ -1,4 +1,6 @@
-﻿using MirageAPI.DirectX;
+﻿using Engine.Configuration;
+using Engine.Events.QuantumEvents.Window;
+using MirageAPI.DirectX;
 using OpenTK.Mathematics;
 // engine sub-systems
 using MirageAPI.Window;
@@ -54,7 +56,7 @@ public class Window
 
     public virtual NativeWindow PrepareInstance()
     {
-        return new NativeWindow(
+        var win = new NativeWindow(
             new WindowRect
             {
                 x = MetaData.WinData.Position.X,
@@ -68,13 +70,28 @@ public class Window
             WindowType.Overlapped,
             CreateDefaultWindowContextConfig()
         );
+        return win;
     }
 
     protected DX12WindowContextConfig CreateDefaultWindowContextConfig()
     {
         var windowContextConfig = DX12WindowContextConfig.Default;
+        windowContextConfig.EnableDebugLayer = GlData.EnableDebugLayer && BaseConfig.DebugMode;
+        windowContextConfig.AllowTearing = GlData.AllowTearing && BaseConfig.DebugMode;
+        
         windowContextConfig.BufferCount = GlData.MaxFramesInFlight;
-        windowContextConfig.EnableDebugLayer = GlData.EnableDebugLayer;
+        windowContextConfig.SwapEffect = GlData.SwapEffect;
+        windowContextConfig.SampleCount = GlData.NumberOfSamples;
+        windowContextConfig.SwapQuality = GlData.SwapQuality;
+
+        windowContextConfig.viewportX = MetaData.GlData.Viewport.X;
+        windowContextConfig.viewportY = MetaData.GlData.Viewport.Y;
+        windowContextConfig.viewportWidth = MetaData.GlData.Viewport.Z;
+        windowContextConfig.viewportHeight = MetaData.GlData.Viewport.W;
+
+        windowContextConfig.viewportDepthX = MetaData.GlData.ViewportDepth.X;
+        windowContextConfig.viewportDepthY = MetaData.GlData.ViewportDepth.Y;
+
         return windowContextConfig;
     }
 
@@ -135,6 +152,24 @@ public class Window
         NativeWindow.SetVSync(enabled);
     }
 
+    protected void UpdateViewport()
+    {
+        NativeWindow.DXContext.SetViewport(
+            MetaData.GlData.Viewport.X,
+            MetaData.GlData.Viewport.Y,
+            MetaData.GlData.Viewport.Z,
+            MetaData.GlData.Viewport.W
+        );
+    }
+
+    protected void UpdateViewportDepth()
+    {
+        NativeWindow.DXContext.SetViewportDepth(
+            MetaData.GlData.ViewportDepth.X,
+            MetaData.GlData.ViewportDepth.Y
+        );
+    }
+
     protected void BeginFrame() => NativeWindow.BeginFrame();
 
     protected void Clear(Vector4 clearColor) =>
@@ -157,6 +192,16 @@ public class Window
             ActiveWindow = this;
         else if (e.Type == EventType.WindowFocusLost && ActiveWindow == this)
             ActiveWindow = null;
+        else if (e is WinResizeEvent winResize)
+            HandleResize(winResize.Size);
+    }
+
+    protected virtual void HandleResize(Vector2i size)
+    {
+        MetaData.GlData.Viewport.Z = size.X;
+        MetaData.GlData.Viewport.W = size.Y;
+        UpdateSize(size);
+        UpdateViewport();
     }
 
     public virtual void PreUpdate()

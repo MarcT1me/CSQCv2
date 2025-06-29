@@ -3,33 +3,63 @@
 
 #include "DX12WindowContext.h"
 
+#include <iostream>
+#include <ostream>
+
 namespace MirageAPI::DirectX
 {
     DX12WindowContext::DX12WindowContext(
         HWND hwnd,
         int width, int height,
         DX12WindowContextConfig^ config
-    ) : m_width(width),
-        m_height(height)
+    ) : m_bufferCount(config->BufferCount),
+        m_width(width),
+        m_height(height),
+        m_config(config)
     {
-        // 1. Создание фабрики DXGI
+        // Создание фабрики DXGI
         IDXGIFactory4* factory = nullptr;
         UINT factoryFlags = config->EnableDebugLayer ? DXGI_CREATE_FACTORY_DEBUG : 0;
         HRESULT hr = CreateDXGIFactory2(factoryFlags, IID_PPV_ARGS(&factory));
         if (FAILED(hr))
         {
-            throw gcnew System::Exception("CreateDXGIFactory2 failed: " + hr);
+            LPSTR errorText = nullptr;
+            FormatMessageA(
+                FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                nullptr,
+                hr,
+                MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                reinterpret_cast<LPSTR>(&errorText),
+                0,
+                nullptr
+            );
+
+            System::String^ errorMsg;
+            if (errorText != nullptr)
+            {
+                errorMsg = "CreateDXGIFactory2 failed: " + gcnew System::String(errorText);
+                LocalFree(errorText);
+            }
+            else
+            {
+                errorMsg = "CreateDXGIFactory2 failed with error code: " + hr;
+            }
+
+            if (factory) factory->Release();
+            throw gcnew System::Exception(errorMsg);
         }
 
-        // 2. Создание swap chain с учетом настроек
+        // Создание swap chain с учетом настроек
         DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
         swapChainDesc.BufferCount = config->BufferCount;
         swapChainDesc.Width = m_width;
         swapChainDesc.Height = m_height;
         swapChainDesc.Format = static_cast<DXGI_FORMAT>(config->Format);
         swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-        swapChainDesc.SwapEffect = static_cast<DXGI_SWAP_EFFECT>(config->SwapEffect);
+        if (config->SwapEffect != DX12SwapEffect::None)
+            swapChainDesc.SwapEffect = static_cast<DXGI_SWAP_EFFECT>(config->SwapEffect);
         swapChainDesc.SampleDesc.Count = config->SampleCount;
+        swapChainDesc.SampleDesc.Quality = config->SwapQuality;
         swapChainDesc.Flags = config->AllowTearing ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
 
         IDXGISwapChain1* tempSwapChain;
@@ -59,309 +89,255 @@ namespace MirageAPI::DirectX
         }
         m_swapChain = swapChain;
 
-        // 3. Создание RTV heap
-        D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = {};
-        rtvHeapDesc.NumDescriptors = 2;
-        rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-        rtvHeapDesc.Flags = static_cast<D3D12_DESCRIPTOR_HEAP_FLAGS>(config->RTVHeapFlags);
+        // создание буферов кадров
+        CreateFrameBuffers();
 
-        ID3D12DescriptorHeap* rtvHeap;
-        hr = DX12Context::GetDevice()->CreateDescriptorHeap(
-            &rtvHeapDesc,
-            IID_PPV_ARGS(&rtvHeap)
-        );
+        m_windowCommandList = gcnew DX12WindowCommandList();
+        m_windowCommandList->Close();
 
-        if (FAILED(hr))
-        {
-            m_swapChain->Release();
-            throw gcnew System::Exception("CreateDescriptorHeap failed: " + hr);
-        }
-        m_rtvHeap = rtvHeap;
-
-        m_rtvDescriptorSize = DX12Context::GetDevice()->GetDescriptorHandleIncrementSize(
-            D3D12_DESCRIPTOR_HEAP_TYPE_RTV
-        );
-
-        // 4. Создание render targets и RTV
-        D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle(
-            m_rtvHeap->GetCPUDescriptorHandleForHeapStart()
-        );
-
-        // Первый буфер
-        ID3D12Resource* renderTarget0;
-        hr = m_swapChain->GetBuffer(0, IID_PPV_ARGS(&renderTarget0));
-        if (FAILED(hr))
-        {
-            Cleanup();
-            throw gcnew System::Exception("GetBuffer(0) failed: " + hr);
-        }
-        m_renderTarget0 = renderTarget0;
-
-        DX12Context::GetDevice()->CreateRenderTargetView(
-            m_renderTarget0,
-            nullptr,
-            rtvHandle
-        );
-        m_rtvHandle0 = HandleToInt(rtvHandle);
-
-        // Второй буфер
-        rtvHandle.ptr += m_rtvDescriptorSize;
-
-        ID3D12Resource* renderTarget1;
-        hr = m_swapChain->GetBuffer(1, IID_PPV_ARGS(&renderTarget1));
-        if (FAILED(hr))
-        {
-            Cleanup();
-            throw gcnew System::Exception("GetBuffer(1) failed: " + hr);
-        }
-        m_renderTarget1 = renderTarget1;
-
-        DX12Context::GetDevice()->CreateRenderTargetView(
-            m_renderTarget1,
-            nullptr,
-            rtvHandle
-        );
-        m_rtvHandle1 = HandleToInt(rtvHandle);
-
-        // 5. Создание командного аллокатора
-        ID3D12CommandAllocator* commandAllocator;
-        hr = DX12Context::GetDevice()->CreateCommandAllocator(
-            D3D12_COMMAND_LIST_TYPE_DIRECT,
-            IID_PPV_ARGS(&commandAllocator)
-        );
-        m_commandAllocator = commandAllocator;
-
-        if (FAILED(hr))
-        {
-            Cleanup();
-            throw gcnew System::Exception("CreateCommandAllocator failed: " + hr);
-        }
-
-        // 6. Создание командного списка
-        ID3D12GraphicsCommandList* commandList;
-        hr = DX12Context::GetDevice()->CreateCommandList(
-            0,
-            D3D12_COMMAND_LIST_TYPE_DIRECT,
-            m_commandAllocator,
-            nullptr,
-            IID_PPV_ARGS(&commandList)
-        );
-        if (FAILED(hr))
-        {
-            Cleanup();
-            throw gcnew System::Exception("CreateCommandList failed: " + hr);
-        }
-        m_commandList = commandList;
-        m_windowCommandList = gcnew DX12WindowCommandList(m_commandList, m_commandAllocator);;
-        m_commandList->Close();
-
-        // 7. Создание fence
+        // Создание fence
         ID3D12Fence* fence;
         hr = DX12Context::GetDevice()->CreateFence(
-            0,
-            D3D12_FENCE_FLAG_NONE,
-            IID_PPV_ARGS(&fence)
-        );
-
+            0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
         if (FAILED(hr))
         {
-            Cleanup();
             throw gcnew System::Exception("CreateFence failed: " + hr);
         }
         m_fence = fence;
 
-        m_fenceValue = 1;
         m_fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
         if (!m_fenceEvent)
         {
-            Cleanup();
-            throw gcnew System::Exception("CreateEvent failed");
+            throw gcnew System::Exception("Failed to create fence event");
         }
-
-        m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
     }
 
-    DX12WindowContext::~DX12WindowContext()
+    void DX12WindowContext::CreateFrameBuffers()
     {
-        this->!DX12WindowContext();
-        System::GC::SuppressFinalize(this);
+        if (!m_swapChain) return;
+
+        if (m_rtvHeap)
+        {
+            m_rtvHeap->Release();
+            m_rtvHeap = nullptr;
+        }
+
+        // Создаем RTV heap
+        D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = {};
+        rtvHeapDesc.NumDescriptors = m_bufferCount;
+        rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+        rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+
+        ID3D12DescriptorHeap* rtvHeap = nullptr;
+        HRESULT hr = DX12Context::GetDevice()->CreateDescriptorHeap(
+            &rtvHeapDesc, IID_PPV_ARGS(&rtvHeap)
+        );
+        m_rtvHeap = rtvHeap;
+
+        if (FAILED(hr))
+        {
+            throw gcnew System::Exception("CreateDescriptorHeap failed");
+        }
+
+        m_rtvDescriptorSize = DX12Context::GetDevice()->GetDescriptorHandleIncrementSize(
+            D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+
+        // Создаем фрейм-буферы
+        m_frameBuffers = gcnew array<DX12FrameBuffer^>(m_bufferCount);
+        D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = m_rtvHeap->GetCPUDescriptorHandleForHeapStart();
+
+        for (UINT i = 0; i < m_bufferCount; i++)
+        {
+            ID3D12Resource* renderTarget = nullptr;
+            if (FAILED(m_swapChain->GetBuffer(i, IID_PPV_ARGS(&renderTarget))))
+            {
+                m_rtvHeap->Release();
+                throw gcnew System::Exception("GetBuffer failed");
+            }
+
+            D3D12_CPU_DESCRIPTOR_HANDLE* handlePtr = new D3D12_CPU_DESCRIPTOR_HANDLE();
+            *handlePtr = rtvHandle;
+
+            DX12Context::GetDevice()->CreateRenderTargetView(renderTarget, nullptr, *handlePtr);
+
+            m_frameBuffers[i] = gcnew DX12FrameBuffer(renderTarget, handlePtr);
+
+            rtvHandle.ptr += m_rtvDescriptorSize;
+        }
     }
 
     DX12WindowContext::!DX12WindowContext()
     {
-        if (!disposed)
-        {
-            Cleanup();
-            disposed = true;
-        }
-    }
-
-    void DX12WindowContext::Cleanup()
-    {
         if (disposed) return;
 
-        const UINT64 fence = m_fenceValue;
-        if (m_fence && DX12Context::GetCommandQueue())
-        {
-            DX12Context::GetCommandQueue()->Signal(m_fence, fence);
-            m_fenceValue++;
+        WaitForGpuCompletion();
 
-            if (m_fence->GetCompletedValue() < fence && m_fenceEvent)
-            {
-                m_fence->SetEventOnCompletion(fence, m_fenceEvent);
-                WaitForSingleObject(m_fenceEvent, INFINITE);
-            }
+        for each (auto frameBuffer in m_frameBuffers)
+        {
+            delete frameBuffer;
         }
 
-        if (m_renderTarget0)
-        {
-            m_renderTarget0->Release();
-            m_renderTarget0 = nullptr;
-        }
-        if (m_renderTarget1)
-        {
-            m_renderTarget1->Release();
-            m_renderTarget1 = nullptr;
-        }
+        delete m_windowCommandList;
 
+        if (m_rtvHeap)
+        {
+            m_rtvHeap->Release();
+            m_rtvHeap = nullptr;
+        }
 
         if (m_swapChain)
         {
             m_swapChain->Release();
             m_swapChain = nullptr;
         }
-        if (m_commandAllocator)
-        {
-            m_commandAllocator->Release();
-            m_commandAllocator = nullptr;
-        }
-        if (m_commandList)
-        {
-            m_commandList->Release();
-            m_commandList = nullptr;
-        }
-        if (m_rtvHeap)
-        {
-            m_rtvHeap->Release();
-            m_rtvHeap = nullptr;
-        }
+
         if (m_fence)
         {
             m_fence->Release();
             m_fence = nullptr;
         }
 
-
-        if (m_fenceEvent && m_fenceEvent != INVALID_HANDLE_VALUE)
+        if (m_fenceEvent)
         {
             CloseHandle(m_fenceEvent);
-            m_fenceEvent = INVALID_HANDLE_VALUE;
+            m_fenceEvent = nullptr;
         }
-
-        m_windowCommandList = nullptr;
 
         disposed = true;
     }
 
     void DX12WindowContext::Resize(int width, int height)
     {
-        const UINT64 fence = m_fenceValue;
-        DX12Context::GetCommandQueue()->Signal(m_fence, fence);
-        m_fenceValue++;
-        if (m_fence->GetCompletedValue() < fence)
-        {
-            m_fence->SetEventOnCompletion(fence, m_fenceEvent);
-            WaitForSingleObject(m_fenceEvent, INFINITE);
-        }
+        if (width <= 0 || height <= 0) return;
 
         m_width = width;
         m_height = height;
 
-        if (m_renderTarget0) m_renderTarget0->Release();
-        if (m_renderTarget1) m_renderTarget1->Release();
+        WaitForGpuCompletion();
 
-        D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = m_rtvHeap->GetCPUDescriptorHandleForHeapStart();
-        m_rtvHandle0 = HandleToInt(rtvHandle);
-        rtvHandle.ptr += m_rtvDescriptorSize;
-        m_rtvHandle1 = HandleToInt(rtvHandle);
+        if (m_rtvHeap)
+        {
+            m_rtvHeap->Release();
+            m_rtvHeap = nullptr;
+        }
 
-        ID3D12Resource* renderTarget0;
-        m_swapChain->GetBuffer(0, IID_PPV_ARGS(&renderTarget0));
-        m_renderTarget0 = renderTarget0;
-        DX12Context::GetDevice()->CreateRenderTargetView(m_renderTarget0, nullptr, IntToHandle(m_rtvHandle0));
+        for each (auto frameBuffer in m_frameBuffers)
+        {
+            delete frameBuffer;
+        }
 
-        ID3D12Resource* renderTarget1;
-        m_swapChain->GetBuffer(1, IID_PPV_ARGS(&renderTarget1));
-        m_renderTarget1 = renderTarget1;
-        DX12Context::GetDevice()->CreateRenderTargetView(m_renderTarget1, nullptr, IntToHandle(m_rtvHandle1));
+        DXGI_SWAP_CHAIN_DESC desc;
+        m_swapChain->GetDesc(&desc);
 
+        if (FAILED(m_swapChain->ResizeBuffers(
+            m_bufferCount,
+            width, height,
+            desc.BufferDesc.Format,
+            desc.Flags)))
+        {
+            throw gcnew System::Exception("Swap chain resize failed");
+        }
         m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
+
+        CreateFrameBuffers();
+    }
+
+    void DX12WindowContext::SetViewport(float x, float y, float width, float height)
+    {
+        m_config->viewportX = x;
+        m_config->viewportY = y;
+        m_config->viewportWidth = width;
+        m_config->viewportHeight = height;
+    }
+
+    void DX12WindowContext::SetViewportDepth(float x, float y)
+    {
+        m_config->viewportDepthX = x;
+        m_config->viewportDepthY = y;
     }
 
     void DX12WindowContext::BeginFrame()
     {
         if (m_width == 0 || m_height == 0) return;
 
-        // Ждем завершения предыдущего кадра
-        const UINT64 fenceValue = m_fenceValue;
-        DX12Context::GetCommandQueue()->Signal(m_fence, fenceValue);
-        m_fenceValue++;
+        WaitForGpuCompletion();
 
-        if (m_fence->GetCompletedValue() < fenceValue)
-        {
-            m_fence->SetEventOnCompletion(fenceValue, m_fenceEvent);
-            WaitForSingleObject(m_fenceEvent, INFINITE);
-        }
+        m_windowCommandList->Reset();
 
-        m_commandAllocator->Reset();
-        m_commandList->Reset(m_commandAllocator, nullptr);
+        m_windowCommandList->SetViewport(
+            m_config->viewportX, m_config->viewportY,
+            m_config->viewportWidth != -1 ? m_config->viewportWidth : static_cast<float>(m_width),
+            m_config->viewportHeight != -1 ? m_config->viewportHeight : static_cast<float>(m_height),
+            m_config->viewportDepthX, m_config->viewportDepthY
+        );
+        m_windowCommandList->SetScissorRect(
+            0, 0,
+            m_width, m_height
+        );
 
         // Получаем текущий RTV
-        D3D12_CPU_DESCRIPTOR_HANDLE currentRtv = GetCurrentRTV();
-
-        ID3D12Resource* currentTarget = GetRenderTarget();
+        ID3D12Resource* currentResource = CurrentFrameBuffer->NativeResource;
 
         // Переход в состояние рендеринга
         D3D12_RESOURCE_BARRIER barrier;
         barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
         barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-        barrier.Transition.pResource = currentTarget;
+        barrier.Transition.pResource = currentResource;
         barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
         barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
         barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 
-        m_commandList->ResourceBarrier(1, &barrier);
+        m_windowCommandList->NativeCommandList->ResourceBarrier(1, &barrier);
 
-        // Устанавливаем render target
-        m_commandList->OMSetRenderTargets(1, &currentRtv, FALSE, nullptr);
+        D3D12_CPU_DESCRIPTOR_HANDLE* rtvHandle = CurrentFrameBuffer->RTVHandle;
+
+        m_windowCommandList->NativeCommandList->OMSetRenderTargets(1, rtvHandle, FALSE, nullptr);
+    }
+
+    void DX12WindowContext::WaitForGpuCompletion()
+    {
+        if (m_width == 0 || m_height == 0) return;
+
+        const UINT64 fenceValue = m_fenceValue;
+        if (SUCCEEDED(DX12Context::GetCommandQueue()->Signal(m_fence, fenceValue)))
+        {
+            m_fenceValue++;
+
+            if (m_fence->GetCompletedValue() < fenceValue)
+            {
+                if (SUCCEEDED(m_fence->SetEventOnCompletion(fenceValue, m_fenceEvent)))
+                {
+                    WaitForSingleObject(m_fenceEvent, INFINITE);
+                }
+            }
+        }
     }
 
     void DX12WindowContext::EndFrame()
     {
-        if (m_width == 0 || m_height == 0) return;
+        if (!m_swapChain || !m_windowCommandList || !m_windowCommandList->NativeCommandList)
+            return;
 
         // Получаем текущий RTV
-        ID3D12Resource* currentTarget = GetRenderTarget();
+        ID3D12Resource* currentResource = CurrentFrameBuffer->NativeResource;
 
         // Переход в состояние презентации
         D3D12_RESOURCE_BARRIER barrier;
         barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
         barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-        barrier.Transition.pResource = currentTarget;
+        barrier.Transition.pResource = currentResource;
         barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
         barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
         barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 
-        m_commandList->ResourceBarrier(1, &barrier);
-        m_commandList->Close();
+        m_windowCommandList->NativeCommandList->ResourceBarrier(1, &barrier);
+        m_windowCommandList->Close();
 
         // Выполняем командный список
-        ID3D12CommandList* commandLists[] = {m_commandList};
-        DX12Context::GetCommandQueue()->ExecuteCommandLists(_countof(commandLists), commandLists);
+        ID3D12CommandList* commandLists[] = {m_windowCommandList->NativeCommandList};
+        DX12Context::GetCommandQueue()->ExecuteCommandLists(1, commandLists);
 
-        const UINT64 fenceValue = m_fenceValue;
-        DX12Context::GetCommandQueue()->Signal(m_fence, fenceValue);
-        m_fenceValue++;
+        DX12Context::GetCommandQueue()->Signal(m_fence, m_fenceValue);
     }
 
     void DX12WindowContext::Present()
@@ -369,23 +345,14 @@ namespace MirageAPI::DirectX
         if (m_width == 0 || m_height == 0) return;
 
         m_swapChain->Present(m_vsync, 0);
+
         m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
 
-        // Исправить: использовать предыдущее сигнальное значение
-        const UINT64 waitValue = m_fenceValue - 1;
-        if (m_fence->GetCompletedValue() < waitValue)
+        if (m_fence->GetCompletedValue() < m_fenceValue)
         {
-            m_fence->SetEventOnCompletion(waitValue, m_fenceEvent);
+            m_fence->SetEventOnCompletion(m_fenceValue, m_fenceEvent);
             WaitForSingleObject(m_fenceEvent, INFINITE);
         }
-    }
-
-    void DX12WindowContext::Clear(float r, float g, float b, float a)
-    {
-        // Получаем текущий RTV
-        D3D12_CPU_DESCRIPTOR_HANDLE currentRtv = GetCurrentRTV();
-
-        const float clearColor[] = {r, g, b, a};
-        m_commandList->ClearRenderTargetView(currentRtv, clearColor, 0, nullptr);
+        m_fenceValue++;
     }
 }

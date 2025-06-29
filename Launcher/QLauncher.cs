@@ -1,6 +1,35 @@
 ﻿#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
+using System.Runtime.InteropServices;
+
 namespace QuantumLauncher;
+
+internal static class NativeLibraryLoader
+{
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern bool SetDllDirectory(string lpPathName);
+
+    public static void ConfigureDllLoading()
+    {
+        try
+        {
+            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            var runtimesPath = Path.Combine(baseDir, "bin", "runtimes");
+            var enginePath = Path.Combine(baseDir, "bin", "Engine");
+            
+            var path = Environment.GetEnvironmentVariable("PATH") ?? "";
+            var newPath = $"{runtimesPath};{enginePath};{path}";
+            Environment.SetEnvironmentVariable("PATH", newPath);
+            
+            SetDllDirectory(runtimesPath);
+            SetDllDirectory(enginePath);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error configuring DLL loading: {ex.Message}");
+        }
+    }
+}
 
 public class QLauncher
 {
@@ -13,6 +42,8 @@ public class QLauncher
     public static (AppLibModule, EngineModule) InitProject(
         AppDomain domain, string mainClassName = "AppLib", bool isHeadless = false)
     {
+        NativeLibraryLoader.ConfigureDllLoading();
+        
         RootDir = domain.BaseDirectory;
         BinaryDir = Path.Combine(RootDir, BinariesPath);
 
@@ -25,7 +56,7 @@ public class QLauncher
 
         return (
             AppLibModule = new AppLibModule(domain, mainClassName),
-            EngineModule = new EngineModule(isHeadless)
+            EngineModule = new EngineModule(isHeadless, RootDir)
         );
     }
 }

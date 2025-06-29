@@ -9,7 +9,7 @@ using namespace System::Security::Permissions;
 [assembly:AssemblyTitleAttribute(L"MirageAPI")];
 [assembly:AssemblyDescriptionAttribute(L"")];
 [assembly:AssemblyConfigurationAttribute(L"")];
-[assembly:AssemblyCompanyAttribute(L"")];
+[assembly:AssemblyCompanyAttribute(L"Quantum Dev")];
 [assembly:AssemblyProductAttribute(L"MirageAPI")];
 [assembly:AssemblyCopyrightAttribute(L"(c)  2025")];
 [assembly:AssemblyTrademarkAttribute(L"")];

@@ -133,11 +133,10 @@ namespace MirageAPI::Events
                 }
             case WM_MOVE:
                 {
-                    NativeEventManager::WindowMoveCallback(
-                        window,
-                        LOWORD(lParam),
-                        HIWORD(lParam)
-                    );
+                    int x = LOWORD(lParam);
+                    int y = HIWORD(lParam);
+
+                    NativeEventManager::WindowMoveCallback(window, x, y);
                     break;
                 }
 

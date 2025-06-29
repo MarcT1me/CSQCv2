@@ -8,6 +8,7 @@ namespace MirageAPI::DirectX
     {
         static ID3D12Device* s_device;
         static ID3D12CommandQueue* s_commandQueue;
+        static bool s_comInitialized;
 
     public:
         static void Initialize();

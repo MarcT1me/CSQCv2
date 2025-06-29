@@ -3,7 +3,6 @@
 namespace Engine.Extensions.Tracer;
 
 using Data.RegistryManagers;
-using Decorators;
 using Logging;
 
 /// <summary>
@@ -11,6 +10,8 @@ using Logging;
 /// </summary>
 public static class QuantumTracer
 {
+    private static readonly string[] DeprecatedAssemblies = ["MirageAPI"];
+
     /// <summary>
     /// Метод сканирования домена AppLib на наличие аттрибутов
     /// </summary>
@@ -46,6 +47,10 @@ public static class QuantumTracer
 
     public static void ProcessAssembly(Assembly assembly)
     {
+        var name = assembly.GetName().Name;
+        
+        if (DeprecatedAssemblies.Contains(assembly.GetName().Name)) return;
+
         var types = assembly.GetTypes();
 
         foreach (var type in types)
@@ -53,7 +58,11 @@ public static class QuantumTracer
             ProcessType(type);
 
             // Сканируем методы
-            foreach (var method in type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance))
+            foreach (
+                var method in type.GetMethods(
+                    BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance
+                )
+            )
             {
                 ProcessMethod(type, method);
             }

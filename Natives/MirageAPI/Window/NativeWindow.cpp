@@ -149,7 +149,7 @@ namespace MirageAPI::Window
                 GWL_STYLE,
                 savedStyle & ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU)
             );
-            
+
             SetWindowPos(
                 hwnd,
                 HWND_TOP,
@@ -211,7 +211,7 @@ namespace MirageAPI::Window
     void NativeWindow::SetSize(int width, int height)
     {
         SetWindowPos(hwnd, nullptr, 0, 0, width, height, SWP_NOZORDER | SWP_NOMOVE);
-        dxContext->Resize(width, height);
+        HandleResize(width, height);
     }
 
     void NativeWindow::SetPositionAndSize(int x, int y, int width, int height)
@@ -226,6 +226,11 @@ namespace MirageAPI::Window
 
         BYTE alpha = static_cast<BYTE>(opacity * 255);
         SetLayeredWindowAttributes(hwnd, 0, alpha, LWA_ALPHA);
+    }
+
+    void NativeWindow::HandleResize(int width, int height)
+    {
+        dxContext->Resize(width, height);
     }
 
     void NativeWindow::Update()
@@ -255,12 +260,11 @@ namespace MirageAPI::Window
     {
         BYTE alpha = 0;
         DWORD flags = 0;
-        if (GetLayeredWindowAttributes(hwnd, nullptr, &alpha, &flags) &&
-            (flags & LWA_ALPHA))
+        if (GetLayeredWindowAttributes(hwnd, nullptr, &alpha, &flags) && flags & LWA_ALPHA)
         {
             return static_cast<float>(alpha) / 255.0f;
         }
-        return 1.0f; // Полностью непрозрачное по умолчанию
+        return 1.0f;
     }
 
     bool NativeWindow::IsMinimized::get()
@@ -271,11 +275,6 @@ namespace MirageAPI::Window
     bool NativeWindow::IsMaximized::get()
     {
         return IsZoomed(hwnd) != FALSE;
-    }
-
-    void NativeWindow::HandleResize(int width, int height)
-    {
-        dxContext->Resize(width, height);
     }
 
     void NativeWindow::SetVSync(bool enabled)
@@ -300,6 +299,6 @@ namespace MirageAPI::Window
 
     void NativeWindow::Clear(float r, float g, float b, float a)
     {
-        dxContext->Clear(r, g, b, a);
+        dxContext->CommandList->ClearRenderTargetView(dxContext->CurrentFrameBuffer, r, g, b, a);
     }
 }

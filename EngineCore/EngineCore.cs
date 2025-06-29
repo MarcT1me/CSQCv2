@@ -71,7 +71,6 @@ public abstract class EngineCore
 
         QuantumTracer.HandleAssembly(
             [
-                Assembly.GetExecutingAssembly(),
                 AppLibAssembly
             ]
         );

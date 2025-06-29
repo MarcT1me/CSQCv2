@@ -1,19 +1,20 @@
 ﻿#include "pch.h"
 #include "DX12CommandList.h"
 
-#include "DX12Context.h"
+#include "..\DX12Context.h"
+#include "..\DX12Enums.h"
 
 namespace MirageAPI::DirectX
 {
     DX12CommandList::DX12CommandList(
-        D3D12_COMMAND_LIST_TYPE type
+        DX12CommandListType type
     ) : m_type(type)
     {
         auto device = DX12Context::GetDevice();
 
         ID3D12CommandAllocator* commandAllocator;
         HRESULT hr = device->CreateCommandAllocator(
-            m_type,
+            static_cast<D3D12_COMMAND_LIST_TYPE>(m_type),
             IID_PPV_ARGS(&commandAllocator)
         );
         if (FAILED(hr))
@@ -26,7 +27,7 @@ namespace MirageAPI::DirectX
         ID3D12GraphicsCommandList* commandList;
         hr = device->CreateCommandList(
             0,
-            m_type,
+            static_cast<D3D12_COMMAND_LIST_TYPE>(m_type),
             m_commandAllocator,
             nullptr,
             IID_PPV_ARGS(&commandList)
@@ -39,8 +40,6 @@ namespace MirageAPI::DirectX
 
         Close();
     }
-
-    DX12CommandList::~DX12CommandList() { this->!DX12CommandList(); }
 
     DX12CommandList::!DX12CommandList()
     {
@@ -95,7 +94,7 @@ namespace MirageAPI::DirectX
         CloseHandle(eventHandle);
         fence->Release();
     }
-    
+
     void DX12CommandList::SetPipelineState(DX12PipelineState^ pipelineState)
     {
         m_commandList->SetPipelineState(pipelineState->NativePSO);
@@ -119,5 +118,28 @@ namespace MirageAPI::DirectX
     void DX12CommandList::DrawInstanced(UINT vertexCount, UINT instanceCount, UINT startVertex, UINT startInstance)
     {
         m_commandList->DrawInstanced(vertexCount, instanceCount, startVertex, startInstance);
+    }
+
+    void DX12CommandList::SetViewport(
+    float topLeftX, float topLeftY, 
+    float width, float height, 
+    float minDepth, float maxDepth)
+    {
+        if (!m_commandList) return;
+    
+        D3D12_VIEWPORT viewport = {
+            topLeftX, topLeftY,
+            width, height,
+            minDepth, maxDepth
+        };
+        m_commandList->RSSetViewports(1, &viewport);
+    }
+
+    void DX12CommandList::SetScissorRect(int left, int top, int right, int bottom)
+    {
+        if (!m_commandList) return;
+    
+        D3D12_RECT rect = { left, top, right, bottom };
+        m_commandList->RSSetScissorRects(1, &rect);
     }
 }

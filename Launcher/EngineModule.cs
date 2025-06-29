@@ -5,7 +5,7 @@ namespace QuantumLauncher;
 
 internal class EngineCoreModule : QuantumModule
 {
-    public EngineCoreModule(bool isHeadless)
+    public EngineCoreModule(bool isHeadless, string rootPath)
     {
         Assembly = Assembly.Load("EngineCore");
         
@@ -13,6 +13,8 @@ internal class EngineCoreModule : QuantumModule
             .SetValue(null, QLauncher.AppLibModule.Domain.FriendlyName);
         GetAssemblyProp("Engine.Configuration.BaseConfig", "Headless")?
             .SetValue(null, isHeadless);
+        GetAssemblyProp("Engine.EngineCore", "RootDirectory")?
+            .SetValue(null, rootPath);
     }
 }
 
@@ -23,27 +25,24 @@ public class EngineModule : QuantumModule
 
     private readonly string _baseClassName;
 
-    public EngineModule(bool isHeadless)
+    public EngineModule(bool isHeadless, string rootPath)
     {
         Console.WriteLine(
             "Loading EngineModule"
         );
 
-        _ = new EngineCoreModule(isHeadless);
+        _ = new EngineCoreModule(isHeadless, rootPath);
         
         Console.WriteLine(
             "Loading Native runtimes"
         );
         // LoadNative("SDL2");
         LoadNative("freetype6");
+        LoadNative("..\\Engine\\MirageAPI");
 
-        var assemblyName = isHeadless ? "HeadlessQuantumEngine" : "QuantumEngine";
         _baseClassName = isHeadless ? "HEngineCore" : "QEngineCore";
         
-        Assembly = Assembly.Load(assemblyName);
-
-        GetAssemblyProp($"Engine.{_baseClassName}", "RootDirectory")?
-            .SetValue(null, QLauncher.RootDir);
+        Assembly = Assembly.Load(isHeadless ? "HeadlessQuantumEngine" : "QuantumEngine");
     }
 
     private void LoadNative(string name)

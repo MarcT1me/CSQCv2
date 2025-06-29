@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "DX12ContextConfig.h"
-#include "DX12Shader.h"
+#include "Shader/DX12Shader.h"
 
 namespace MirageAPI::DirectX
 {

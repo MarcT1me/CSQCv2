@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "DX12CommandList.h"
-#include "DX12Enums.h"
+#include "..\CommandList\DX12CommandList.h"
+#include "..\DX12Enums.h"
 
 namespace std
 {
@@ -31,7 +31,7 @@ namespace MirageAPI::DirectX
         !DX12Texture();
 
         void Create();
-        void UploadData(std::byte data[], int size, int mipLevel);
+        void UploadData(std::byte data[], int width, int height);
         void TransitionState(
             DX12CommandList^ commandList,
             D3D12_RESOURCE_STATES newState

@@ -13,9 +13,15 @@ namespace MirageAPI::DirectX
     {
         auto device = DX12Context::GetDevice();
 
-        // 1. Создаем корневую сигнатуру (упрощенная версия)
-        D3D12_ROOT_SIGNATURE_DESC rootSignatureDesc = {};
-        rootSignatureDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+        D3D12_ROOT_PARAMETER param = {};
+        param.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+        param.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+        D3D12_ROOT_SIGNATURE_DESC rootSignatureDesc = {
+            1, &param,
+            0, nullptr,
+            D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT
+        };
 
         ID3DBlob* signatureBlob;
         ID3DBlob* errorBlob;
@@ -76,15 +82,18 @@ namespace MirageAPI::DirectX
         // Ручная настройка блендинга
         psoDesc.BlendState.AlphaToCoverageEnable = FALSE;
         psoDesc.BlendState.IndependentBlendEnable = FALSE;
-        psoDesc.BlendState.RenderTarget[0].BlendEnable = FALSE;
+        
         psoDesc.BlendState.RenderTarget[0].LogicOpEnable = FALSE;
-        psoDesc.BlendState.RenderTarget[0].SrcBlend = D3D12_BLEND_ONE;
-        psoDesc.BlendState.RenderTarget[0].DestBlend = D3D12_BLEND_ZERO;
+        psoDesc.BlendState.RenderTarget[0].LogicOp = D3D12_LOGIC_OP_NOOP;
+        
+        psoDesc.BlendState.RenderTarget[0].BlendEnable = TRUE;
+        psoDesc.BlendState.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+        psoDesc.BlendState.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+        
         psoDesc.BlendState.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
         psoDesc.BlendState.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
         psoDesc.BlendState.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
         psoDesc.BlendState.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
-        psoDesc.BlendState.RenderTarget[0].LogicOp = D3D12_LOGIC_OP_NOOP;
         psoDesc.BlendState.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 
         // Настройки глубины

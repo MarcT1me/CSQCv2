@@ -1,24 +1,32 @@
-﻿// Простая структура вершины
-struct VertexInput {
+struct VertexInput
+{
     float3 position : POSITION;
-    float4 color : COLOR;
 };
 
-// Выход вершинного шейдера
-struct VertexOutput {
+struct VertexOutput
+{
     float4 position : SV_POSITION;
-    float4 color : COLOR;
+    float2 uv : TEXCOORD0;
 };
 
-// Вершинный шейдер
-VertexOutput VS(VertexInput input) {
+VertexOutput VS(VertexInput input)
+{
     VertexOutput output;
-    output.position = float4(input.position, 1.0f);
-    output.color = input.color;
+
+    output.position = float4(
+        input.position,
+        1.0f
+    );
+
+    output.uv = float2(
+        (input.position.x + 1.0f) * 0.5f,
+        1.0f - (input.position.y + 1.0f) * 0.5f
+    );
+
     return output;
 }
 
-// Пиксельный шейдер
-float4 PS(VertexOutput input) : SV_TARGET {
-    return input.color;
+float4 PS(VertexOutput input) : SV_TARGET
+{
+    return float4(input.uv.x, 0.0f, input.uv.y, input.uv.x * input.uv.y);
 }

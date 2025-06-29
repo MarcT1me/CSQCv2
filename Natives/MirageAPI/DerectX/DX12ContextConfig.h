@@ -18,6 +18,8 @@ namespace MirageAPI::DirectX
         Discard = DXGI_SWAP_EFFECT_DISCARD,
         FlipDiscard = DXGI_SWAP_EFFECT_FLIP_DISCARD,
         FlipSequential = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL,
+        Sequential = DXGI_SWAP_EFFECT_SEQUENTIAL,
+        None = 0,
         // Добавьте другие эффекты по необходимости
     };
 
@@ -29,13 +31,23 @@ namespace MirageAPI::DirectX
 
     public value struct DX12WindowContextConfig
     {
-        int BufferCount;
         DX12BufferFormat Format;
-        DX12SwapEffect SwapEffect;
         DX12RTVHeapFlags RTVHeapFlags;
-        int SampleCount;
+        
         bool EnableDebugLayer;
         bool AllowTearing;
+        
+        UINT BufferCount;
+        DX12SwapEffect SwapEffect;
+        UINT SampleCount;
+        UINT SwapQuality;
+
+        float viewportX;
+        float viewportY;
+        float viewportWidth;
+        float viewportHeight;
+        float viewportDepthX;
+        float viewportDepthY;
 
         static property DX12WindowContextConfig Default
         {
@@ -49,6 +61,13 @@ namespace MirageAPI::DirectX
                 settings.SampleCount = 1;
                 settings.EnableDebugLayer = false;
                 settings.AllowTearing = false;
+
+                settings.viewportX = 0;
+                settings.viewportY = 0;
+                settings.viewportWidth = -1;
+                settings.viewportHeight = -1;
+                settings.viewportDepthX = 0;
+                settings.viewportDepthY = 1;
                 return settings;
             }
         }

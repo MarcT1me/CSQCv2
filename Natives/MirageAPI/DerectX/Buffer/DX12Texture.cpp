@@ -4,8 +4,7 @@
 #include <cstddef>
 
 #include "DX12Buffer.h"
-#include "DX12CommandList.h"
-#include "DX12Helpers.h"
+#include "..\DX12Helpers.h"
 
 namespace MirageAPI::DirectX
 {
@@ -86,23 +85,24 @@ namespace MirageAPI::DirectX
         m_texture = texture;
     }
 
-    void DX12Texture::UploadData(std::byte data[], int size, int mipLevel)
+    void DX12Texture::UploadData(std::byte data[], int width, int height)
     {
         if (!m_texture || !data) return;
 
         const UINT64 uploadBufferSize = GetRequiredIntermediateSize(m_texture, 0, 1);
 
         DX12Buffer^ uploadBuffer = gcnew DX12Buffer(
-            static_cast<UINT>(uploadBufferSize),
-            1,
+            width,
+            height,
+            4,
             DX12BufferType::Upload
         );
 
         void* pData = uploadBuffer->Map();
-        memcpy(pData, data, size);
+        memcpy(pData, data, uploadBufferSize);
         uploadBuffer->Unmap();
 
-        DX12CommandList^ commandList = gcnew DX12CommandList(D3D12_COMMAND_LIST_TYPE_DIRECT);
+        DX12CommandList^ commandList = gcnew DX12CommandList(DX12CommandListType::Direct);
         commandList->Reset();
 
         TransitionState(commandList, D3D12_RESOURCE_STATE_COPY_DEST);

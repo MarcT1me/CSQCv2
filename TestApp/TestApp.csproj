@@ -2,16 +2,23 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net9.0</TargetFramework>
+        <TargetFramework>net9.0-windows10.0.22621.0</TargetFramework>
+        <PlatformTarget>x64</PlatformTarget>
 
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
 
         <OutputPath>bin\$(Configuration)</OutputPath>
 
-        <Platforms>x64</Platforms>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+        
+        <PublishSingleFile>false</PublishSingleFile>
+        <IncludeNativeLibrariesForSelfExtract>false</IncludeNativeLibrariesForSelfExtract>
 
         <Configurations>Debug;Release</Configurations>
+        <Platforms>x64</Platforms>
+        <RuntimeIdentifier>win-x64</RuntimeIdentifier>
 
         <ApplicationIcon>Logo.ico</ApplicationIcon>
     </PropertyGroup>
@@ -22,8 +29,9 @@
     </ItemGroup>
 
     <Target Name="CopyRuntimes" AfterTargets="Build">
+        <MakeDir Directories="$(OutputPath)\bin\runtimes" />
+        
         <ItemGroup>
-            <RuntimeBinaries Include="$(OutputPath)\**\SDL2.dll" />
             <RuntimeBinaries Include="$(OutputPath)\**\freetype6.dll" />
         </ItemGroup>
 
@@ -47,6 +55,8 @@
     </Target>
 
     <Target Name="MoveEngineBinaries" AfterTargets="MoveAppBinaries">
+        <MakeDir Directories="$(OutputPath)\bin\Engine" />
+        
         <ItemGroup>
             <TempEngineBinaries Include="$(OutputPath)\**\EngineCore.dll" />
             <TempEngineBinaries Include="$(OutputPath)\**\QuantumEngine.dll" />
@@ -68,6 +78,14 @@
         </ItemGroup>
 
         <Delete Files="@(TrashFiles)" />
+    </Target>
+    
+    <Target Name="PrepareForPublish" AfterTargets="Publish">
+        <ItemGroup>
+            <PublishFiles Include="$(OutputPath)\**\*.*" />
+        </ItemGroup>
+        <Copy SourceFiles="@(PublishFiles)"
+              DestinationFiles="@(PublishFiles->'$(PublishDir)\%(RecursiveDir)%(Filename)%(Extension)')" />
     </Target>
 
 </Project>
