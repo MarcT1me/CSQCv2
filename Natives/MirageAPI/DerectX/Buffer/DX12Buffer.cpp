@@ -9,7 +9,9 @@ namespace MirageAPI::DirectX
     DX12Buffer::DX12Buffer(
         DX12ResourceConfig config
     ) : DX12Resource(config.Width, config.Format),
-        m_stride(config.Stride)
+        m_stride(config.Stride),
+        m_elementCount(config.Width * config.Height),
+        m_bufferType(config.Type)
     {
         auto device = DX12Context::GetDevice();
         if (!device)

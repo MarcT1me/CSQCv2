@@ -15,13 +15,13 @@ namespace MirageAPI::DirectX
         Triangle = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE,
         Patch = D3D12_PRIMITIVE_TOPOLOGY_TYPE_PATCH
     };
-    
+
     public enum class DX12PrimitiveTopology
     {
         Undefined = D3D_PRIMITIVE_TOPOLOGY_UNDEFINED,
         PointList = D3D_PRIMITIVE_TOPOLOGY_POINTLIST,
         LineList = D3D_PRIMITIVE_TOPOLOGY_LINELIST,
-        
+
         TriangleList = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,
         TriangleStrip = D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP,
     };
@@ -108,8 +108,21 @@ namespace MirageAPI::DirectX
         OptimizationLevel3 = D3DCOMPILE_OPTIMIZATION_LEVEL3,
     };
 
+    public enum class DX12ShaderVisibility
+    {
+        Amplification = D3D12_SHADER_VISIBILITY_AMPLIFICATION,
+        Vertex = D3D12_SHADER_VISIBILITY_VERTEX,
+        Pixel = D3D12_SHADER_VISIBILITY_PIXEL,
+        Geometry = D3D12_SHADER_VISIBILITY_GEOMETRY,
+        Mesh = D3D12_SHADER_VISIBILITY_MESH,
+        Domain = D3D12_SHADER_VISIBILITY_DOMAIN,
+        Hull = D3D12_SHADER_VISIBILITY_HULL,
+        All = D3D12_SHADER_VISIBILITY_ALL
+    };
+
     public enum class DX12ResourceType
     {
+        Constants,
         Buffer,
         ConstantBuffer,
         StructuredBuffer,

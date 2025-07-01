@@ -157,7 +157,7 @@ namespace MirageAPI::DirectX
             DX12Context::GetDevice()->CreateRenderTargetView(renderTarget, nullptr, *handlePtr);
 
             DX12ResourceFormat format = DX12ResourceFormat::RGBA8_UNORM;
-            UINT size = GetTextureFormatSize(format);
+            UINT size = GetResourceFormatSize(format);
             m_frameBuffers[i] = gcnew DX12FrameBuffer(
                 renderTarget, 
                 size,

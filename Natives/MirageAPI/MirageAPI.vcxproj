@@ -106,10 +106,13 @@
     </ItemDefinitionGroup>
     <!--  Headers-->
     <ItemGroup>
+        <ClInclude Include="DerectX\Buffer\DX12ConstantBuffer.h" />
+        <ClInclude Include="DerectX\Buffer\DX12StructuredBuffer.h" />
         <ClInclude Include="DerectX\Pipeline\DX12BlendConfig.h" />
         <ClInclude Include="DerectX\Pipeline\DX12PipelineState.h"/>
         <ClInclude Include="DerectX\Pipeline\DX12PipelineStateConfig.h"/>
         <ClInclude Include="DerectX\Pipeline\DX12RasterizerConfig.h" />
+        <ClInclude Include="DerectX\Pipeline\DX12RootParametersConfig.h" />
         <ClInclude Include="pch.h"/>
         <ClInclude Include="Resource.h"/>
         <ClInclude Include="DerectX\DX12Enums.h"/>
@@ -139,8 +142,10 @@
     <ItemGroup>
         <ClCompile Include="AssemblyInfo.cpp"/>
         <ClCompile Include="DerectX\Buffer\DX12Buffer.cpp"/>
+        <ClCompile Include="DerectX\Buffer\DX12ConstantBuffer.cpp" />
         <ClCompile Include="DerectX\Buffer\DX12FrameBuffer.cpp"/>
         <ClCompile Include="DerectX\Buffer\DX12IndexBuffer.cpp"/>
+        <ClCompile Include="DerectX\Buffer\DX12StructuredBuffer.cpp" />
         <ClCompile Include="DerectX\Buffer\DX12Texture.cpp"/>
         <ClCompile Include="DerectX\Buffer\DX12UploadBuffer.cpp"/>
         <ClCompile Include="DerectX\Buffer\DX12VertexBuffer.cpp"/>

@@ -95,33 +95,14 @@ namespace MirageAPI::DirectX
         fence->Release();
     }
 
-    void DX12CommandList::SetPipelineState(DX12PipelineState^ pipelineState)
-    {
-        m_commandList->SetPipelineState(pipelineState->NativePSO);
-    }
-
-    void DX12CommandList::SetGraphicsRootSignature(DX12PipelineState^ pipelineState)
-    {
-        m_commandList->SetGraphicsRootSignature(pipelineState->RootSignature);
-    }
-
-    void DX12CommandList::IASetPrimitiveTopology(DX12PrimitiveTopology topology)
-    {
-        m_commandList->IASetPrimitiveTopology(static_cast<D3D12_PRIMITIVE_TOPOLOGY>(topology));
-    }
-
-    void DX12CommandList::DrawInstanced(UINT vertexCount, UINT instanceCount, UINT startVertex, UINT startInstance)
-    {
-        m_commandList->DrawInstanced(vertexCount, instanceCount, startVertex, startInstance);
-    }
-
     void DX12CommandList::SetViewport(
-    float topLeftX, float topLeftY, 
-    float width, float height, 
-    float minDepth, float maxDepth)
+        float topLeftX, float topLeftY,
+        float width, float height,
+        float minDepth, float maxDepth
+    )
     {
         if (!m_commandList) return;
-    
+
         D3D12_VIEWPORT viewport = {
             topLeftX, topLeftY,
             width, height,
@@ -133,11 +114,11 @@ namespace MirageAPI::DirectX
     void DX12CommandList::SetScissorRect(int left, int top, int right, int bottom)
     {
         if (!m_commandList) return;
-    
-        D3D12_RECT rect = { left, top, right, bottom };
+
+        D3D12_RECT rect = {left, top, right, bottom};
         m_commandList->RSSetScissorRects(1, &rect);
     }
-    
+
     void DX12CommandList::ClearRenderTargetView(
         DX12FrameBuffer^ frameBuffer,
         float r, float g, float b, float a
@@ -147,7 +128,7 @@ namespace MirageAPI::DirectX
 
         D3D12_CPU_DESCRIPTOR_HANDLE* rtvHandle = frameBuffer->RTVHandle;
         if (rtvHandle == nullptr) return;
-        
+
         const float clearColor[] = {r, g, b, a};
         m_commandList->ClearRenderTargetView(*rtvHandle, clearColor, 0, nullptr);
     }

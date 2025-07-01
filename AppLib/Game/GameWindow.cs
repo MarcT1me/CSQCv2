@@ -221,16 +221,7 @@ public class GameWindow : Window
         int vertexSize = Marshal.SizeOf<Vertex>();
         int bufferSize = vertices.Length * vertexSize;
 
-        var vertexConfig = new DX12ResourceConfig
-        {
-            Type = DX12ResourceType.VertexBuffer,
-            Stride = (uint)vertexSize,
-            Width = (uint)bufferSize,
-            HeapType = DX12HeapType.Upload,
-            Flags = DX12ResourceFlags.None,
-            InitialState = DX12ResourceState.VertexAndConstantBuffer
-        };
-        _vertexBuffer = new DX12VertexBuffer(vertexConfig);
+        _vertexBuffer = new DX12VertexBuffer((uint)bufferSize, (uint)vertexSize);
 
         try
         {

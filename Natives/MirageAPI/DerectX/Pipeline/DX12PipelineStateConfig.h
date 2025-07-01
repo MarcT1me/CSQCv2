@@ -1,10 +1,9 @@
 ﻿#pragma once
 
-#include <string>
-
 #include "..\Shader\DX12Shader.h"
 #include "DX12RasterizerConfig.h"
 #include "DX12BlendConfig.h"
+#include "DX12RootParametersConfig.h"
 
 namespace MirageAPI::DirectX
 {
@@ -22,8 +21,10 @@ namespace MirageAPI::DirectX
     {
         DX12Shader^ VertexShader;
         DX12Shader^ PixelShader;
+        
         array<DX12InputElement>^ InputLayouts;
-
+        array<DX12RootParameter>^ RootParams;
+        
         DX12RasterizerConfig RasterizerState;
         DX12BlendConfig BlendState;
         bool DepthEnable;

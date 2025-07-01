@@ -1,105 +1,48 @@
 ﻿#include "pch.h"
 #include "DX12Texture.h"
 
-#include "..\DX12Helpers.h"
-#include "..\DX12Context.h"
-#include "..\CommandList\DX12CommandList.h"
-
 #include "DX12UploadBuffer.h"
+#include "..\DX12Helpers.h"
+#include "..\CommandList\DX12CommandList.h"
 
 namespace MirageAPI::DirectX
 {
-    DX12Texture::DX12Texture(
-        DX12ResourceConfig config
-    ) : DX12Resource(config.Width * config.Height, config.Format),
-        m_type(config.TextureType),
-        m_width(static_cast<UINT>(config.Width)),
-        m_height(static_cast<UINT>(config.Height)),
-        m_mipLevels(config.MipLevels),
-        m_generateMipmaps(config.MipLevels > 1)
+    DX12ResourceConfig GetTextureConfig(
+        unsigned int width, unsigned int height,
+        DX12ResourceFormat format,
+        DX12TextureType type,
+        unsigned int mipLevels,
+        DX12ResourceFlags flags
+    )
     {
-        auto device = DX12Context::GetDevice();
-        if (!device)
-        {
-            throw gcnew System::InvalidOperationException(
-                "DirectX 12 device not initialized. Call DX12Context::Initialize() first."
-            );
-        }
-
-        D3D12_HEAP_PROPERTIES heapProps = {
-            static_cast<D3D12_HEAP_TYPE>(config.HeapType),
-            D3D12_CPU_PAGE_PROPERTY_UNKNOWN,
-            D3D12_MEMORY_POOL_UNKNOWN,
-            0, 0
-        };
-
-        D3D12_RESOURCE_DESC desc = {};
-        desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-        desc.Width = config.Width;
-        desc.Height = config.Height;
-        desc.DepthOrArraySize = config.Depth;
-        desc.MipLevels = config.MipLevels;
-        desc.Format = static_cast<DXGI_FORMAT>(config.Format);
-        desc.SampleDesc.Count = 1;
-        desc.SampleDesc.Quality = 0;
-        desc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-        desc.Flags = static_cast<D3D12_RESOURCE_FLAGS>(config.Flags);
-        
-        D3D12_CLEAR_VALUE* clearValuePtr = nullptr;
-        D3D12_CLEAR_VALUE clearValue = {};
-
-        if (static_cast<int>(config.Flags & DX12ResourceFlags::AllowRenderTarget) != 0)
-        {
-            clearValue.Format = static_cast<DXGI_FORMAT>(m_format);
-            clearValue.Color[0] = 0.0f;
-            clearValue.Color[1] = 0.0f;
-            clearValue.Color[2] = 0.0f;
-            clearValue.Color[3] = 1.0f;
-            clearValuePtr = &clearValue;
-        }
-        else if (static_cast<int>(config.Flags & DX12ResourceFlags::AllowDepthStencil) != 0)
-        {
-            clearValue.Format = static_cast<DXGI_FORMAT>(m_format);
-            clearValue.DepthStencil.Depth = 1.0f;
-            clearValue.DepthStencil.Stencil = 0;
-            clearValuePtr = &clearValue;
-        }
-
-        ID3D12Resource* buffer = nullptr;
-        HRESULT hr = device->CreateCommittedResource(
-            &heapProps,
-            D3D12_HEAP_FLAG_NONE,
-            &desc,
-            static_cast<D3D12_RESOURCE_STATES>(config.InitialState),
-            clearValuePtr,
-            IID_PPV_ARGS(&buffer)
-        );
-
-        if (FAILED(hr))
-        {
-            throw gcnew System::Exception(
-                "Failed to create buffer: " + hr
-            );
-        }
-
-        m_nativeResource = buffer;
+        DX12ResourceConfig config;
+        config.Type = DX12ResourceType::Texture;
+        config.Width = width;
+        config.Height = height;
+        config.Format = format;
+        config.TextureType = type;
+        config.MipLevels = mipLevels;
+        config.Flags = flags;
+        config.Stride = GetResourceFormatSize(format);
+        config.Depth = 1;
+        config.HeapType = DX12HeapType::Default;
+        config.InitialState = DX12ResourceState::Common;
+        return config;
     }
 
-    void DX12Texture::TransitionState(
-        DX12CommandList^ commandList,
-        DX12ResourceState newState)
+    DX12Texture::DX12Texture(
+        unsigned int width, unsigned int height,
+        DX12ResourceFormat format,
+        DX12TextureType type,
+        unsigned int mipLevels,
+        DX12ResourceFlags flags
+    ) : DX12Buffer(GetTextureConfig(width, height, format, type, mipLevels, flags)),
+        m_type(type),
+        m_width(width),
+        m_height(height),
+        m_mipLevels(mipLevels),
+        m_generateMipmaps(mipLevels > 1)
     {
-        if (m_currentState == newState) return;
-
-        D3D12_RESOURCE_BARRIER barrier = {};
-        barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-        barrier.Transition.pResource = m_nativeResource;
-        barrier.Transition.StateBefore = static_cast<D3D12_RESOURCE_STATES>(m_currentState);
-        barrier.Transition.StateAfter = static_cast<D3D12_RESOURCE_STATES>(newState);
-        barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-
-        commandList->NativeCommandList->ResourceBarrier(1, &barrier);
-        m_currentState = newState;
     }
 
     void DX12Texture::UploadData(std::byte data[], int width, int height)
@@ -127,7 +70,7 @@ namespace MirageAPI::DirectX
 
         D3D12_SUBRESOURCE_DATA subresourceData;
         subresourceData.pData = &data[0];
-        subresourceData.RowPitch = static_cast<LONG_PTR>(width * GetTextureFormatSize(m_format));
+        subresourceData.RowPitch = static_cast<LONG_PTR>(width * GetResourceFormatSize(m_format));
         subresourceData.SlicePitch = subresourceData.RowPitch * height;
 
         UpdateSubresources(
@@ -160,5 +103,18 @@ namespace MirageAPI::DirectX
         // Реализация генерации мипмапов будет добавлена позже
         // Это сложная операция, требующая вычислительных шейдеров
         // или последовательного рендеринга в уменьшающиеся текстуры
+    }
+
+    D3D12_SHADER_RESOURCE_VIEW_DESC DX12Texture::CreateSRVDesc()
+    {
+        D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+        srvDesc.Format = static_cast<DXGI_FORMAT>(m_format);
+        srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+        srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+        srvDesc.Buffer.FirstElement = 0;
+        srvDesc.Buffer.NumElements = m_elementCount;
+        srvDesc.Buffer.StructureByteStride = m_stride;
+        srvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+        return srvDesc;
     }
 }

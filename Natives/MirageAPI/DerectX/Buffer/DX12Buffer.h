@@ -8,7 +8,9 @@ namespace MirageAPI::DirectX
     public ref class DX12Buffer : public DX12Resource
     {
     internal:
-        UINT m_stride;
+        unsigned int  m_stride;
+        unsigned int m_elementCount;
+        DX12ResourceType m_bufferType;
 
     public:
         DX12Buffer(DX12ResourceConfig config);
@@ -20,11 +22,11 @@ namespace MirageAPI::DirectX
 
         virtual property DX12ResourceType ResourceType
         {
-            DX12ResourceType get() override { return DX12ResourceType::Buffer; }
+            DX12ResourceType get() override { return m_bufferType; }
         }
 
-        void UploadData(array<System::Byte>^ data);
+        virtual void UploadData(array<System::Byte>^ data);
 
-        property UINT Stride { UINT get() { return m_stride; } }
+        property unsigned int  Stride { unsigned int  get() { return m_stride; } }
     };
 }

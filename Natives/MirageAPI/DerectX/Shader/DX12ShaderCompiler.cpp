@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <ostream>
+#include <comdef.h>
 
 namespace MirageAPI::DirectX
 {

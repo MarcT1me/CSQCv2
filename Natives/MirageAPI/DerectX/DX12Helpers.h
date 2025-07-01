@@ -9,8 +9,8 @@ namespace MirageAPI::DirectX
         ID3D12Resource* pDestinationResource,
         ID3D12Resource* pIntermediate,
         UINT64 IntermediateOffset,
-        UINT FirstSubresource,
-        UINT NumSubresources,
+        unsigned int FirstSubresource,
+        unsigned int NumSubresources,
         const D3D12_SUBRESOURCE_DATA* pSrcData
     )
     {
@@ -65,7 +65,7 @@ namespace MirageAPI::DirectX
         return requiredSize;
     }
 
-    inline UINT GetTextureFormatSize(DX12ResourceFormat format)
+    inline unsigned int GetResourceFormatSize(DX12ResourceFormat format)
     {
         switch (format)
         {

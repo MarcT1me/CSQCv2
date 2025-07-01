@@ -8,7 +8,7 @@ namespace MirageAPI::DirectX
 {
     DX12FrameBuffer::DX12FrameBuffer(
         ID3D12Resource* resource,
-        UINT size,
+        unsigned int size,
         D3D12_CPU_DESCRIPTOR_HANDLE* rtvHandle,
         DX12ResourceFormat format
     ) : DX12Resource(size, format),

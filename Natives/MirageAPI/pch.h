@@ -8,8 +8,6 @@
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "d3dcompiler.lib")
 
-#include <comdef.h>
-
 #include <d3d12.h>
 #include <dxgi1_4.h>
 

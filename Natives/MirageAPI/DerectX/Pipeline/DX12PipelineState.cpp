@@ -9,18 +9,58 @@
 
 namespace MirageAPI::DirectX
 {
+    D3D12_ROOT_PARAMETER GenerateRootParameterDesc(DX12RootParameter param)
+    {
+        D3D12_ROOT_PARAMETER d3dParam = {};
+        d3dParam.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+        switch (param.Type)
+        {
+        case DX12ResourceType::Constants:
+            d3dParam.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+            d3dParam.Constants.Num32BitValues = param.NumConstants;
+            d3dParam.Constants.ShaderRegister = param.RegisterSlot;
+            d3dParam.Constants.RegisterSpace = param.RegisterSpace;
+            break;
+
+        case DX12ResourceType::ConstantBuffer:
+            d3dParam.ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+            d3dParam.Descriptor.ShaderRegister = param.RegisterSlot;
+            d3dParam.Descriptor.RegisterSpace = param.RegisterSpace;
+            break;
+
+        case DX12ResourceType::StructuredBuffer:
+        case DX12ResourceType::Texture:
+            d3dParam.ParameterType = D3D12_ROOT_PARAMETER_TYPE_SRV;
+            d3dParam.Descriptor.ShaderRegister = param.RegisterSlot;
+            d3dParam.Descriptor.RegisterSpace = param.RegisterSpace;
+            break;
+
+        default:
+            break;
+        }
+
+        // ReSharper disable once CppSomeObjectMembersMightNotBeInitialized
+        return d3dParam;
+    }
+
     DX12PipelineState::DX12PipelineState(
         DX12PipelineStateConfig config
     )
     {
         auto device = DX12Context::GetDevice();
 
-        D3D12_ROOT_PARAMETER param = {};
-        param.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-        param.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+        if (config.RootParams)
+        {
+            m_rootParametersLength = config.RootParams->Length;
+            m_rootParameters = new D3D12_ROOT_PARAMETER[m_rootParametersLength];
+
+            for (int i = 0; i < m_rootParametersLength; i++)
+                m_rootParameters[i] = GenerateRootParameterDesc(config.RootParams[i]);
+        }
 
         D3D12_ROOT_SIGNATURE_DESC rootSignatureDesc = {
-            1, &param,
+            m_rootParametersLength, m_rootParameters,
             0, nullptr,
             D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT
         };
@@ -100,8 +140,8 @@ namespace MirageAPI::DirectX
         psoDesc.BlendState.RenderTarget[0].SrcBlendAlpha = static_cast<D3D12_BLEND>(config.BlendState.SrcBlendAlpha);
         psoDesc.BlendState.RenderTarget[0].DestBlendAlpha = static_cast<D3D12_BLEND>(config.BlendState.DestBlendAlpha);
         psoDesc.BlendState.RenderTarget[0].BlendOpAlpha = static_cast<D3D12_BLEND_OP>(config.BlendState.BlendOpAlpha);
-        psoDesc.BlendState.RenderTarget[0].RenderTargetWriteMask = static_cast<UINT8>(config.BlendState.
-            RenderTargetWriteMask);
+        psoDesc.BlendState.RenderTarget[0].RenderTargetWriteMask = static_cast<UINT8>(
+            config.BlendState.RenderTargetWriteMask);
 
         // Настройки глубины
         psoDesc.DepthStencilState.DepthEnable = config.DepthEnable;
@@ -113,7 +153,7 @@ namespace MirageAPI::DirectX
         psoDesc.NumRenderTargets = 1;
         psoDesc.RTVFormats[0] = static_cast<DXGI_FORMAT>(config.RTVFormat);
         psoDesc.SampleDesc.Count = 1;
-        
+
         m_inputLayoutsLength = config.InputLayouts->Length;
         m_inputLayoutsArr = new D3D12_INPUT_ELEMENT_DESC[m_inputLayoutsLength];
         m_semanticNames = new std::string[m_inputLayoutsLength];
@@ -133,7 +173,7 @@ namespace MirageAPI::DirectX
             };
         }
         psoDesc.InputLayout = {m_inputLayoutsArr, m_inputLayoutsLength};
-        
+
         ID3D12PipelineState* pso;
         hr = device->CreateGraphicsPipelineState(
             &psoDesc,

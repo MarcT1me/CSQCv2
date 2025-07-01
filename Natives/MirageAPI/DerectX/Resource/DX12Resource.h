@@ -15,12 +15,12 @@ namespace MirageAPI::DirectX
         DX12ResourceState m_currentState;
 
     protected:
-        UINT m_size;
+        unsigned int m_size;
         DX12ResourceFormat m_format;
 
     public:
         DX12Resource(
-            UINT size,
+            unsigned int size,
             DX12ResourceFormat format
         ) : m_size(size),
             m_format(format)

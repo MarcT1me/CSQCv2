@@ -6,19 +6,19 @@ namespace MirageAPI::DirectX
     {
         DX12ResourceType Type;
 
-        UINT64 Width;
-        UINT Height;
-        UINT Stride;
+        unsigned int Width;
+        unsigned int Height;
+        unsigned int Stride;
 
-        UINT Depth;
-        UINT MipLevels;
+        unsigned int Depth;
+        unsigned int MipLevels;
 
         DX12ResourceFormat Format;
         DX12TextureType TextureType;
-        
+
         DX12ResourceFlags Flags;
         DX12ResourceState InitialState;
-        
+
         DX12HeapType HeapType;
 
         static property DX12ResourceConfig DefaultVertexBuffer

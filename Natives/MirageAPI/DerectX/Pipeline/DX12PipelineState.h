@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include <string>
+
 #include "..\DX12ContextConfig.h"
 #include "DX12PipelineStateConfig.h"
 
@@ -13,6 +15,8 @@ namespace MirageAPI::DirectX
         std::string* m_semanticNames;
         D3D12_INPUT_ELEMENT_DESC* m_inputLayoutsArr;
         unsigned int m_inputLayoutsLength;
+        D3D12_ROOT_PARAMETER* m_rootParameters;
+        unsigned int m_rootParametersLength;
 
     public:
         DX12PipelineState(DX12PipelineStateConfig config);
