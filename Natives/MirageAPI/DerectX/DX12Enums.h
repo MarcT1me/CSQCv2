@@ -288,4 +288,12 @@ namespace MirageAPI::DirectX
         Back = D3D12_CULL_MODE_BACK,
         Front = D3D12_CULL_MODE_FRONT,
     };
+
+    public enum class DX12DescriptorHeapType
+    {
+        CBV_SRV_UAV,
+        Sampler,
+        RTV,
+        DSV
+    };
 }

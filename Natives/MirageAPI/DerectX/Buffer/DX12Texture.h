@@ -14,6 +14,7 @@ namespace MirageAPI::DirectX
         unsigned int m_height;
         unsigned int m_mipLevels;
         bool m_generateMipmaps;
+        UINT m_srvIndex = UINT_MAX;
 
     public:
         DX12Texture(
@@ -34,5 +35,11 @@ namespace MirageAPI::DirectX
         D3D12_SHADER_RESOURCE_VIEW_DESC CreateSRVDesc();
 
         void GenerateMipmaps(DX12CommandList^ commandList);
+        
+        void CreateSRV();
+        void ReleaseSRV();
+    
+        property UINT SRVIndex { UINT get() { return m_srvIndex; } }
+        property bool HasSRV { bool get() { return m_srvIndex != UINT_MAX; } }
     };
 }

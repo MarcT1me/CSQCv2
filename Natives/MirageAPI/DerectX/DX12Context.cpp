@@ -1,6 +1,10 @@
 ﻿#include "pch.h"
 #include "DX12Context.h"
 
+#include <algorithm>
+
+#include "DX12DescriptorHeapManager.h"
+
 namespace MirageAPI::DirectX
 {
     void DX12Context::Initialize()
@@ -48,11 +52,39 @@ namespace MirageAPI::DirectX
 
     void DX12Context::Deinitialize()
     {
-        if (s_commandQueue) s_commandQueue->Release();
-        if (s_device) s_device->Release();
-        if (s_comInitialized) CoUninitialize();
-        s_commandQueue = nullptr;
-        s_device = nullptr;
-        s_comInitialized = false;
+        if (s_commandQueue)
+        {
+            s_commandQueue->Release();
+            s_commandQueue = nullptr;
+        }
+        if (s_device)
+        {
+            s_device->Release();
+            s_device = nullptr;
+        }
+        if (s_comInitialized)
+        {
+            CoUninitialize();
+            s_comInitialized = false;
+        }
+        if (s_descriptorHeaps)
+        {
+            for each (auto heap in s_descriptorHeaps->Values)
+            {
+                delete heap;
+            }
+            delete s_descriptorHeaps;
+            s_descriptorHeaps = nullptr;
+        }
+    }
+
+    DX12DescriptorHeap^ DX12Context::GetDescriptorHeap(
+        DX12DescriptorHeapType type,
+        UINT minCapacity,
+        bool shaderVisible
+    )
+    {
+        return DX12DescriptorHeapManager::Instance->GetHeap(
+            type, minCapacity, shaderVisible);
     }
 }

@@ -112,44 +112,39 @@ namespace MirageAPI::DirectX
 
     void DX12WindowContext::CreateFrameBuffers()
     {
-        if (!m_swapChain) return;
-
-        if (m_rtvHeap)
+        if (!m_swapChain)
         {
-            m_rtvHeap->Release();
-            m_rtvHeap = nullptr;
+            throw gcnew System::InvalidOperationException("Swap chain not initialized");
         }
 
-        // Создаем RTV heap
-        D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = {};
-        rtvHeapDesc.NumDescriptors = m_bufferCount;
-        rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-        rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-
-        ID3D12DescriptorHeap* rtvHeap = nullptr;
-        HRESULT hr = DX12Context::GetDevice()->CreateDescriptorHeap(
-            &rtvHeapDesc, IID_PPV_ARGS(&rtvHeap)
+        m_rtvHeap = DX12Context::GetDescriptorHeap(
+            DX12DescriptorHeapType::RTV,
+            m_bufferCount,
+            false
         );
-        m_rtvHeap = rtvHeap;
 
-        if (FAILED(hr))
+        if (m_rtvHeap == nullptr)
         {
-            throw gcnew System::Exception("CreateDescriptorHeap failed");
+            throw gcnew System::NullReferenceException(
+                "GetDescriptorHeap returned null for RTV type");
         }
+
+        m_rtvHeap->Validate();
 
         m_rtvDescriptorSize = DX12Context::GetDevice()->GetDescriptorHandleIncrementSize(
             D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
         // Создаем фрейм-буферы
         m_frameBuffers = gcnew array<DX12FrameBuffer^>(m_bufferCount);
-        D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = m_rtvHeap->GetCPUDescriptorHandleForHeapStart();
+        D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = m_rtvHeap->NativeHeap->GetCPUDescriptorHandleForHeapStart();
+        UINT rtvDescriptorSize = m_rtvHeap->DescriptorSize;
 
         for (UINT i = 0; i < m_bufferCount; i++)
         {
             ID3D12Resource* renderTarget = nullptr;
             if (FAILED(m_swapChain->GetBuffer(i, IID_PPV_ARGS(&renderTarget))))
             {
-                m_rtvHeap->Release();
+                delete m_rtvHeap;
                 throw gcnew System::Exception("GetBuffer failed");
             }
 
@@ -158,14 +153,17 @@ namespace MirageAPI::DirectX
 
             DX12ResourceFormat format = DX12ResourceFormat::RGBA8_UNORM;
             UINT size = GetResourceFormatSize(format);
+
+            UINT descriptorIndex = i;
             m_frameBuffers[i] = gcnew DX12FrameBuffer(
-                renderTarget, 
+                renderTarget,
                 size,
-                handlePtr,
+                m_rtvHeap,
+                descriptorIndex,
                 format
             );
 
-            rtvHandle.ptr += m_rtvDescriptorSize;
+            rtvHandle.ptr += rtvDescriptorSize;
         }
     }
 
@@ -175,16 +173,25 @@ namespace MirageAPI::DirectX
 
         WaitForGpuCompletion();
 
-        for each (auto frameBuffer in m_frameBuffers)
+        if (m_frameBuffers != nullptr)
         {
-            delete frameBuffer;
+            for each (auto frameBuffer in m_frameBuffers)
+            {
+                if (frameBuffer != nullptr)
+                    delete frameBuffer;
+            }
+            m_frameBuffers = nullptr;
         }
 
-        delete m_windowCommandList;
-
-        if (m_rtvHeap)
+        if (m_windowCommandList != nullptr)
         {
-            m_rtvHeap->Release();
+            delete m_windowCommandList;
+            m_windowCommandList = nullptr;
+        }
+
+        if (m_rtvHeap != nullptr)
+        {
+            delete m_rtvHeap;
             m_rtvHeap = nullptr;
         }
 
@@ -218,28 +225,36 @@ namespace MirageAPI::DirectX
 
         WaitForGpuCompletion();
 
-        if (m_rtvHeap)
+        if (m_frameBuffers != nullptr)
         {
-            m_rtvHeap->Release();
-            m_rtvHeap = nullptr;
+            for each (auto frameBuffer in m_frameBuffers)
+            {
+                if (frameBuffer != nullptr)
+                    delete frameBuffer;
+            }
+            m_frameBuffers = nullptr;
         }
 
-        for each (auto frameBuffer in m_frameBuffers)
+        if (m_rtvHeap != nullptr)
         {
-            delete frameBuffer;
+            delete m_rtvHeap;
+            m_rtvHeap = nullptr;
         }
 
         DXGI_SWAP_CHAIN_DESC desc;
         m_swapChain->GetDesc(&desc);
 
-        if (FAILED(m_swapChain->ResizeBuffers(
+        HRESULT hr = m_swapChain->ResizeBuffers(
             m_bufferCount,
             width, height,
             desc.BufferDesc.Format,
-            desc.Flags)))
+            desc.Flags);
+
+        if (FAILED(hr))
         {
-            throw gcnew System::Exception("Swap chain resize failed");
+            throw gcnew System::Exception("Swap chain resize failed: " + hr);
         }
+
         m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
 
         CreateFrameBuffers();
@@ -298,9 +313,9 @@ namespace MirageAPI::DirectX
 
         m_windowCommandList->NativeCommandList->ResourceBarrier(1, &barrier);
 
-        D3D12_CPU_DESCRIPTOR_HANDLE* rtvHandle = CurrentFrameBuffer->RTVHandle;
+        D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = CurrentFrameBuffer->RTVHandle;
 
-        m_windowCommandList->NativeCommandList->OMSetRenderTargets(1, rtvHandle, FALSE, nullptr);
+        m_windowCommandList->NativeCommandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
     }
 
     void DX12WindowContext::WaitForGpuCompletion()

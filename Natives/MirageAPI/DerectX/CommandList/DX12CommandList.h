@@ -9,6 +9,9 @@
 
 namespace MirageAPI::DirectX
 {
+    ref class DX12Texture;
+    ref class DX12DescriptorHeap;
+
     public ref class DX12CommandList
     {
     protected:
@@ -56,6 +59,9 @@ namespace MirageAPI::DirectX
             m_commandList->DrawInstanced(vertexCount, instanceCount, startVertex, startInstance);
         }
 
+        void SetDescriptorHeap(DX12DescriptorHeap^ heap);
+        void SetTextureSRV(UINT rootIndex, DX12Texture^ texture);
+        void TransitionTexture(DX12Texture^ texture, DX12ResourceState newState);
         void SetViewport(
             float left, float top,
             float width, float height,

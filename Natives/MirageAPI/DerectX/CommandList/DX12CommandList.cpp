@@ -3,6 +3,7 @@
 
 #include "..\DX12Enums.h"
 #include "..\DX12Context.h"
+#include "..\Buffer\DX12Texture.h"
 
 namespace MirageAPI::DirectX
 {
@@ -95,6 +96,34 @@ namespace MirageAPI::DirectX
         fence->Release();
     }
 
+    void DX12CommandList::SetDescriptorHeap(DX12DescriptorHeap^ heap)
+    {
+        if (!heap) return;
+        ID3D12DescriptorHeap* heaps[] = {heap->NativeHeap};
+        m_commandList->SetDescriptorHeaps(1, heaps);
+    }
+
+    void DX12CommandList::SetTextureSRV(UINT rootIndex, DX12Texture^ texture)
+    {
+        if (!texture || !texture->HasSRV) return;
+
+        auto srvHeap = DX12Context::GetDescriptorHeap(DX12DescriptorHeapType::CBV_SRV_UAV, 256, true);
+
+        D3D12_GPU_DESCRIPTOR_HANDLE handle = srvHeap->NativeHeap->GetGPUDescriptorHandleForHeapStart();
+        handle.ptr += texture->SRVIndex * srvHeap->DescriptorSize;
+
+        m_commandList->SetGraphicsRootDescriptorTable(rootIndex, handle);
+    }
+
+    void DX12CommandList::TransitionTexture(
+        DX12Texture^ texture,
+        DX12ResourceState newState
+    )
+    {
+        if (!texture) return;
+        texture->TransitionState(this, newState);
+    }
+
     void DX12CommandList::SetViewport(
         float topLeftX, float topLeftY,
         float width, float height,
@@ -126,10 +155,7 @@ namespace MirageAPI::DirectX
     {
         if (!m_commandList || frameBuffer == nullptr) return;
 
-        D3D12_CPU_DESCRIPTOR_HANDLE* rtvHandle = frameBuffer->RTVHandle;
-        if (rtvHandle == nullptr) return;
-
         const float clearColor[] = {r, g, b, a};
-        m_commandList->ClearRenderTargetView(*rtvHandle, clearColor, 0, nullptr);
+        m_commandList->ClearRenderTargetView(frameBuffer->RTVHandle, clearColor, 0, nullptr);
     }
 }

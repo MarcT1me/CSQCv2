@@ -18,7 +18,7 @@ namespace MirageAPI::DirectX
 
         array<DX12FrameBuffer^>^ m_frameBuffers;
         DX12WindowCommandList^ m_windowCommandList;
-        ID3D12DescriptorHeap* m_rtvHeap = nullptr;
+        DX12DescriptorHeap^ m_rtvHeap;
 
         UINT m_frameIndex = 0;
         UINT m_rtvDescriptorSize = 0;
@@ -57,10 +57,8 @@ namespace MirageAPI::DirectX
             }
         }
 
-        property DX12WindowCommandList^ CommandList
-        {
-            DX12WindowCommandList^ get() { return m_windowCommandList; }
-        }
+        property DX12WindowCommandList^ CommandList { DX12WindowCommandList^ get() { return m_windowCommandList; } }
+        property DX12DescriptorHeap^ RTVHeap { DX12DescriptorHeap^ get() { return m_rtvHeap; } }
 
         property int VSync
         {

@@ -1,5 +1,4 @@
 ﻿using Engine.Base;
-using OpenTK.Mathematics;
 
 namespace AppLib.Game;
 
@@ -9,11 +8,7 @@ public class TestApp : Game<TestAppData, GameWindow>
     {
         return new TestAppData
         {
-            Tps = 0,
-            GlData = new()
-            {
-                ClearColor = Vector4.Zero
-            }
+            Tps = 0
         };
     }
 

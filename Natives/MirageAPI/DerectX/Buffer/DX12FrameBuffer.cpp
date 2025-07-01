@@ -9,10 +9,12 @@ namespace MirageAPI::DirectX
     DX12FrameBuffer::DX12FrameBuffer(
         ID3D12Resource* resource,
         unsigned int size,
-        D3D12_CPU_DESCRIPTOR_HANDLE* rtvHandle,
+        DX12DescriptorHeap^ rtvHeap,
+        unsigned int rtvDescriptorIndex,
         DX12ResourceFormat format
     ) : DX12Resource(size, format),
-        m_rtvHandle(rtvHandle)
+        m_rtvDescriptorIndex(rtvDescriptorIndex),
+        m_rtvHeap(rtvHeap)
     {
         m_nativeResource = resource;
         m_currentState = DX12ResourceState::Present;
@@ -84,21 +86,7 @@ namespace MirageAPI::DirectX
 
         m_nativeResource = buffer;
 
-        // Создаем RTV
-        D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = {};
-        rtvHeapDesc.NumDescriptors = 1;
-        rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-        rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-
-        ID3D12DescriptorHeap* rtvHeap;
-        if (FAILED(device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&rtvHeap))))
-        {
-            throw gcnew System::Exception("Failed to create RTV heap");
-        }
-
-        m_rtvHandle = new D3D12_CPU_DESCRIPTOR_HANDLE();
-        *m_rtvHandle = rtvHeap->GetCPUDescriptorHandleForHeapStart();
-        device->CreateRenderTargetView(m_nativeResource, nullptr, *m_rtvHandle);
+        m_rtvHeap = DX12Context::GetDescriptorHeap(DX12DescriptorHeapType::RTV, 256, true);
     }
 
     DX12FrameBuffer::~DX12FrameBuffer()
@@ -108,10 +96,10 @@ namespace MirageAPI::DirectX
 
     DX12FrameBuffer::!DX12FrameBuffer()
     {
-        if (m_rtvHandle)
+        if (m_rtvDescriptorIndex != UINT_MAX && m_rtvHeap != nullptr)
         {
-            delete m_rtvHandle;
-            m_rtvHandle = nullptr;
+            m_rtvHeap->Free(m_rtvDescriptorIndex);
+            m_rtvDescriptorIndex = UINT_MAX;
         }
 
         if (m_nativeResource)
@@ -122,6 +110,18 @@ namespace MirageAPI::DirectX
                 m_nativeResource = nullptr;
             }
         }
+    }
+
+    D3D12_CPU_DESCRIPTOR_HANDLE DX12FrameBuffer::RTVHandle::get()
+    {
+        if (m_rtvHeap == nullptr || !m_rtvHeap->IsValid || m_rtvDescriptorIndex == UINT_MAX)
+        {
+            throw gcnew System::InvalidOperationException("Invalid RTV handle");
+        }
+
+        D3D12_CPU_DESCRIPTOR_HANDLE handle = m_rtvHeap->NativeHeap->GetCPUDescriptorHandleForHeapStart();
+        handle.ptr += m_rtvDescriptorIndex * m_rtvHeap->DescriptorSize;
+        return handle;
     }
 
     void DX12FrameBuffer::TransitionState(
