@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include <d3d12.h>
-#include "..\DX12Enums.h"
 
 namespace MirageAPI::DirectX
 {

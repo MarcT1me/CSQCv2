@@ -1,7 +1,8 @@
 ﻿#pragma once
 
-#include "..\DX12Enums.h"
-#include "..\DX12PipelineState.h"
+#include "..\Pipeline\DX12PipelineState.h"
+#include "..\Buffer\DX12FrameBuffer.h"
+#include "..\Buffer\DX12IndexBuffer.h"
 #include "..\Buffer\DX12VertexBuffer.h"
 
 namespace MirageAPI::DirectX
@@ -35,8 +36,7 @@ namespace MirageAPI::DirectX
 
         void SetPipelineState(DX12PipelineState^ pipelineState);
         void SetGraphicsRootSignature(DX12PipelineState^ pipelineState);
-        void IASetPrimitiveTopology(PrimitiveTopology topology);
-        void IASetVertexBuffer(DX12VertexBuffer^ vertexBuffer);
+        void IASetPrimitiveTopology(DX12PrimitiveTopology topology);
         void DrawInstanced(UINT vertexCount, UINT instanceCount, UINT startVertex, UINT startInstance);
 
         void SetViewport(
@@ -48,5 +48,17 @@ namespace MirageAPI::DirectX
             int left, int top,
             int right, int bottom
         );
+
+        void ClearRenderTargetView(DX12FrameBuffer^ frameBuffer, float r, float g, float b, float a);
+
+        void BindBuffer(DX12VertexBuffer^ vertexBuffer)
+        {
+            vertexBuffer->Bind(m_commandList);
+        }
+        
+        void BindBuffer(DX12IndexBuffer^ indexBuffer)
+        {
+            indexBuffer->Bind(m_commandList);
+        }
     };
 }

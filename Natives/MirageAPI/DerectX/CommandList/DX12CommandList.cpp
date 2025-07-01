@@ -1,8 +1,8 @@
 ﻿#include "pch.h"
 #include "DX12CommandList.h"
 
-#include "..\DX12Context.h"
 #include "..\DX12Enums.h"
+#include "..\DX12Context.h"
 
 namespace MirageAPI::DirectX
 {
@@ -105,14 +105,9 @@ namespace MirageAPI::DirectX
         m_commandList->SetGraphicsRootSignature(pipelineState->RootSignature);
     }
 
-    void DX12CommandList::IASetPrimitiveTopology(PrimitiveTopology topology)
+    void DX12CommandList::IASetPrimitiveTopology(DX12PrimitiveTopology topology)
     {
         m_commandList->IASetPrimitiveTopology(static_cast<D3D12_PRIMITIVE_TOPOLOGY>(topology));
-    }
-
-    void DX12CommandList::IASetVertexBuffer(DX12VertexBuffer^ vertexBuffer)
-    {
-        vertexBuffer->Bind(m_commandList);
     }
 
     void DX12CommandList::DrawInstanced(UINT vertexCount, UINT instanceCount, UINT startVertex, UINT startInstance)
@@ -141,5 +136,19 @@ namespace MirageAPI::DirectX
     
         D3D12_RECT rect = { left, top, right, bottom };
         m_commandList->RSSetScissorRects(1, &rect);
+    }
+    
+    void DX12CommandList::ClearRenderTargetView(
+        DX12FrameBuffer^ frameBuffer,
+        float r, float g, float b, float a
+    )
+    {
+        if (!m_commandList || frameBuffer == nullptr) return;
+
+        D3D12_CPU_DESCRIPTOR_HANDLE* rtvHandle = frameBuffer->RTVHandle;
+        if (rtvHandle == nullptr) return;
+        
+        const float clearColor[] = {r, g, b, a};
+        m_commandList->ClearRenderTargetView(*rtvHandle, clearColor, 0, nullptr);
     }
 }

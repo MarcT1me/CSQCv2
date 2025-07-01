@@ -269,12 +269,12 @@ namespace MirageAPI::Window
 
     bool NativeWindow::IsMinimized::get()
     {
-        return IsIconic(hwnd) != FALSE;
+        return IsIconic(hwnd) && TRUE;
     }
 
     bool NativeWindow::IsMaximized::get()
     {
-        return IsZoomed(hwnd) != FALSE;
+        return IsZoomed(hwnd) && TRUE;
     }
 
     void NativeWindow::SetVSync(bool enabled)
@@ -299,6 +299,6 @@ namespace MirageAPI::Window
 
     void NativeWindow::Clear(float r, float g, float b, float a)
     {
-        dxContext->CommandList->ClearRenderTargetView(dxContext->CurrentFrameBuffer, r, g, b, a);
+        dxContext->Clear(r, g, b, a);
     }
 }

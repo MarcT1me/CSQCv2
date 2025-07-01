@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "DX12ContextConfig.h"
+
 #include "CommandList/DX12WindowCommandList.h"
 #include "Buffer/DX12FrameBuffer.h"
 
@@ -41,6 +42,7 @@ namespace MirageAPI::DirectX
         void Resize(int width, int height);
         void SetViewport(float x, float y, float width, float height);
         void SetViewportDepth(float x, float y);
+        void Clear(float r, float g, float b, float a);
         void BeginFrame();
         void EndFrame();
         void Present();

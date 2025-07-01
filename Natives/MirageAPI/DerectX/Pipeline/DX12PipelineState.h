@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "DX12ContextConfig.h"
-#include "Shader/DX12Shader.h"
+#include "..\DX12ContextConfig.h"
+#include "DX12PipelineStateConfig.h"
 
 namespace MirageAPI::DirectX
 {
@@ -9,13 +9,13 @@ namespace MirageAPI::DirectX
     {
         ID3D12PipelineState* m_pso;
         ID3D12RootSignature* m_rootSignature;
+        
+        std::string* m_semanticNames;
+        D3D12_INPUT_ELEMENT_DESC* m_inputLayoutsArr;
+        unsigned int m_inputLayoutsLength;
 
     public:
-        DX12PipelineState(
-            DX12Shader^ vertexShader,
-            DX12Shader^ pixelShader,
-            DX12BufferFormat rtvFormat
-        );
+        DX12PipelineState(DX12PipelineStateConfig config);
         ~DX12PipelineState();
         !DX12PipelineState();
 

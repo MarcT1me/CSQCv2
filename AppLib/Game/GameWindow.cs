@@ -1,5 +1,4 @@
 ﻿using System.Runtime.InteropServices;
-using Engine.Asset;
 using Engine.Events.QuantumEvents;
 using OpenTK.Mathematics;
 using Engine.Graphic.Window;
@@ -7,7 +6,11 @@ using Engine.Logging;
 using MirageAPI.DirectX;
 using System.Reflection;
 using System.Text;
+
+#if !DEBUG
+using Engine.Asset;
 using Engine;
+#endif
 
 namespace AppLib.Game;
 
@@ -23,20 +26,10 @@ public static class ShaderResourceLoader
         using var reader = new StreamReader(stream, Encoding.UTF8);
         return reader.ReadToEnd();
     }
-
-    public static byte[] LoadEmbeddedShaderBytes(string resourceName)
-    {
-        var assembly = Assembly.GetExecutingAssembly();
-        using var stream = assembly.GetManifestResourceStream(resourceName);
-        if (stream == null)
-            throw new FileNotFoundException($"Embedded shader resource not found: {resourceName}");
-
-        using var ms = new MemoryStream();
-        stream.CopyTo(ms);
-        return ms.ToArray();
-    }
 }
 
+// Cache generator
+#if !DEBUG
 public static class ShaderCacheManager
 {
     private static string CacheDirectory => Path.Combine(
@@ -100,6 +93,7 @@ public static class ShaderCacheManager
         return shader;
     }
 }
+#endif
 
 [StructLayout(LayoutKind.Sequential)]
 struct Vertex
@@ -196,7 +190,18 @@ public class GameWindow : Window
 
     private void CreatePipelineState()
     {
-        _pipelineState = new DX12PipelineState(_vertexShader, _pixelShader, DX12BufferFormat.RGBA_UNORM);
+        var config = DX12PipelineStateConfig.Default;
+        config.VertexShader = _vertexShader;
+        config.PixelShader = _pixelShader;
+        config.InputLayouts =
+        [
+            new DX12InputElement
+            {
+                SemanticName = "POSITION",
+                Format = DX12ResourceFormat.RGB32_FLOAT
+            }
+        ];
+        _pipelineState = new DX12PipelineState(config);
     }
 
     private void CreateGeometryBuffers()
@@ -216,7 +221,17 @@ public class GameWindow : Window
         int vertexSize = Marshal.SizeOf<Vertex>();
         int bufferSize = vertices.Length * vertexSize;
 
-        _vertexBuffer = new DX12VertexBuffer((uint)bufferSize, (uint)vertexSize);
+        var vertexConfig = new DX12ResourceConfig
+        {
+            Type = DX12ResourceType.VertexBuffer,
+            Stride = (uint)vertexSize,
+            Width = (uint)bufferSize,
+            HeapType = DX12HeapType.Upload,
+            Flags = DX12ResourceFlags.None,
+            InitialState = DX12ResourceState.VertexAndConstantBuffer
+        };
+        _vertexBuffer = new DX12VertexBuffer(vertexConfig);
+
         try
         {
             unsafe
@@ -254,9 +269,9 @@ public class GameWindow : Window
         commandList.SetPipelineState(_pipelineState);
         commandList.SetGraphicsRootSignature(_pipelineState);
 
-        commandList.IASetPrimitiveTopology(PrimitiveTopology.TriangleList);
+        commandList.IASetPrimitiveTopology(DX12PrimitiveTopology.TriangleList);
 
-        commandList.IASetVertexBuffer(_vertexBuffer);
+        commandList.BindBuffer(_vertexBuffer);
 
         commandList.DrawInstanced(6, 1, 0, 0);
     }

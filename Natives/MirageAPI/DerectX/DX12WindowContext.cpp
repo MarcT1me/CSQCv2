@@ -1,10 +1,8 @@
 ﻿#include "pch.h"
-#include "DX12Context.h"
-
 #include "DX12WindowContext.h"
 
-#include <iostream>
-#include <ostream>
+#include "DX12Helpers.h"
+#include "DX12Context.h"
 
 namespace MirageAPI::DirectX
 {
@@ -155,12 +153,17 @@ namespace MirageAPI::DirectX
                 throw gcnew System::Exception("GetBuffer failed");
             }
 
-            D3D12_CPU_DESCRIPTOR_HANDLE* handlePtr = new D3D12_CPU_DESCRIPTOR_HANDLE();
-            *handlePtr = rtvHandle;
-
+            D3D12_CPU_DESCRIPTOR_HANDLE* handlePtr = new D3D12_CPU_DESCRIPTOR_HANDLE(rtvHandle);
             DX12Context::GetDevice()->CreateRenderTargetView(renderTarget, nullptr, *handlePtr);
 
-            m_frameBuffers[i] = gcnew DX12FrameBuffer(renderTarget, handlePtr);
+            DX12ResourceFormat format = DX12ResourceFormat::RGBA8_UNORM;
+            UINT size = GetTextureFormatSize(format);
+            m_frameBuffers[i] = gcnew DX12FrameBuffer(
+                renderTarget, 
+                size,
+                handlePtr,
+                format
+            );
 
             rtvHandle.ptr += m_rtvDescriptorSize;
         }
@@ -255,6 +258,12 @@ namespace MirageAPI::DirectX
         m_config->viewportDepthX = x;
         m_config->viewportDepthY = y;
     }
+
+    void DX12WindowContext::Clear(float r, float g, float b, float a)
+    {
+        m_windowCommandList->ClearRenderTargetView(CurrentFrameBuffer, r, g, b, a);
+    }
+
 
     void DX12WindowContext::BeginFrame()
     {

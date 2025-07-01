@@ -1,8 +1,6 @@
 ﻿#include "pch.h"
 #include "DX12Context.h"
 
-#include <d3d12.h>
-
 namespace MirageAPI::DirectX
 {
     void DX12Context::Initialize()
