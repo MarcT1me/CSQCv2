@@ -3,45 +3,24 @@
 
 namespace MirageAPI::DirectX
 {
-    DX12ResourceConfig GetStructuredBufferConfig(
-        unsigned int
-        elementCount,
-        unsigned int stride,
-        DX12HeapType heapType,
-        DX12ResourceFlags flags
-    )
+    DX12StructuredBuffer::~DX12StructuredBuffer()
     {
-        DX12ResourceConfig config;
-        config.Type = DX12ResourceType::StructuredBuffer;
-        config.Width = static_cast<UINT64>(elementCount) * stride;
-        config.Stride = stride;
-        config.HeapType = heapType;
-        config.InitialState = DX12ResourceState::Common;
-        config.Flags = flags;
-        return config;
+        this->!DX12StructuredBuffer();
     }
 
-    DX12StructuredBuffer::DX12StructuredBuffer(
-        unsigned int elementCount,
-        unsigned int stride,
-        DX12HeapType heapType,
-        DX12ResourceFlags flags
-    ): DX12Buffer(GetStructuredBufferConfig(elementCount, stride, heapType, flags))
+    void DX12StructuredBuffer::!DX12StructuredBuffer()
     {
-    }
-
-    void DX12StructuredBuffer::UpdateData(array<System::Byte>^ data)
-    {
-        if (!m_nativeResource || data->Length != m_size) return;
-
-        if (void* pData = this->Map())
+        ReleaseSRV();
+        if (m_nativeResource)
         {
-            pin_ptr<System::Byte> pinData = &data[0];
-            memcpy(pData, pinData, m_size);
             Unmap();
+            if (m_nativeResource->Release() == 0)
+            {
+                m_nativeResource = nullptr;
+            }
         }
     }
-
+    
     D3D12_SHADER_RESOURCE_VIEW_DESC DX12StructuredBuffer::CreateSRVDesc()
     {
         D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -53,5 +32,35 @@ namespace MirageAPI::DirectX
         srvDesc.Buffer.StructureByteStride = m_stride;
         srvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
         return srvDesc;
+    }
+
+    void DX12StructuredBuffer::CreateSRV()
+    {
+        if (m_srvIndex != UINT_MAX) return;
+
+        auto srvHeap = DX12Context::GetDescriptorHeap(DX12DescriptorHeapType::CBV_SRV_UAV, 256, true);
+
+        m_srvIndex = srvHeap->Allocate();
+        auto device = DX12Context::GetDevice();
+
+        D3D12_CPU_DESCRIPTOR_HANDLE handle = srvHeap->NativeHeap->GetCPUDescriptorHandleForHeapStart();
+        handle.ptr += m_srvIndex * srvHeap->DescriptorSize;
+
+        D3D12_SHADER_RESOURCE_VIEW_DESC desc = CreateSRVDesc();
+        device->CreateShaderResourceView(
+            m_nativeResource,
+            &desc,
+            handle
+        );
+    }
+
+    void DX12StructuredBuffer::ReleaseSRV()
+    {
+        if (m_srvIndex == UINT_MAX) return;
+
+        auto srvHeap = DX12Context::GetDescriptorHeap(DX12DescriptorHeapType::CBV_SRV_UAV, 256, true);
+
+        srvHeap->Free(m_srvIndex);
+        m_srvIndex = UINT_MAX;
     }
 }

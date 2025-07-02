@@ -2,6 +2,8 @@
 
 #include <d3d12.h>
 
+#include "DX12Context.h"
+
 namespace MirageAPI::DirectX
 {
     inline void UpdateSubresources(
@@ -11,37 +13,43 @@ namespace MirageAPI::DirectX
         UINT64 IntermediateOffset,
         unsigned int FirstSubresource,
         unsigned int NumSubresources,
-        const D3D12_SUBRESOURCE_DATA* pSrcData
-    )
+        const D3D12_SUBRESOURCE_DATA* pSrcData)
     {
-        // Упрощенная реализация для одного субресурса
-        if (NumSubresources == 1)
+        // Получаем описание ресурса
+        D3D12_RESOURCE_DESC desc = pDestinationResource->GetDesc();
+
+        // Рассчитываем параметры копирования
+        D3D12_PLACED_SUBRESOURCE_FOOTPRINT layout;
+        UINT64 rowSizeInBytes;
+        UINT64 totalBytes;
+        DX12Context::GetDevice()->GetCopyableFootprints(
+            &desc,
+            FirstSubresource,
+            NumSubresources,
+            IntermediateOffset,
+            &layout,
+            nullptr,
+            &rowSizeInBytes,
+            &totalBytes
+        );
+
+        // Копируем данные
+        for (UINT i = 0; i < NumSubresources; ++i)
         {
-            D3D12_RESOURCE_DESC desc = pDestinationResource->GetDesc();
             D3D12_TEXTURE_COPY_LOCATION dst = {
                 pDestinationResource,
                 D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX,
-                FirstSubresource
+                FirstSubresource + i
             };
+
             D3D12_TEXTURE_COPY_LOCATION src = {
                 pIntermediate,
                 D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT,
-                {
-                    IntermediateOffset, {
-                        desc.Format,
-                        static_cast<UINT>(desc.Width),
-                        static_cast<UINT>(desc.Height),
-                        static_cast<UINT>(desc.DepthOrArraySize),
-                        static_cast<UINT>(pSrcData->RowPitch)
-                    }
-                }
+                {layout.Offset + i * layout.Footprint.RowPitch * layout.Footprint.Height}
             };
+            src.PlacedFootprint = layout;
+
             pCmdList->CopyTextureRegion(&dst, 0, 0, 0, &src, nullptr);
-        }
-        else
-        {
-            // Для нескольких субресурсов потребуется более сложная реализация
-            throw gcnew System::NotImplementedException("Multi-subresource updates not implemented");
         }
     }
 
@@ -121,7 +129,7 @@ namespace MirageAPI::DirectX
         // Unknown/default
         case DX12ResourceFormat::Unknown:
         default:
-            return 1;
+            throw gcnew System::NotImplementedException("Unsupported texture format");
         }
     }
 }

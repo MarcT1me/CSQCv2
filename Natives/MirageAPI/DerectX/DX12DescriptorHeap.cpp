@@ -76,6 +76,11 @@ namespace MirageAPI::DirectX
 
     UINT DX12DescriptorHeap::Allocate()
     {
+        if (!m_heap || m_descriptorSize == 0)
+        {
+            throw gcnew System::InvalidOperationException("Descriptor heap not initialized");
+        }
+        
         Validate();
 
         if (m_freeList->Count > 0)

@@ -9,35 +9,62 @@
 
 namespace MirageAPI::DirectX
 {
-    D3D12_ROOT_PARAMETER GenerateRootParameterDesc(DX12RootParameter param)
+    D3D12_ROOT_PARAMETER DX12PipelineState::GenerateRootParameterDesc(DX12PipelineParameter param)
     {
-        D3D12_ROOT_PARAMETER d3dParam = {};
+        D3D12_ROOT_PARAMETER d3dParam;
         d3dParam.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
         switch (param.Type)
         {
         case DX12ResourceType::Constants:
-            d3dParam.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-            d3dParam.Constants.Num32BitValues = param.NumConstants;
-            d3dParam.Constants.ShaderRegister = param.RegisterSlot;
-            d3dParam.Constants.RegisterSpace = param.RegisterSpace;
-            break;
+            {
+                d3dParam.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
 
+                d3dParam.Constants.Num32BitValues = param.NumConstants;
+                d3dParam.Constants.ShaderRegister = param.RegisterSlot;
+                d3dParam.Constants.RegisterSpace = param.RegisterSpace;
+                break;
+            }
         case DX12ResourceType::ConstantBuffer:
-            d3dParam.ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-            d3dParam.Descriptor.ShaderRegister = param.RegisterSlot;
-            d3dParam.Descriptor.RegisterSpace = param.RegisterSpace;
-            break;
+            {
+                d3dParam.ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 
+                d3dParam.Descriptor.ShaderRegister = param.RegisterSlot;
+                d3dParam.Descriptor.RegisterSpace = param.RegisterSpace;
+                break;
+            }
         case DX12ResourceType::StructuredBuffer:
-        case DX12ResourceType::Texture:
-            d3dParam.ParameterType = D3D12_ROOT_PARAMETER_TYPE_SRV;
-            d3dParam.Descriptor.ShaderRegister = param.RegisterSlot;
-            d3dParam.Descriptor.RegisterSpace = param.RegisterSpace;
-            break;
+            {
+                d3dParam.ParameterType = D3D12_ROOT_PARAMETER_TYPE_SRV;
 
+                d3dParam.Descriptor.ShaderRegister = param.RegisterSlot;
+                d3dParam.Descriptor.RegisterSpace = param.RegisterSpace;
+                break;
+            }
+        case DX12ResourceType::Texture:
+            {
+                d3dParam.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+                d3dParam.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+                // Создаем диапазон в куче
+                D3D12_DESCRIPTOR_RANGE* range = new D3D12_DESCRIPTOR_RANGE();
+                range->RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+                range->NumDescriptors = 1;
+                range->BaseShaderRegister = param.RegisterSlot;
+                range->RegisterSpace = param.RegisterSpace;
+                range->OffsetInDescriptorsFromTableStart = 0;
+
+                d3dParam.DescriptorTable.NumDescriptorRanges = 1;
+                d3dParam.DescriptorTable.pDescriptorRanges = range;
+
+                // Сохраняем указатель для последующего удаления
+                m_descriptorRanges->Add(System::IntPtr(range));
+                break;
+            }
         default:
-            break;
+            {
+                throw gcnew System::NotSupportedException("Unsupported resource type");
+            }
         }
 
         // ReSharper disable once CppSomeObjectMembersMightNotBeInitialized
@@ -46,9 +73,15 @@ namespace MirageAPI::DirectX
 
     DX12PipelineState::DX12PipelineState(
         DX12PipelineStateConfig config
-    )
+    ) : m_descriptorRanges(gcnew System::Collections::Generic::List<System::IntPtr>())
     {
         auto device = DX12Context::GetDevice();
+        if (!device)
+        {
+            throw gcnew System::InvalidOperationException(
+                "DirectX 12 device not initialized. Call DX12Context::Initialize() first."
+            );
+        }
 
         if (config.RootParams)
         {
@@ -59,9 +92,24 @@ namespace MirageAPI::DirectX
                 m_rootParameters[i] = GenerateRootParameterDesc(config.RootParams[i]);
         }
 
+        D3D12_STATIC_SAMPLER_DESC samplerDesc = {};
+        samplerDesc.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+        samplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+        samplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+        samplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+        samplerDesc.MipLODBias = 0.0f;
+        samplerDesc.MaxAnisotropy = 16;
+        samplerDesc.ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+        samplerDesc.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
+        samplerDesc.MinLOD = 0.0f;
+        samplerDesc.MaxLOD = D3D12_FLOAT32_MAX;
+        samplerDesc.ShaderRegister = 0; // register(s0)
+        samplerDesc.RegisterSpace = 0;
+        samplerDesc.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
         D3D12_ROOT_SIGNATURE_DESC rootSignatureDesc = {
             m_rootParametersLength, m_rootParameters,
-            0, nullptr,
+            1, &samplerDesc,
             D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT
         };
 
@@ -98,7 +146,13 @@ namespace MirageAPI::DirectX
 
         if (FAILED(hr))
         {
-            throw gcnew System::Exception("Failed to create root signature");
+            if (hr == DXGI_ERROR_DEVICE_REMOVED)
+            {
+                HRESULT deviceRemovedReason = device->GetDeviceRemovedReason();
+                System::String^ reasonMsg = "Device removed reason: " + deviceRemovedReason;
+                throw gcnew System::Exception(reasonMsg);
+            }
+            throw gcnew System::Exception("Failed to create root signature: " + hr);
         }
         m_rootSignature = rootSignature;
 
@@ -209,6 +263,19 @@ namespace MirageAPI::DirectX
         {
             delete[] m_semanticNames;
             m_semanticNames = nullptr;
+        }
+        m_descriptorRanges->Clear();
+        if (m_rootParameters)
+        {
+            for (unsigned int i = 0; i < m_rootParametersLength; i++)
+            {
+                if (m_rootParameters[i].ParameterType == D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE)
+                {
+                    delete m_rootParameters[i].DescriptorTable.pDescriptorRanges;
+                }
+            }
+            delete[] m_rootParameters;
+            m_rootParameters = nullptr;
         }
     }
 }

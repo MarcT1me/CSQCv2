@@ -8,9 +8,8 @@ public static class DependencyResolver
 {
     private static readonly ConcurrentSet<string> LoadedSet = new();
 
-    public static async Task<LinkedList<AssetData>> ResolveAsync(
-        AssetFile assetFile,
-        CancellationToken ct = default
+    public static LinkedList<AssetData> Resolve(
+        AssetFile assetFile
     )
     {
         Logger.Info($"Resolving asset dependencies for {assetFile.Identifier}");
@@ -30,12 +29,12 @@ public static class DependencyResolver
         AssetFile? currentDependency = null;
         try
         {
-            var loadTasks = assetFile.Dependencies
-                .Select(dep => AssetManager.LoadAsync(dep, ct: ct))
+            var assetDatas = assetFile.Dependencies
+                .Select(dep => AssetManager.Load(dep))
                 .ToList();
 
-            await Task.WhenAll(loadTasks);
-            foreach (var task in loadTasks) dependencies.AddLast(task.Result);
+            foreach (var data in assetDatas) 
+                dependencies.AddLast(data);
 
             return dependencies;
         }

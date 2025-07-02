@@ -8,10 +8,9 @@ namespace MirageAPI::DirectX
 {
     DX12Buffer::DX12Buffer(
         DX12ResourceConfig config
-    ) : DX12Resource(config.Width, config.Format),
-        m_stride(config.Stride),
-        m_elementCount(config.Width * config.Height),
-        m_bufferType(config.Type)
+    ) : DX12Resource(config, config.Width * config.Stride),
+        m_elementCount(config.Width),
+        m_stride(config.Stride)
     {
         auto device = DX12Context::GetDevice();
         if (!device)
@@ -31,13 +30,14 @@ namespace MirageAPI::DirectX
         D3D12_RESOURCE_DESC desc = {};
         desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
         desc.Width = config.Width;
+        desc.Format = static_cast<DXGI_FORMAT>(config.Format);
+        desc.Flags = static_cast<D3D12_RESOURCE_FLAGS>(config.Flags);
+
         desc.Height = 1;
         desc.DepthOrArraySize = 1;
         desc.MipLevels = 1;
-        desc.Format = DXGI_FORMAT_UNKNOWN;
         desc.SampleDesc = {1, 0};
         desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-        desc.Flags = static_cast<D3D12_RESOURCE_FLAGS>(config.Flags);
 
         ID3D12Resource* buffer = nullptr;
         HRESULT hr = device->CreateCommittedResource(
@@ -48,20 +48,22 @@ namespace MirageAPI::DirectX
             nullptr,
             IID_PPV_ARGS(&buffer)
         );
-
+        if (hr == DXGI_ERROR_DEVICE_REMOVED)
+        {
+            HRESULT reason = device->GetDeviceRemovedReason();
+            throw gcnew System::Exception("Device removed during buffer creation: " + reason);
+        }
         if (FAILED(hr))
         {
-            throw gcnew System::Exception(
-                "Failed to create buffer: " + hr
-            );
+            throw gcnew System::Exception("Failed to create buffer: " + hr);
         }
-
         m_nativeResource = buffer;
     }
 
     void DX12Buffer::TransitionState(
         DX12CommandList^ commandList,
-        DX12ResourceState newState)
+        DX12ResourceState newState
+    )
     {
         if (m_currentState == newState) return;
 
@@ -76,7 +78,9 @@ namespace MirageAPI::DirectX
         m_currentState = newState;
     }
 
-    void DX12Buffer::UploadData(array<System::Byte>^ data)
+    void DX12Buffer::UploadData(
+        array<System::Byte>^ data
+    )
     {
         if (!m_nativeResource || data->Length != m_size) return;
 

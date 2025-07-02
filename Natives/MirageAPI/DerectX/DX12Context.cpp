@@ -7,21 +7,39 @@
 
 namespace MirageAPI::DirectX
 {
-    void DX12Context::Initialize()
+    void DX12Context::Initialize(bool isDebug)
     {
+        if (isDebug)
+        {
+            ID3D12Debug* debugController;
+            if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController))))
+            {
+                debugController->EnableDebugLayer();
+                debugController->Release();
+
+                ID3D12Debug1* debugController1;
+                if (SUCCEEDED(debugController->QueryInterface(IID_PPV_ARGS(&debugController1))))
+                {
+                    debugController1->SetEnableGPUBasedValidation(true);
+                    debugController1->Release();
+                }
+            }
+        }
+
         ID3D12Device* device;
         HRESULT hr = D3D12CreateDevice(
             nullptr,
             D3D_FEATURE_LEVEL_11_0,
             IID_PPV_ARGS(&device)
         );
-        if (hr == DXGI_ERROR_UNSUPPORTED)
-        {
-            throw gcnew System::Exception("DirectX 12 не поддерживается на этой системе");
-        }
         if (FAILED(hr))
         {
-            throw gcnew System::Exception("Failed to create D3D12 Device.");
+            if (hr == DXGI_ERROR_DEVICE_REMOVED)
+            {
+                HRESULT reason = device->GetDeviceRemovedReason();
+                throw gcnew System::Exception("Device removed during initialization: 0x" + reason);
+            }
+            throw gcnew System::Exception("Failed to create D3D12 Device: 0x" + hr);
         }
         s_device = device;
 

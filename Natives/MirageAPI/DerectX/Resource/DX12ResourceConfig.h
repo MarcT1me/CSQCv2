@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "../DX12Helpers.h"
 
 namespace MirageAPI::DirectX
 {
@@ -18,43 +19,137 @@ namespace MirageAPI::DirectX
 
         DX12ResourceFlags Flags;
         DX12ResourceState InitialState;
-
         DX12HeapType HeapType;
 
-        static property DX12ResourceConfig DefaultVertexBuffer
+        static DX12ResourceConfig BufferConfig(DX12ResourceType type)
         {
-            DX12ResourceConfig get()
-            {
-                return {
-                    DX12ResourceType::Buffer,
-                    1024, 1,
-                    sizeof(float) * 3,
-                    1, 1,
-                    DX12ResourceFormat::Unknown,
-                    DX12TextureType::None,
-                    DX12ResourceFlags::None,
-                    DX12ResourceState::VertexAndConstantBuffer,
-                    DX12HeapType::Upload
-                };
-            }
+            DX12ResourceConfig config;
+            config.Type = type;
+            config.Format = DX12ResourceFormat::Unknown;
+            config.TextureType = DX12TextureType::None;
+            config.Flags = DX12ResourceFlags::None;
+            return config;
         }
 
-        static property DX12ResourceConfig DefaultRenderTarget
+        static DX12ResourceConfig VertexBufferConfig(
+            unsigned int elementCount,
+            unsigned int stride
+        )
         {
-            DX12ResourceConfig get()
+            DX12ResourceConfig config = BufferConfig(DX12ResourceType::VertexBuffer);
+            config.Width = elementCount;
+            config.Stride = stride;
+
+            config.InitialState = DX12ResourceState::VertexAndConstantBuffer;
+            config.HeapType = DX12HeapType::Upload;
+            return config;
+        }
+
+        static DX12ResourceConfig IndexBufferConfig(
+            unsigned int elementCount,
+            DX12ResourceFormat format
+        )
+        {
+            if (format != DX12ResourceFormat::R16_UINT &&
+                format != DX12ResourceFormat::R32_UINT)
             {
-                return {
-                    DX12ResourceType::Texture,
-                    1024, 768,
-                    0,
-                    1, 1,
-                    DX12ResourceFormat::RGBA8_UNORM,
-                    DX12TextureType::RenderTarget,
-                    DX12ResourceFlags::AllowRenderTarget,
-                    DX12ResourceState::RenderTarget,
-                    DX12HeapType::Default,
-                };
+                throw gcnew System::ArgumentException("Invalid index buffer format");
             }
+
+            DX12ResourceConfig config = BufferConfig(DX12ResourceType::IndexBuffer);
+            config.Width = elementCount;
+            config.Stride = GetResourceFormatSize(format);
+            config.Format = format;
+
+            config.InitialState = DX12ResourceState::IndexBuffer;
+            config.HeapType = DX12HeapType::Upload;
+            return config;
+        }
+
+        static DX12ResourceConfig UploadBufferConfig(
+            unsigned int size
+        )
+        {
+            DX12ResourceConfig config = BufferConfig(DX12ResourceType::UploadBuffer);
+            config.Width = size;
+            config.Stride = 1;
+
+            config.InitialState = DX12ResourceState::GenericRead;
+            config.HeapType = DX12HeapType::Upload;
+            return config;
+        }
+
+        static DX12ResourceConfig ConstantBufferConfig()
+        {
+            DX12ResourceConfig config = BufferConfig(DX12ResourceType::ConstantBuffer);
+            config.Width = 256;
+
+            config.InitialState = DX12ResourceState::GenericRead;
+            config.HeapType = DX12HeapType::Upload;
+            return config;
+        }
+
+        static DX12ResourceConfig StructuredBufferConfig(
+            unsigned int elementCount,
+            unsigned int stride,
+            DX12ResourceFlags flags,
+            DX12HeapType heapType
+        )
+        {
+            DX12ResourceConfig config = BufferConfig(DX12ResourceType::StructuredBuffer);
+            config.Width = elementCount;
+            config.Stride = stride;
+
+            config.Flags = flags;
+            config.InitialState = DX12ResourceState::Common;
+            config.HeapType = heapType;
+            return config;
+        }
+
+        static DX12ResourceConfig TextureConfig(
+            unsigned int width,
+            unsigned int height,
+            DX12ResourceFormat format,
+            unsigned int depth,
+            unsigned int mipLevels,
+            DX12TextureType type,
+            DX12ResourceFlags flags
+        )
+        {
+            return {
+                DX12ResourceType::Texture,
+                width,
+                height,
+                GetResourceFormatSize(format),
+                depth,
+                mipLevels,
+                format,
+                type,
+                flags,
+                DX12ResourceState::Common,
+                DX12HeapType::Default
+            };
+        }
+
+        static DX12ResourceConfig RenderTargetConfig(
+            unsigned int width,
+            unsigned int height,
+            DX12ResourceFormat format
+        )
+        {
+            DX12ResourceConfig config = TextureConfig(
+                width,
+                height,
+                format,
+                1,
+                1,
+                DX12TextureType::RenderTarget,
+                DX12ResourceFlags::AllowRenderTarget
+            );
+            config.Type = DX12ResourceType::FrameBuffer;
+            config.InitialState = DX12ResourceState::RenderTarget;
+            config.HeapType = DX12HeapType::Default;
+            return config;
         }
     };
 }

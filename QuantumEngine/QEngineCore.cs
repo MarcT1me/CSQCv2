@@ -1,4 +1,7 @@
 ﻿using System.Reflection;
+using Engine.Asset;
+using Engine.Asset.Defaults;
+using Engine.Configuration;
 
 namespace Engine;
 
@@ -23,7 +26,9 @@ public class QEngineCore(Assembly? appLibAssembly) : EngineCore(appLibAssembly)
     protected override void InitializeModeSpecific()
     {
         Logger.Info("Initialize MirageAPI::DirectX12");
-        MirageAPI.DirectX.DX12Context.Initialize();
+        MirageAPI.DirectX.DX12Context.Initialize(BaseConfig.DebugMode);
+        
+        AssetManager.RegisterAssetType(new AssetType("image", new ImageAssetLoader()));
     }
 
     protected override void EnableDebugFeatures()

@@ -3,7 +3,7 @@
 #include "..\Shader\DX12Shader.h"
 #include "DX12RasterizerConfig.h"
 #include "DX12BlendConfig.h"
-#include "DX12RootParametersConfig.h"
+#include "DX12PipelineParameter.h"
 
 namespace MirageAPI::DirectX
 {
@@ -23,7 +23,7 @@ namespace MirageAPI::DirectX
         DX12Shader^ PixelShader;
         
         array<DX12InputElement>^ InputLayouts;
-        array<DX12RootParameter>^ RootParams;
+        array<DX12PipelineParameter>^ RootParams;
         
         DX12RasterizerConfig RasterizerState;
         DX12BlendConfig BlendState;

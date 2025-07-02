@@ -17,6 +17,9 @@ namespace MirageAPI::DirectX
         unsigned int m_inputLayoutsLength;
         D3D12_ROOT_PARAMETER* m_rootParameters;
         unsigned int m_rootParametersLength;
+        System::Collections::Generic::List<System::IntPtr>^ m_descriptorRanges;
+
+        D3D12_ROOT_PARAMETER GenerateRootParameterDesc(DX12PipelineParameter param);
 
     public:
         DX12PipelineState(DX12PipelineStateConfig config);

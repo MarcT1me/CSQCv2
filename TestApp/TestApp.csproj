@@ -12,7 +12,7 @@
 
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
         <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
-        
+
         <PublishSingleFile>false</PublishSingleFile>
         <IncludeNativeLibrariesForSelfExtract>false</IncludeNativeLibrariesForSelfExtract>
 
@@ -24,68 +24,68 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Launcher\Launcher.csproj" />
-        <ProjectReference Include="..\AppLib\AppLib.csproj" />
+        <ProjectReference Include="..\Launcher\Launcher.csproj"/>
+        <ProjectReference Include="..\AppLib\AppLib.csproj"/>
     </ItemGroup>
 
     <Target Name="CopyRuntimes" AfterTargets="Build">
-        <MakeDir Directories="$(OutputPath)\bin\runtimes" />
-        
+        <MakeDir Directories="$(OutputPath)\bin\runtimes"/>
+
         <ItemGroup>
-            <RuntimeBinaries Include="$(OutputPath)\**\freetype6.dll" />
+            <RuntimeBinaries Include="$(OutputPath)\**\freetype6.dll"/>
         </ItemGroup>
 
-        <Move SourceFiles="@(RuntimeBinaries)" DestinationFolder="$(OutputPath)\bin\runtimes" />
-        <RemoveDir Directories="$(OutputPath)\runtimes" />
+        <Move SourceFiles="@(RuntimeBinaries)" DestinationFolder="$(OutputPath)\bin\runtimes"/>
+        <RemoveDir Directories="$(OutputPath)\runtimes"/>
     </Target>
 
     <Target Name="MoveAppBinaries" AfterTargets="CopyRuntimes">
         <ItemGroup>
-            <TempAppBinaries Include="$(OutputPath)\*.dll" />
+            <TempAppBinaries Include="$(OutputPath)\*.dll"/>
         </ItemGroup>
 
         <ItemGroup>
-            <UniqueTempAppBinaries Include="@(TempAppBinaries-&gt;Distinct())" />
+            <UniqueTempAppBinaries Include="@(TempAppBinaries-&gt;Distinct())"/>
         </ItemGroup>
 
-        <Move SourceFiles="@(UniqueTempAppBinaries)" DestinationFolder="$(OutputPath)\bin" />
+        <Move SourceFiles="@(UniqueTempAppBinaries)" DestinationFolder="$(OutputPath)\bin"/>
 
-        <Move SourceFiles="$(OutputPath)\bin\Launcher.dll" DestinationFolder="$(OutputPath)" />
-        <Move SourceFiles="$(OutputPath)\bin\TestApp.dll" DestinationFolder="$(OutputPath)" Condition="Exists('$(OutputPath)\bin\TestApp.dll')" />
+        <Move SourceFiles="$(OutputPath)\bin\Launcher.dll" DestinationFolder="$(OutputPath)"/>
+        <Move SourceFiles="$(OutputPath)\bin\TestApp.dll" DestinationFolder="$(OutputPath)" Condition="Exists('$(OutputPath)\bin\TestApp.dll')"/>
     </Target>
 
     <Target Name="MoveEngineBinaries" AfterTargets="MoveAppBinaries">
-        <MakeDir Directories="$(OutputPath)\bin\Engine" />
-        
+        <MakeDir Directories="$(OutputPath)\bin\Engine"/>
+
         <ItemGroup>
-            <TempEngineBinaries Include="$(OutputPath)\**\EngineCore.dll" />
-            <TempEngineBinaries Include="$(OutputPath)\**\QuantumEngine.dll" />
-            <TempEngineBinaries Include="$(OutputPath)\**\Ijwhost.dll" />
-            <TempEngineBinaries Include="$(OutputPath)\**\HeadlessQuantumEngine.dll" />
-            <TempEngineBinaries Include="$(OutputPath)\**\MirageAPI.dll" />
+            <TempEngineBinaries Include="$(OutputPath)\**\EngineCore.dll"/>
+            <TempEngineBinaries Include="$(OutputPath)\**\QuantumEngine.dll"/>
+            <TempEngineBinaries Include="$(OutputPath)\**\Ijwhost.dll"/>
+            <TempEngineBinaries Include="$(OutputPath)\**\HeadlessQuantumEngine.dll"/>
+            <TempEngineBinaries Include="$(OutputPath)\**\MirageAPI.dll"/>
         </ItemGroup>
 
         <ItemGroup>
-            <UniqueTempEngineBinaries Include="@(TempEngineBinaries-&gt;Distinct())" />
+            <UniqueTempEngineBinaries Include="@(TempEngineBinaries-&gt;Distinct())"/>
         </ItemGroup>
 
-        <Move SourceFiles="@(UniqueTempEngineBinaries)" DestinationFolder="$(OutputPath)\bin\Engine" />
+        <Move SourceFiles="@(UniqueTempEngineBinaries)" DestinationFolder="$(OutputPath)\bin\Engine"/>
     </Target>
 
     <Target Name="DelTrash" AfterTargets="MoveEngineBinaries">
         <ItemGroup>
-            <TrashFiles Include="$(OutputPath)\**\*.pdb" />
+            <TrashFiles Include="$(OutputPath)\**\*.pdb"/>
         </ItemGroup>
 
-        <Delete Files="@(TrashFiles)" />
+        <Delete Files="@(TrashFiles)"/>
     </Target>
-    
+
     <Target Name="PrepareForPublish" AfterTargets="Publish">
         <ItemGroup>
-            <PublishFiles Include="$(OutputPath)\**\*.*" />
+            <PublishFiles Include="$(OutputPath)\**\*.*"/>
         </ItemGroup>
         <Copy SourceFiles="@(PublishFiles)"
-              DestinationFiles="@(PublishFiles->'$(PublishDir)\%(RecursiveDir)%(Filename)%(Extension)')" />
+              DestinationFiles="@(PublishFiles->'$(PublishDir)\%(RecursiveDir)%(Filename)%(Extension)')"/>
     </Target>
 
 </Project>

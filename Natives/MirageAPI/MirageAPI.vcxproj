@@ -114,7 +114,7 @@
         <ClInclude Include="DerectX\Pipeline\DX12PipelineState.h"/>
         <ClInclude Include="DerectX\Pipeline\DX12PipelineStateConfig.h"/>
         <ClInclude Include="DerectX\Pipeline\DX12RasterizerConfig.h" />
-        <ClInclude Include="DerectX\Pipeline\DX12RootParametersConfig.h" />
+        <ClInclude Include="DerectX\Pipeline\DX12PipelineParameter.h" />
         <ClInclude Include="pch.h"/>
         <ClInclude Include="Resource.h"/>
         <ClInclude Include="DerectX\DX12Enums.h"/>

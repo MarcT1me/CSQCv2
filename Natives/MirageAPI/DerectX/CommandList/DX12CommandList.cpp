@@ -105,13 +105,25 @@ namespace MirageAPI::DirectX
 
     void DX12CommandList::SetTextureSRV(UINT rootIndex, DX12Texture^ texture)
     {
-        if (!texture || !texture->HasSRV) return;
+        if (!m_commandList || !texture || !texture->HasSRV)
+            return;
 
+        // Получаем кучу дескрипторов
         auto srvHeap = DX12Context::GetDescriptorHeap(DX12DescriptorHeapType::CBV_SRV_UAV, 256, true);
+        if (!srvHeap || !srvHeap->IsValid || !srvHeap->NativeHeap)
+        {
+            throw gcnew System::InvalidOperationException("Invalid SRV descriptor heap");
+        }
 
+        // Устанавливаем кучу дескрипторов в командный список
+        ID3D12DescriptorHeap* heaps[] = {srvHeap->NativeHeap};
+        m_commandList->SetDescriptorHeaps(1, heaps);
+
+        // Рассчитываем GPU-дескриптор
         D3D12_GPU_DESCRIPTOR_HANDLE handle = srvHeap->NativeHeap->GetGPUDescriptorHandleForHeapStart();
         handle.ptr += texture->SRVIndex * srvHeap->DescriptorSize;
 
+        // Устанавливаем дескрипторную таблицу
         m_commandList->SetGraphicsRootDescriptorTable(rootIndex, handle);
     }
 

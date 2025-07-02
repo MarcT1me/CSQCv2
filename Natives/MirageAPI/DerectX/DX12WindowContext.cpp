@@ -1,7 +1,6 @@
 ﻿#include "pch.h"
 #include "DX12WindowContext.h"
 
-#include "DX12Helpers.h"
 #include "DX12Context.h"
 
 namespace MirageAPI::DirectX
@@ -152,12 +151,12 @@ namespace MirageAPI::DirectX
             DX12Context::GetDevice()->CreateRenderTargetView(renderTarget, nullptr, *handlePtr);
 
             DX12ResourceFormat format = DX12ResourceFormat::RGBA8_UNORM;
-            UINT size = GetResourceFormatSize(format);
 
             UINT descriptorIndex = i;
             m_frameBuffers[i] = gcnew DX12FrameBuffer(
                 renderTarget,
-                size,
+                m_width,
+                m_height,
                 m_rtvHeap,
                 descriptorIndex,
                 format

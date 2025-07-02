@@ -34,10 +34,9 @@ public static class AssetManager
     /// <returns></returns>
     /// <exception cref="InvalidAssetTypeError">В случае, если тип ассета был указан не верно</exception>
     /// <exception cref="AssetError">В любых других случаях, если ассет не был загружен до конца</exception>
-    public static async Task<AssetData> LoadAsync(
+    public static AssetData Load(
         AssetFile assetFile, 
-        IEnumerable<AssetData>? alreadyLoadedDependencies = null,
-        CancellationToken ct = default
+        IEnumerable<AssetData>? alreadyLoadedDependencies = null
         )
     {
         var assetType = CoreRegistries.AssetTypeRegistry.Get(assetFile.TypeName);
@@ -56,14 +55,14 @@ public static class AssetManager
             );
 
             // resolve dependencies
-            var resolvedDependencies = await DependencyResolver.ResolveAsync(assetFile, ct: ct);
+            var resolvedDependencies = DependencyResolver.Resolve(assetFile);
 
             // load content from file 
-            var loadedContent = await assetType.AssetLoader.LoadFileAsync(assetFile, ct: ct);
+            var loadedContent = assetType.AssetLoader.LoadFile(assetFile);
 
             // create asset data instance
             var finalDependencies = resolvedDependencies.Concat(alreadyLoadedDependencies ?? []);
-            var assetData = await AssetLoader.CreateAsset(assetFile, finalDependencies, loadedContent);
+            var assetData = assetType.AssetLoader.CreateAsset(assetFile, finalDependencies, loadedContent);
 
             // save in asset branch
             branch[assetData.Identifier] = assetData;

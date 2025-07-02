@@ -8,7 +8,7 @@ namespace MirageAPI::DirectX
     {
     public:
         DX12IndexBuffer(
-            unsigned int size,
+            unsigned int elementCount,
             DX12ResourceFormat format
         );
 

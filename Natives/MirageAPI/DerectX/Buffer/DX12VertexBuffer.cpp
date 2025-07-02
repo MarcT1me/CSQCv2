@@ -3,30 +3,10 @@
 
 namespace MirageAPI::DirectX
 {
-    DX12ResourceConfig GetVertexBufferConfig(
-        unsigned int size,
-        unsigned int stride
-    )
-    {
-        return {
-            DX12ResourceType::VertexBuffer,
-            size,
-            1,
-            stride,
-            1,
-            1,
-            DX12ResourceFormat::Unknown,
-            DX12TextureType::None,
-            DX12ResourceFlags::None,
-            DX12ResourceState::VertexAndConstantBuffer,
-            DX12HeapType::Upload
-        };
-    }
-
     DX12VertexBuffer::DX12VertexBuffer(
-        unsigned int size,
+        unsigned int elementCount,
         unsigned int stride
-    ) : DX12Buffer(GetVertexBufferConfig(size, stride))
+    ) : DX12Buffer(DX12ResourceConfig::VertexBufferConfig(elementCount, stride))
     {
     }
 

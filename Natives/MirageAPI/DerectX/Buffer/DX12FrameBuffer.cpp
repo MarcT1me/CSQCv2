@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 #include "DX12FrameBuffer.h"
 
+#include "..\DX12Helpers.h"
 #include "..\DX12Context.h"
 #include "..\CommandList\DX12CommandList.h"
 
@@ -8,11 +9,15 @@ namespace MirageAPI::DirectX
 {
     DX12FrameBuffer::DX12FrameBuffer(
         ID3D12Resource* resource,
-        unsigned int size,
+        unsigned int width,
+        unsigned int height,
         DX12DescriptorHeap^ rtvHeap,
         unsigned int rtvDescriptorIndex,
         DX12ResourceFormat format
-    ) : DX12Resource(size, format),
+    ) : DX12Resource(
+            DX12ResourceConfig::RenderTargetConfig(width, height, format),
+            width * height * GetResourceFormatSize(format)
+        ),
         m_rtvDescriptorIndex(rtvDescriptorIndex),
         m_rtvHeap(rtvHeap)
     {
@@ -22,7 +27,7 @@ namespace MirageAPI::DirectX
 
     DX12FrameBuffer::DX12FrameBuffer(
         DX12ResourceConfig config
-    ) : DX12Resource(config.Width * config.Height * 4, config.Format)
+    ) : DX12Resource(config, config.Width * config.Height * GetResourceFormatSize(config.Format))
     {
         auto device = DX12Context::GetDevice();
         if (!device)
@@ -42,8 +47,7 @@ namespace MirageAPI::DirectX
         desc.DepthOrArraySize = 1;
         desc.MipLevels = 1;
         desc.Format = static_cast<DXGI_FORMAT>(m_format);
-        desc.SampleDesc.Count = 1;
-        desc.SampleDesc.Quality = 0;
+        desc.SampleDesc = {1, 0};
         desc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
         desc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
 
@@ -100,15 +104,6 @@ namespace MirageAPI::DirectX
         {
             m_rtvHeap->Free(m_rtvDescriptorIndex);
             m_rtvDescriptorIndex = UINT_MAX;
-        }
-
-        if (m_nativeResource)
-        {
-            Unmap();
-            if (m_nativeResource->Release() == 0)
-            {
-                m_nativeResource = nullptr;
-            }
         }
     }
 

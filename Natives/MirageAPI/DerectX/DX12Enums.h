@@ -29,10 +29,11 @@ namespace MirageAPI::DirectX
     public enum class DX12TextureType
     {
         None,
+        Texture1D,
         Texture2D,
+        Texture3D,
         RenderTarget,
-        DepthStencil,
-        CubeMap,
+        DepthStencil
     };
 
     public enum class DX12ResourceFormat

@@ -8,7 +8,7 @@ namespace MirageAPI::DirectX
     {
     public:
         DX12VertexBuffer(
-            unsigned int size,
+            unsigned int elementCount,
             unsigned int stride
         );
 

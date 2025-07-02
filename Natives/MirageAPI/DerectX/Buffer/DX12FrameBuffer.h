@@ -15,7 +15,8 @@ namespace MirageAPI::DirectX
     internal:
         DX12FrameBuffer(
             ID3D12Resource* resource,
-            unsigned int size,
+            unsigned int width,
+            unsigned int height,
             DX12DescriptorHeap^ rtvHeap,
             unsigned int rtvDescriptorIndex,
             DX12ResourceFormat format

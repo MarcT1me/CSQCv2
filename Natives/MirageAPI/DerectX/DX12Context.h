@@ -14,7 +14,7 @@ namespace MirageAPI::DirectX
         static System::Collections::Generic::Dictionary<DX12DescriptorHeapType, DX12DescriptorHeap^>^ s_descriptorHeaps;
 
     public:
-        static void Initialize();
+        static void Initialize(bool isDebug);
         static void Deinitialize();
 
         static ID3D12Device* GetDevice() { return s_device; }

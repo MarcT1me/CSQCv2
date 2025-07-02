@@ -31,14 +31,11 @@ public sealed class LocalisationAssetloader : AssetLoader
 {
     private static readonly FileIniDataParser IniParser = new();
 
-    public override async Task<object> LoadFileAsync(
-        AssetFile assetFile,
-        CancellationToken ct = default
+    public override object LoadFile(
+        AssetFile assetFile
     )
     {
-        var data = await Task.FromResult(
-            IniParser.ReadFile(assetFile.GetFullPath())
-        );
+        var data = IniParser.ReadFile(assetFile.GetFullPath());
 
         LocalisationData localisation = new(
             new Vector2i

@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "DX12ResourceConfig.h"
 
 namespace MirageAPI::DirectX
 {
@@ -13,21 +14,22 @@ namespace MirageAPI::DirectX
     internal:
         ID3D12Resource* m_nativeResource = nullptr;
         DX12ResourceState m_currentState;
-
-    protected:
+        
+        DX12ResourceType m_resourceType;
         unsigned int m_size;
         DX12ResourceFormat m_format;
 
     public:
         DX12Resource(
-            unsigned int size,
-            DX12ResourceFormat format
-        ) : m_size(size),
-            m_format(format)
+            DX12ResourceConfig config,
+            unsigned int size
+        ) : m_resourceType(config.Type),
+            m_size(size),
+            m_format(config.Format)
         {
         }
 
-        virtual ~DX12Resource();
+        ~DX12Resource();
         !DX12Resource();
 
         virtual void TransitionState(
@@ -37,23 +39,27 @@ namespace MirageAPI::DirectX
 
         property ID3D12Resource* NativeResource
         {
-            ID3D12Resource* get()
-            {
-                return m_nativeResource;
-            }
+            ID3D12Resource* get() { return m_nativeResource; }
         }
 
         property D3D12_GPU_VIRTUAL_ADDRESS GPUAddress
         {
-            D3D12_GPU_VIRTUAL_ADDRESS get()
-            {
-                return m_nativeResource ? m_nativeResource->GetGPUVirtualAddress() : 0;
-            }
+            D3D12_GPU_VIRTUAL_ADDRESS get() { return m_nativeResource->GetGPUVirtualAddress(); }
         }
 
-        property DX12ResourceType ResourceType
+        property DX12ResourceState CurrentState
         {
-            virtual DX12ResourceType get() abstract;
+            DX12ResourceState get() { return m_currentState; }
+        }
+
+        virtual property DX12ResourceType ResourceType
+        {
+            DX12ResourceType get() { return m_resourceType; }
+        }
+
+        property unsigned int Size
+        {
+            unsigned int get() { return m_size; }
         }
 
         property DX12ResourceFormat Format
