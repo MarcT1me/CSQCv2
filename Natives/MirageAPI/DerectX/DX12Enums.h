@@ -1,10 +1,5 @@
 ﻿#pragma once
 
-#include <d3d12.h>
-#include <d3dcommon.h>
-#include <dxgiformat.h>
-#include <d3dcompiler.h>
-
 namespace MirageAPI::DirectX
 {
     public enum class DX12PrimitiveTopologyType
@@ -197,12 +192,26 @@ namespace MirageAPI::DirectX
         VideoEncodeReferenceOnly = D3D12_RESOURCE_FLAG_VIDEO_ENCODE_REFERENCE_ONLY,
     };
 
+    public enum class DX12DescriptorHeapType
+    {
+        CBV_SRV_UAV,
+        Sampler,
+        RTV,
+        DSV
+    };
+
     public enum class DX12HeapType
     {
         Custom = D3D12_HEAP_TYPE_CUSTOM,
         Default = D3D12_HEAP_TYPE_DEFAULT,
         Readback = D3D12_HEAP_TYPE_READBACK,
         Upload = D3D12_HEAP_TYPE_UPLOAD,
+    };
+
+    public enum class DX12RTVHeapFlags
+    {
+        None = D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
+        ShaderVisible = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE
     };
 
     public enum class DX12CommandListType
@@ -288,13 +297,5 @@ namespace MirageAPI::DirectX
         None = D3D12_CULL_MODE_NONE,
         Back = D3D12_CULL_MODE_BACK,
         Front = D3D12_CULL_MODE_FRONT,
-    };
-
-    public enum class DX12DescriptorHeapType
-    {
-        CBV_SRV_UAV,
-        Sampler,
-        RTV,
-        DSV
     };
 }

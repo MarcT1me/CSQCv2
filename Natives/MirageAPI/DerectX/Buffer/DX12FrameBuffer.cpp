@@ -22,7 +22,6 @@ namespace MirageAPI::DirectX
         m_rtvHeap(rtvHeap)
     {
         m_nativeResource = resource;
-        m_currentState = DX12ResourceState::Present;
     }
 
     DX12FrameBuffer::DX12FrameBuffer(
@@ -80,14 +79,12 @@ namespace MirageAPI::DirectX
             clearValuePtr,
             IID_PPV_ARGS(&buffer)
         );
-
         if (FAILED(hr))
         {
             throw gcnew System::Exception(
                 "Failed to create buffer: " + hr
             );
         }
-
         m_nativeResource = buffer;
 
         m_rtvHeap = DX12Context::GetDescriptorHeap(DX12DescriptorHeapType::RTV, 256, true);

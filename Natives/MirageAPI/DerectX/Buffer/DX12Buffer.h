@@ -17,7 +17,12 @@ namespace MirageAPI::DirectX
         void TransitionState(
             DX12CommandList^ commandList,
             DX12ResourceState newState
-        ) override;
+            ) override;
+
+        property unsigned int ElementCount
+        {
+            unsigned int get() { return m_elementCount; }
+        }
 
         property unsigned int Stride
         {

@@ -14,22 +14,21 @@ namespace MirageAPI::DirectX
     internal:
         ID3D12Resource* m_nativeResource = nullptr;
         DX12ResourceState m_currentState;
-        
         DX12ResourceType m_resourceType;
+        DX12ResourceFormat m_resourceFormat;
         unsigned int m_size;
-        DX12ResourceFormat m_format;
 
     public:
         DX12Resource(
-            DX12ResourceConfig config,
-            unsigned int size
-        ) : m_resourceType(config.Type),
-            m_size(size),
-            m_format(config.Format)
+            DX12ResourceConfig config
+        ) : m_currentState(config.InitialState),
+            m_resourceType(config.Type),
+            m_resourceFormat(config.Format),
+            m_size(config.Width * config.Width * config.Stride)
         {
         }
 
-        ~DX12Resource();
+        virtual ~DX12Resource();
         !DX12Resource();
 
         virtual void TransitionState(
@@ -57,14 +56,14 @@ namespace MirageAPI::DirectX
             DX12ResourceType get() { return m_resourceType; }
         }
 
+        property DX12ResourceFormat ResourceFormat
+        {
+            DX12ResourceFormat get() { return m_resourceFormat; }
+        }
+
         property unsigned int Size
         {
             unsigned int get() { return m_size; }
-        }
-
-        property DX12ResourceFormat Format
-        {
-            DX12ResourceFormat get() { return m_format; }
         }
 
         void* Map();

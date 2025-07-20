@@ -25,6 +25,7 @@ namespace MirageAPI::DirectX
         {
             DX12ResourceConfig config;
             config.Type = type;
+            config.Height = 1;
             config.Format = DX12ResourceFormat::Unknown;
             config.TextureType = DX12TextureType::None;
             config.Flags = DX12ResourceFlags::None;
@@ -147,7 +148,7 @@ namespace MirageAPI::DirectX
                 DX12ResourceFlags::AllowRenderTarget
             );
             config.Type = DX12ResourceType::FrameBuffer;
-            config.InitialState = DX12ResourceState::RenderTarget;
+            config.InitialState = DX12ResourceState::Present;
             config.HeapType = DX12HeapType::Default;
             return config;
         }

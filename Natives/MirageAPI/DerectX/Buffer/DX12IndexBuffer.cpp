@@ -15,7 +15,7 @@ namespace MirageAPI::DirectX
         D3D12_INDEX_BUFFER_VIEW view;
         view.BufferLocation = GPUAddress;
         view.SizeInBytes = m_size;
-        view.Format = static_cast<DXGI_FORMAT>(m_format);
+        view.Format = static_cast<DXGI_FORMAT>(m_resourceFormat);
 
         commandList->IASetIndexBuffer(&view);
     }

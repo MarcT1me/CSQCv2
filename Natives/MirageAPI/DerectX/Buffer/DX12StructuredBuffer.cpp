@@ -1,6 +1,8 @@
 ﻿#include "pch.h"
 #include "DX12StructuredBuffer.h"
 
+#include "../DX12DescriptorHeap.h"
+
 namespace MirageAPI::DirectX
 {
     DX12StructuredBuffer::~DX12StructuredBuffer()
@@ -20,7 +22,7 @@ namespace MirageAPI::DirectX
             }
         }
     }
-    
+
     D3D12_SHADER_RESOURCE_VIEW_DESC DX12StructuredBuffer::CreateSRVDesc()
     {
         D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -36,15 +38,14 @@ namespace MirageAPI::DirectX
 
     void DX12StructuredBuffer::CreateSRV()
     {
-        if (m_srvIndex != UINT_MAX) return;
+        if (m_srvIndex != UINT_MAX || m_srvHeap) return;
 
-        auto srvHeap = DX12Context::GetDescriptorHeap(DX12DescriptorHeapType::CBV_SRV_UAV, 256, true);
+        m_srvHeap = gcnew DX12DescriptorHeap(DX12DescriptorHeapType::CBV_SRV_UAV, 1, true);
 
-        m_srvIndex = srvHeap->Allocate();
-        auto device = DX12Context::GetDevice();
+        auto device = GetContextDevice();
 
-        D3D12_CPU_DESCRIPTOR_HANDLE handle = srvHeap->NativeHeap->GetCPUDescriptorHandleForHeapStart();
-        handle.ptr += m_srvIndex * srvHeap->DescriptorSize;
+        D3D12_CPU_DESCRIPTOR_HANDLE handle = m_srvHeap->NativeHeap->GetCPUDescriptorHandleForHeapStart();
+        handle.ptr += m_srvHeap->Allocate() * m_srvHeap->DescriptorSize;
 
         D3D12_SHADER_RESOURCE_VIEW_DESC desc = CreateSRVDesc();
         device->CreateShaderResourceView(
@@ -56,11 +57,9 @@ namespace MirageAPI::DirectX
 
     void DX12StructuredBuffer::ReleaseSRV()
     {
-        if (m_srvIndex == UINT_MAX) return;
-
-        auto srvHeap = DX12Context::GetDescriptorHeap(DX12DescriptorHeapType::CBV_SRV_UAV, 256, true);
-
-        srvHeap->Free(m_srvIndex);
+        if (m_srvIndex == UINT_MAX || !m_srvHeap) return;
+        m_srvHeap->Free(m_srvIndex);
         m_srvIndex = UINT_MAX;
+        m_srvHeap = nullptr;
     }
 }

@@ -8,17 +8,11 @@ namespace MirageAPI::DirectX
 {
     DX12Buffer::DX12Buffer(
         DX12ResourceConfig config
-    ) : DX12Resource(config, config.Width * config.Stride),
+    ) : DX12Resource(config),
         m_elementCount(config.Width),
         m_stride(config.Stride)
     {
-        auto device = DX12Context::GetDevice();
-        if (!device)
-        {
-            throw gcnew System::InvalidOperationException(
-                "DirectX 12 device not initialized. Call DX12Context::Initialize() first."
-            );
-        }
+        auto device = GetContextDevice();
 
         D3D12_HEAP_PROPERTIES heapProps = {
             static_cast<D3D12_HEAP_TYPE>(config.HeapType),
@@ -29,7 +23,7 @@ namespace MirageAPI::DirectX
 
         D3D12_RESOURCE_DESC desc = {};
         desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-        desc.Width = config.Width;
+        desc.Width = m_size;
         desc.Format = static_cast<DXGI_FORMAT>(config.Format);
         desc.Flags = static_cast<D3D12_RESOURCE_FLAGS>(config.Flags);
 
@@ -42,21 +36,13 @@ namespace MirageAPI::DirectX
         ID3D12Resource* buffer = nullptr;
         HRESULT hr = device->CreateCommittedResource(
             &heapProps,
-            D3D12_HEAP_FLAG_NONE,
+            static_cast<D3D12_HEAP_FLAGS>(D3D12_HEAP_FLAG_NONE),
             &desc,
             static_cast<D3D12_RESOURCE_STATES>(config.InitialState),
             nullptr,
             IID_PPV_ARGS(&buffer)
         );
-        if (hr == DXGI_ERROR_DEVICE_REMOVED)
-        {
-            HRESULT reason = device->GetDeviceRemovedReason();
-            throw gcnew System::Exception("Device removed during buffer creation: " + reason);
-        }
-        if (FAILED(hr))
-        {
-            throw gcnew System::Exception("Failed to create buffer: " + hr);
-        }
+        DX12_CHECK(device, hr, "Failed to create buffer");
         m_nativeResource = buffer;
     }
 

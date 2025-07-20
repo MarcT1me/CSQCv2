@@ -363,7 +363,7 @@ public class GameWindow : Window
         if (e is KeyEvent { Type: EventType.KeyDown, Key: 122 })
         {
             Logger.Debug("ToggleFullscreen");
-            NativeWindow.ToggleFullscreen();
+            // NativeWindow.ToggleFullscreen();
         }
     }
 

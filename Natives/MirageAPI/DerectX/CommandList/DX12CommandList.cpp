@@ -4,6 +4,7 @@
 #include "..\DX12Enums.h"
 #include "..\DX12Context.h"
 #include "..\Buffer\DX12Texture.h"
+#include "..\DX12DescriptorHeap.h"
 
 namespace MirageAPI::DirectX
 {
@@ -11,17 +12,14 @@ namespace MirageAPI::DirectX
         DX12CommandListType type
     ) : m_type(type)
     {
-        auto device = DX12Context::GetDevice();
+        auto device = GetContextDevice();
 
         ID3D12CommandAllocator* commandAllocator;
         HRESULT hr = device->CreateCommandAllocator(
             static_cast<D3D12_COMMAND_LIST_TYPE>(m_type),
             IID_PPV_ARGS(&commandAllocator)
         );
-        if (FAILED(hr))
-        {
-            throw gcnew System::Exception("Failed to create command allocator");
-        }
+        DX12_CHECK(device, hr, "Failed to create command allocator");
         m_commandAllocator = commandAllocator;
 
         // Создаем командный список
@@ -33,13 +31,25 @@ namespace MirageAPI::DirectX
             nullptr,
             IID_PPV_ARGS(&commandList)
         );
-        if (FAILED(hr))
-        {
-            throw gcnew System::Exception("Failed to create command list");
-        }
+        DX12_CHECK(device, hr, "Failed to create command list");
         m_commandList = commandList;
-
         Close();
+
+        // создаём очередь команд GPU
+        D3D12_COMMAND_QUEUE_DESC queueDesc;
+        queueDesc.Type = static_cast<D3D12_COMMAND_LIST_TYPE>(m_type);
+        queueDesc.Priority = D3D12_COMMAND_QUEUE_PRIORITY_NORMAL;
+        queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
+        queueDesc.NodeMask = 0;
+        
+        ID3D12CommandQueue* commandQueue;
+        hr = device->CreateCommandQueue(
+            &queueDesc,
+            IID_PPV_ARGS(&commandQueue)
+        );
+        DX12_CHECK(device, hr, "Failed to create command queue.");
+        m_commandQueue = commandQueue;
+        
     }
 
     DX12CommandList::!DX12CommandList()
@@ -62,22 +72,23 @@ namespace MirageAPI::DirectX
     void DX12CommandList::Execute()
     {
         ID3D12CommandList* ppCommandLists[] = {m_commandList};
-        DX12Context::GetCommandQueue()->ExecuteCommandLists(1, ppCommandLists);
+        m_commandQueue->ExecuteCommandLists(1, ppCommandLists);
     }
 
     void DX12CommandList::WaitForCompletion()
     {
         // Создаем fence
         ID3D12Fence* fence;
-        HRESULT hr = DX12Context::GetDevice()->CreateFence(
-            0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
+        HRESULT hr = GetContextDevice()->CreateFence(
+            0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)
+        );
         if (FAILED(hr)) return;
 
         HANDLE eventHandle = CreateEvent(nullptr, FALSE, FALSE, nullptr);
         if (!eventHandle) return;
 
         // Сигнализируем fence
-        hr = DX12Context::GetCommandQueue()->Signal(fence, 1);
+        hr = m_commandQueue->Signal(fence, 1);
         if (FAILED(hr))
         {
             CloseHandle(eventHandle);
@@ -99,6 +110,7 @@ namespace MirageAPI::DirectX
     void DX12CommandList::SetDescriptorHeap(DX12DescriptorHeap^ heap)
     {
         if (!heap) return;
+        m_descriptorHeap = heap;
         ID3D12DescriptorHeap* heaps[] = {heap->NativeHeap};
         m_commandList->SetDescriptorHeaps(1, heaps);
     }
@@ -109,19 +121,18 @@ namespace MirageAPI::DirectX
             return;
 
         // Получаем кучу дескрипторов
-        auto srvHeap = DX12Context::GetDescriptorHeap(DX12DescriptorHeapType::CBV_SRV_UAV, 256, true);
-        if (!srvHeap || !srvHeap->IsValid || !srvHeap->NativeHeap)
+        if (!m_descriptorHeap || !m_descriptorHeap->IsValid || !m_descriptorHeap->NativeHeap)
         {
             throw gcnew System::InvalidOperationException("Invalid SRV descriptor heap");
         }
 
         // Устанавливаем кучу дескрипторов в командный список
-        ID3D12DescriptorHeap* heaps[] = {srvHeap->NativeHeap};
+        ID3D12DescriptorHeap* heaps[] = {m_descriptorHeap->NativeHeap};
         m_commandList->SetDescriptorHeaps(1, heaps);
 
         // Рассчитываем GPU-дескриптор
-        D3D12_GPU_DESCRIPTOR_HANDLE handle = srvHeap->NativeHeap->GetGPUDescriptorHandleForHeapStart();
-        handle.ptr += texture->SRVIndex * srvHeap->DescriptorSize;
+        D3D12_GPU_DESCRIPTOR_HANDLE handle = m_descriptorHeap->NativeHeap->GetGPUDescriptorHandleForHeapStart();
+        handle.ptr += texture->SRVIndex * m_descriptorHeap->DescriptorSize;
 
         // Устанавливаем дескрипторную таблицу
         m_commandList->SetGraphicsRootDescriptorTable(rootIndex, handle);

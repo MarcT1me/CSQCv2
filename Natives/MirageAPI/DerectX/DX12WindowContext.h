@@ -16,18 +16,19 @@ namespace MirageAPI::DirectX
         HANDLE m_fenceEvent = nullptr;
         UINT64 m_fenceValue = 1;
 
-        array<DX12FrameBuffer^>^ m_frameBuffers;
-        DX12WindowCommandList^ m_windowCommandList;
         DX12DescriptorHeap^ m_rtvHeap;
-
+        array<DX12FrameBuffer^>^ m_frameBuffers;
         UINT m_frameIndex = 0;
         UINT m_rtvDescriptorSize = 0;
         UINT m_bufferCount = 2;
+        
+        DX12WindowCommandList^ m_windowCommandList;
 
         int m_width = 0;
         int m_height = 0;
         int m_vsync = 0;
         DX12WindowContextConfig^ m_config;
+        
         bool disposed = false;
 
         void CreateFrameBuffers();

@@ -4,6 +4,8 @@
 
 namespace MirageAPI::DirectX
 {
+    ref class DX12DescriptorHeap;
+
     public ref class DX12Texture : public DX12Resource
     {
     internal:

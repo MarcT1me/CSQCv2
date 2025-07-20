@@ -6,9 +6,11 @@ namespace MirageAPI::DirectX
     {
     internal:
         ID3D12DescriptorHeap* m_heap = nullptr;
+        
         unsigned int m_capacity;
         unsigned int m_descriptorSize;
         unsigned int m_nextFreeIndex = 0;
+        
         System::Collections::Generic::List<unsigned int>^ m_freeList =
             gcnew System::Collections::Generic::List<unsigned int>();
 

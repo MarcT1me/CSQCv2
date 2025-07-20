@@ -22,7 +22,7 @@ namespace MirageAPI::DirectX
         D3D12_PLACED_SUBRESOURCE_FOOTPRINT layout;
         UINT64 rowSizeInBytes;
         UINT64 totalBytes;
-        DX12Context::GetDevice()->GetCopyableFootprints(
+        GetContextDevice()->GetCopyableFootprints(
             &desc,
             FirstSubresource,
             NumSubresources,

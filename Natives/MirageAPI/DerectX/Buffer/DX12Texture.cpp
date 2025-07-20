@@ -26,19 +26,13 @@ namespace MirageAPI::DirectX
 
     DX12Texture::DX12Texture(
         DX12ResourceConfig config
-    ) : DX12Resource(config, config.Width * config.Height * GetResourceFormatSize(config.Format)),
+    ) : DX12Resource(config),
         m_textureType(config.TextureType),
         m_width(config.Width),
         m_height(config.Height),
         m_mipLevels(config.MipLevels)
     {
-        auto device = DX12Context::GetDevice();
-        if (!device)
-        {
-            throw gcnew System::InvalidOperationException(
-                "DirectX 12 device not initialized. Call DX12Context::Initialize() first."
-            );
-        }
+        auto device = GetContextDevice();
 
         D3D12_RESOURCE_DESC desc = {};
         desc.Dimension = GetTextureDimension(m_textureType);

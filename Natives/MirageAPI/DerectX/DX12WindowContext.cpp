@@ -2,6 +2,7 @@
 #include "DX12WindowContext.h"
 
 #include "DX12Context.h"
+#include "DX12DescriptorHeap.h"
 
 namespace MirageAPI::DirectX
 {
@@ -14,6 +15,9 @@ namespace MirageAPI::DirectX
         m_height(height),
         m_config(config)
     {
+        auto device = GetContextDevice();
+        m_windowCommandList = gcnew DX12WindowCommandList();
+
         // Создание фабрики DXGI
         IDXGIFactory4* factory = nullptr;
         UINT factoryFlags = config->EnableDebugLayer ? DXGI_CREATE_FACTORY_DEBUG : 0;
@@ -61,7 +65,7 @@ namespace MirageAPI::DirectX
 
         IDXGISwapChain1* tempSwapChain;
         hr = factory->CreateSwapChainForHwnd(
-            DX12Context::GetCommandQueue(),
+            m_windowCommandList->m_commandQueue,
             hwnd,
             &swapChainDesc,
             nullptr,
@@ -69,37 +73,28 @@ namespace MirageAPI::DirectX
             &tempSwapChain
         );
 
-        if (FAILED(hr))
-        {
-            factory->Release();
-            throw gcnew System::Exception("CreateSwapChainForHwnd failed: " + hr);
-        }
+        if (FAILED(hr)) factory->Release();
+        DX12_CHECK(device, hr, "CreateSwapChainForHwnd failed");
 
         IDXGISwapChain3* swapChain;
         hr = tempSwapChain->QueryInterface(IID_PPV_ARGS(&swapChain));
         tempSwapChain->Release();
         factory->Release();
 
-        if (FAILED(hr))
-        {
-            throw gcnew System::Exception("QueryInterface for swap chain failed: " + hr);
-        }
+        DX12_CHECK(device, hr, "QueryInterface for swap chain failed");
         m_swapChain = swapChain;
 
         // создание буферов кадров
         CreateFrameBuffers();
 
-        m_windowCommandList = gcnew DX12WindowCommandList();
-        m_windowCommandList->Close();
-
         // Создание fence
         ID3D12Fence* fence;
-        hr = DX12Context::GetDevice()->CreateFence(
-            0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
-        if (FAILED(hr))
-        {
-            throw gcnew System::Exception("CreateFence failed: " + hr);
-        }
+        hr = device->CreateFence(
+            0,
+            D3D12_FENCE_FLAG_NONE,
+            IID_PPV_ARGS(&fence)
+        );
+        DX12_CHECK(device, hr, "CreateFence failed");
         m_fence = fence;
 
         m_fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
@@ -116,7 +111,7 @@ namespace MirageAPI::DirectX
             throw gcnew System::InvalidOperationException("Swap chain not initialized");
         }
 
-        m_rtvHeap = DX12Context::GetDescriptorHeap(
+        auto rtvHeap = gcnew DX12DescriptorHeap(
             DX12DescriptorHeapType::RTV,
             m_bufferCount,
             false
@@ -124,19 +119,17 @@ namespace MirageAPI::DirectX
 
         if (m_rtvHeap == nullptr)
         {
-            throw gcnew System::NullReferenceException(
-                "GetDescriptorHeap returned null for RTV type");
+            throw gcnew System::NullReferenceException("GetDescriptorHeap returned null for RTV type");
         }
 
+        m_rtvHeap = rtvHeap;
         m_rtvHeap->Validate();
-
-        m_rtvDescriptorSize = DX12Context::GetDevice()->GetDescriptorHandleIncrementSize(
-            D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+        
+        auto device = GetContextDevice();
 
         // Создаем фрейм-буферы
         m_frameBuffers = gcnew array<DX12FrameBuffer^>(m_bufferCount);
         D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = m_rtvHeap->NativeHeap->GetCPUDescriptorHandleForHeapStart();
-        UINT rtvDescriptorSize = m_rtvHeap->DescriptorSize;
 
         for (UINT i = 0; i < m_bufferCount; i++)
         {
@@ -147,22 +140,23 @@ namespace MirageAPI::DirectX
                 throw gcnew System::Exception("GetBuffer failed");
             }
 
-            D3D12_CPU_DESCRIPTOR_HANDLE* handlePtr = new D3D12_CPU_DESCRIPTOR_HANDLE(rtvHandle);
-            DX12Context::GetDevice()->CreateRenderTargetView(renderTarget, nullptr, *handlePtr);
-
             DX12ResourceFormat format = DX12ResourceFormat::RGBA8_UNORM;
 
-            UINT descriptorIndex = i;
+            D3D12_RENDER_TARGET_VIEW_DESC desc = {};
+            desc.Format = static_cast<DXGI_FORMAT>(format);
+            desc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+            device->CreateRenderTargetView(renderTarget, &desc, rtvHandle);
+
             m_frameBuffers[i] = gcnew DX12FrameBuffer(
                 renderTarget,
                 m_width,
                 m_height,
                 m_rtvHeap,
-                descriptorIndex,
+                m_rtvHeap->Allocate(),
                 format
             );
 
-            rtvHandle.ptr += rtvDescriptorSize;
+            rtvHandle.ptr += m_rtvHeap->DescriptorSize;
         }
     }
 
@@ -278,7 +272,6 @@ namespace MirageAPI::DirectX
         m_windowCommandList->ClearRenderTargetView(CurrentFrameBuffer, r, g, b, a);
     }
 
-
     void DX12WindowContext::BeginFrame()
     {
         if (m_width == 0 || m_height == 0) return;
@@ -298,19 +291,8 @@ namespace MirageAPI::DirectX
             m_width, m_height
         );
 
-        // Получаем текущий RTV
-        ID3D12Resource* currentResource = CurrentFrameBuffer->NativeResource;
-
         // Переход в состояние рендеринга
-        D3D12_RESOURCE_BARRIER barrier;
-        barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-        barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-        barrier.Transition.pResource = currentResource;
-        barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-        barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-        barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-
-        m_windowCommandList->NativeCommandList->ResourceBarrier(1, &barrier);
+        CurrentFrameBuffer->TransitionState(m_windowCommandList, DX12ResourceState::RenderTarget);
 
         D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = CurrentFrameBuffer->RTVHandle;
 
@@ -341,19 +323,8 @@ namespace MirageAPI::DirectX
         if (!m_swapChain || !m_windowCommandList || !m_windowCommandList->NativeCommandList)
             return;
 
-        // Получаем текущий RTV
-        ID3D12Resource* currentResource = CurrentFrameBuffer->NativeResource;
-
         // Переход в состояние презентации
-        D3D12_RESOURCE_BARRIER barrier;
-        barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-        barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-        barrier.Transition.pResource = currentResource;
-        barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-        barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
-        barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-
-        m_windowCommandList->NativeCommandList->ResourceBarrier(1, &barrier);
+        CurrentFrameBuffer->TransitionState(m_windowCommandList, DX12ResourceState::Present);
         m_windowCommandList->Close();
 
         // Выполняем командный список

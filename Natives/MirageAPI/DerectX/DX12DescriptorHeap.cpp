@@ -11,21 +11,18 @@ namespace MirageAPI::DirectX
         bool shaderVisible
     ) : m_capacity(capacity)
     {
-        auto device = DX12Context::GetDevice();
-        if (!device)
-        {
-            throw gcnew System::InvalidOperationException("DX12 device not initialized");
-        }
+        auto device = GetContextDevice();
 
         D3D12_DESCRIPTOR_HEAP_DESC heapDesc = {};
         heapDesc.Type = static_cast<D3D12_DESCRIPTOR_HEAP_TYPE>(type);
         heapDesc.NumDescriptors = capacity;
         heapDesc.Flags = shaderVisible ? D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE : D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 
-        ID3D12DescriptorHeap* heap = nullptr;
+        ID3D12DescriptorHeap* heap;
         HRESULT hr = device->CreateDescriptorHeap(
             &heapDesc,
-            IID_PPV_ARGS(&heap));
+            IID_PPV_ARGS(&heap)
+        );
 
         if (FAILED(hr))
         {
@@ -48,7 +45,8 @@ namespace MirageAPI::DirectX
 
         m_heap = heap;
         m_descriptorSize = device->GetDescriptorHandleIncrementSize(
-            static_cast<D3D12_DESCRIPTOR_HEAP_TYPE>(type));
+            static_cast<D3D12_DESCRIPTOR_HEAP_TYPE>(type)
+        );
 
         if (m_descriptorSize == 0)
         {
@@ -80,7 +78,7 @@ namespace MirageAPI::DirectX
         {
             throw gcnew System::InvalidOperationException("Descriptor heap not initialized");
         }
-        
+
         Validate();
 
         if (m_freeList->Count > 0)
