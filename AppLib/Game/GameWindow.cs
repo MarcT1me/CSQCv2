@@ -105,6 +105,7 @@ public class GameWindow : Window
     private DX12VertexBuffer? _vertexBuffer;
     private DX12Shader? _vertexShader;
     private DX12Shader? _pixelShader;
+    private DX12DescriptorHeap? _descriptorHeap;
 
     private AssetData? _img;
     private DX12Texture? _texture;
@@ -353,7 +354,7 @@ public class GameWindow : Window
     {
         Logger.Debug("Preparing window...");
 
-        NativeWindow.ToggleFullscreen();
+        // NativeWindow.ToggleFullscreen();
         base.Prepare();
     }
 
@@ -373,14 +374,13 @@ public class GameWindow : Window
 
         // Подготовка трубы и стыковка с CommandList
         var commandList = NativeWindow.DXContext.CommandList;
-        commandList.SetPipelineState(_pipelineState);
-        commandList.SetGraphicsRootSignature(_pipelineState);
+        commandList.PipelineState = _pipelineState;
 
         // Загружаем текстуру в шейдер, если есть 
-        if (_texture is not null) commandList.SetTextureSRV(0, _texture);
+        if (_texture is not null) commandList.SetTexture(0, _texture);
 
         // Финальная подготовка объекта к рендеру
-        commandList.IASetPrimitiveTopology(DX12PrimitiveTopology.TriangleList);
+        commandList.SetPrimitiveTopology(DX12PrimitiveTopology.TriangleList);
         commandList.BindBuffer(_vertexBuffer);
 
         // Рендер

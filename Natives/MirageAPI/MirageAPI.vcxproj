@@ -109,6 +109,7 @@
         <ClInclude Include="DerectX\Buffer\DX12ConstantBuffer.h" />
         <ClInclude Include="DerectX\Buffer\DX12StructuredBuffer.h" />
         <ClInclude Include="DerectX\DX12DescriptorHeap.h" />
+        <ClInclude Include="DerectX\DX12Object.h" />
         <ClInclude Include="DerectX\extensions.h" />
         <ClInclude Include="DerectX\Pipeline\DX12BlendConfig.h" />
         <ClInclude Include="DerectX\Pipeline\DX12PipelineState.h"/>
@@ -155,6 +156,7 @@
         <ClCompile Include="DerectX\CommandList\DX12WindowCommandList.cpp"/>
         <ClCompile Include="DerectX\DX12Context.cpp"/>
         <ClCompile Include="DerectX\DX12DescriptorHeap.cpp" />
+        <ClCompile Include="DerectX\DX12Object.cpp" />
         <ClCompile Include="DerectX\DX12WindowContext.cpp"/>
         <ClCompile Include="DerectX\Pipeline\DX12PipelineState.cpp"/>
         <ClCompile Include="DerectX\Resource\DX12Resource.cpp"/>

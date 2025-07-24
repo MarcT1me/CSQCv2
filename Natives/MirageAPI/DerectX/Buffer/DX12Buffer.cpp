@@ -1,8 +1,7 @@
 ﻿#include "pch.h"
 #include "DX12Buffer.h"
 
-#include "..\DX12Context.h"
-#include "..\CommandList\DX12CommandList.h"
+#include "../CommandList/DX12CommandList.h"
 
 namespace MirageAPI::DirectX
 {
@@ -12,27 +11,29 @@ namespace MirageAPI::DirectX
         m_elementCount(config.Width),
         m_stride(config.Stride)
     {
-        auto device = GetContextDevice();
-
+        // creating heap info
         D3D12_HEAP_PROPERTIES heapProps = {
             static_cast<D3D12_HEAP_TYPE>(config.HeapType),
+            // constant
             D3D12_CPU_PAGE_PROPERTY_UNKNOWN,
             D3D12_MEMORY_POOL_UNKNOWN,
             0, 0
         };
 
+        // creating resource description
         D3D12_RESOURCE_DESC desc = {};
         desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-        desc.Width = m_size;
+        desc.Width = m_elementCount;
         desc.Format = static_cast<DXGI_FORMAT>(config.Format);
         desc.Flags = static_cast<D3D12_RESOURCE_FLAGS>(config.Flags);
-
+        // constant
         desc.Height = 1;
         desc.DepthOrArraySize = 1;
         desc.MipLevels = 1;
         desc.SampleDesc = {1, 0};
         desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 
+        // creating resource himself
         ID3D12Resource* buffer = nullptr;
         HRESULT hr = device->CreateCommittedResource(
             &heapProps,
@@ -43,6 +44,7 @@ namespace MirageAPI::DirectX
             IID_PPV_ARGS(&buffer)
         );
         DX12_CHECK(device, hr, "Failed to create buffer");
+
         m_nativeResource = buffer;
     }
 
@@ -51,7 +53,10 @@ namespace MirageAPI::DirectX
         DX12ResourceState newState
     )
     {
-        if (m_currentState == newState) return;
+        Validate();
+        
+        if (m_currentState == newState)
+            return;
 
         D3D12_RESOURCE_BARRIER barrier = {};
         barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -60,7 +65,7 @@ namespace MirageAPI::DirectX
         barrier.Transition.StateAfter = static_cast<D3D12_RESOURCE_STATES>(newState);
         barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 
-        commandList->NativeCommandList->ResourceBarrier(1, &barrier);
+        commandList->NativeList->ResourceBarrier(1, &barrier);
         m_currentState = newState;
     }
 
@@ -68,6 +73,8 @@ namespace MirageAPI::DirectX
         array<System::Byte>^ data
     )
     {
+        Validate();
+        
         if (!m_nativeResource || data->Length != m_size) return;
 
         if (void* pData = this->Map())

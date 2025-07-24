@@ -5,9 +5,9 @@ namespace MirageAPI::DirectX
     public value struct DX12PipelineParameter
     {
         DX12ResourceType Type;
-        unsigned int RegisterSlot;
-        unsigned int RegisterSpace;
-        unsigned int NumConstants;
+        UINT RegisterSlot;
+        UINT RegisterSpace;
+        UINT NumConstants;
         
         static property DX12PipelineParameter Default
         {

@@ -12,9 +12,9 @@ namespace MirageAPI::DirectX
         System::String^ SemanticName;
         uint32_t SemanticIndex;
         DX12ResourceFormat Format;
-        unsigned int InputSlot;
-        unsigned int Offset;
-        unsigned int DataStepRate;
+        UINT InputSlot;
+        UINT Offset;
+        UINT DataStepRate;
     };
 
     public value struct DX12PipelineStateConfig

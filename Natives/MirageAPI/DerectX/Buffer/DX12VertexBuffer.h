@@ -8,9 +8,11 @@ namespace MirageAPI::DirectX
     {
     public:
         DX12VertexBuffer(
-            unsigned int elementCount,
-            unsigned int stride
-        );
+            UINT elementCount,
+            UINT stride
+        ) : DX12Buffer(DX12ResourceConfig::VertexBufferConfig(elementCount, stride))
+        {
+        }
 
         void Bind(ID3D12GraphicsCommandList* commandList);
     };

@@ -1,5 +1,4 @@
 ﻿#pragma once
-#include "../DX12Helpers.h"
 
 namespace MirageAPI::DirectX
 {
@@ -7,12 +6,12 @@ namespace MirageAPI::DirectX
     {
         DX12ResourceType Type;
 
-        unsigned int Width;
-        unsigned int Height;
-        unsigned int Stride;
+        UINT Width;
+        UINT Height;
+        UINT Stride;
 
-        unsigned int Depth;
-        unsigned int MipLevels;
+        UINT Depth;
+        UINT MipLevels;
 
         DX12ResourceFormat Format;
         DX12TextureType TextureType;
@@ -21,11 +20,15 @@ namespace MirageAPI::DirectX
         DX12ResourceState InitialState;
         DX12HeapType HeapType;
 
-        static DX12ResourceConfig BufferConfig(DX12ResourceType type)
+        static DX12ResourceConfig BufferConfig(DX12ResourceType type, UINT size)
         {
             DX12ResourceConfig config;
             config.Type = type;
+
+            config.Width = size;
             config.Height = 1;
+            config.Stride = 1;
+
             config.Format = DX12ResourceFormat::Unknown;
             config.TextureType = DX12TextureType::None;
             config.Flags = DX12ResourceFlags::None;
@@ -33,12 +36,11 @@ namespace MirageAPI::DirectX
         }
 
         static DX12ResourceConfig VertexBufferConfig(
-            unsigned int elementCount,
-            unsigned int stride
+            UINT elementCount,
+            UINT stride
         )
         {
-            DX12ResourceConfig config = BufferConfig(DX12ResourceType::VertexBuffer);
-            config.Width = elementCount;
+            DX12ResourceConfig config = BufferConfig(DX12ResourceType::VertexBuffer, elementCount);
             config.Stride = stride;
 
             config.InitialState = DX12ResourceState::VertexAndConstantBuffer;
@@ -47,7 +49,7 @@ namespace MirageAPI::DirectX
         }
 
         static DX12ResourceConfig IndexBufferConfig(
-            unsigned int elementCount,
+            UINT elementCount,
             DX12ResourceFormat format
         )
         {
@@ -57,8 +59,7 @@ namespace MirageAPI::DirectX
                 throw gcnew System::ArgumentException("Invalid index buffer format");
             }
 
-            DX12ResourceConfig config = BufferConfig(DX12ResourceType::IndexBuffer);
-            config.Width = elementCount;
+            DX12ResourceConfig config = BufferConfig(DX12ResourceType::IndexBuffer, elementCount);
             config.Stride = GetResourceFormatSize(format);
             config.Format = format;
 
@@ -67,23 +68,16 @@ namespace MirageAPI::DirectX
             return config;
         }
 
-        static DX12ResourceConfig UploadBufferConfig(
-            unsigned int size
-        )
-        {
-            DX12ResourceConfig config = BufferConfig(DX12ResourceType::UploadBuffer);
-            config.Width = size;
-            config.Stride = 1;
-
-            config.InitialState = DX12ResourceState::GenericRead;
-            config.HeapType = DX12HeapType::Upload;
-            return config;
-        }
-
         static DX12ResourceConfig ConstantBufferConfig()
         {
-            DX12ResourceConfig config = BufferConfig(DX12ResourceType::ConstantBuffer);
-            config.Width = 256;
+            return UploadBufferConfig(256);
+        }
+
+        static DX12ResourceConfig UploadBufferConfig(
+            UINT size
+        )
+        {
+            DX12ResourceConfig config = BufferConfig(DX12ResourceType::UploadBuffer, size);
 
             config.InitialState = DX12ResourceState::GenericRead;
             config.HeapType = DX12HeapType::Upload;
@@ -91,14 +85,13 @@ namespace MirageAPI::DirectX
         }
 
         static DX12ResourceConfig StructuredBufferConfig(
-            unsigned int elementCount,
-            unsigned int stride,
+            UINT elementCount,
+            UINT stride,
             DX12ResourceFlags flags,
             DX12HeapType heapType
         )
         {
-            DX12ResourceConfig config = BufferConfig(DX12ResourceType::StructuredBuffer);
-            config.Width = elementCount;
+            DX12ResourceConfig config = BufferConfig(DX12ResourceType::StructuredBuffer, elementCount);
             config.Stride = stride;
 
             config.Flags = flags;
@@ -108,33 +101,37 @@ namespace MirageAPI::DirectX
         }
 
         static DX12ResourceConfig TextureConfig(
-            unsigned int width,
-            unsigned int height,
+            UINT width,
+            UINT height,
             DX12ResourceFormat format,
-            unsigned int depth,
-            unsigned int mipLevels,
+            UINT depth,
+            UINT mipLevels,
             DX12TextureType type,
             DX12ResourceFlags flags
         )
         {
             return {
-                DX12ResourceType::Texture,
-                width,
-                height,
-                GetResourceFormatSize(format),
-                depth,
-                mipLevels,
-                format,
-                type,
-                flags,
-                DX12ResourceState::Common,
-                DX12HeapType::Default
+                .Type = DX12ResourceType::Texture,
+                
+                .Width = width,
+                .Height = height,
+                .Stride = GetResourceFormatSize(format),
+                
+                .Depth = depth,
+                .MipLevels = mipLevels,
+                
+                .Format = format,
+                .TextureType = type,
+                
+                .Flags = flags,
+                .InitialState = DX12ResourceState::Common,
+                .HeapType = DX12HeapType::Default
             };
         }
 
         static DX12ResourceConfig RenderTargetConfig(
-            unsigned int width,
-            unsigned int height,
+            UINT width,
+            UINT height,
             DX12ResourceFormat format
         )
         {

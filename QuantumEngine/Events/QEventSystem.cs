@@ -102,6 +102,12 @@ public class QEventSystem
             while (EventQueue.TryDequeue(out var qEvent))
             {
                 handler.Handle(qEvent);
+                if (qEvent is WindowedQuantumEvent { Type: EventType.WindowClose } wEvent &&
+                    Registries.WindowRegistry.Size == 0)
+                    EnqueueEvent(new WindowedQuantumEvent(
+                        EventType.Quit,
+                        wEvent.WindowId
+                    ));
                 UpdateInputState(qEvent);
             }
 
@@ -140,17 +146,10 @@ public class QEventSystem
         switch (e.Type)
         {
             case NativeWindowEventType.Close:
-            {
-                if (Registries.WindowRegistry.Size == 1)
-                    EnqueueEvent(new WindowedQuantumEvent(
-                        EventType.Quit,
-                        e.windowID
-                    ));
                 return new WindowedQuantumEvent(
                     EventType.WindowClose,
                     e.windowID
                 );
-            }
             case NativeWindowEventType.Focus:
                 return new WindowedQuantumEvent(
                     e.X == 1 ? EventType.WindowFocusGained : EventType.WindowFocusLost,

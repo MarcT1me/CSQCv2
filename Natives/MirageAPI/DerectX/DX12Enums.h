@@ -90,7 +90,7 @@ namespace MirageAPI::DirectX
     };
 
     [System::Flags]
-    public enum class DX12ShaderCompileFlags : unsigned char
+    public enum class DX12ShaderCompileFlags : unsigned int
     {
         None = 0,
         Debug = D3DCOMPILE_DEBUG,
@@ -175,7 +175,7 @@ namespace MirageAPI::DirectX
     };
 
     [System::Flags]
-    public enum class DX12ResourceFlags : unsigned char
+    public enum class DX12ResourceFlags : unsigned int
     {
         None = D3D12_RESOURCE_FLAG_NONE,
 
@@ -206,12 +206,6 @@ namespace MirageAPI::DirectX
         Default = D3D12_HEAP_TYPE_DEFAULT,
         Readback = D3D12_HEAP_TYPE_READBACK,
         Upload = D3D12_HEAP_TYPE_UPLOAD,
-    };
-
-    public enum class DX12RTVHeapFlags
-    {
-        None = D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
-        ShaderVisible = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE
     };
 
     public enum class DX12CommandListType

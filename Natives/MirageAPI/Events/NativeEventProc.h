@@ -1,7 +1,5 @@
 ﻿#pragma once
 
-#include <Windows.h>
-
 #include "../Window/NativeWindow.h"
 
 namespace MirageAPI::Events
@@ -11,6 +9,6 @@ namespace MirageAPI::Events
         static Window::NativeWindow^ GetNativeWindow(HWND hWnd);
 
     internal:
-        static LRESULT CALLBACK QuantumWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+        static LRESULT QuantumWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
     };
 }

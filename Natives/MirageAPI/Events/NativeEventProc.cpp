@@ -45,13 +45,15 @@ namespace MirageAPI::Events
             *button = 3;
             *action = 0;
             break;
+            
         default:
             *button = -1;
             *action = -1;
+            break;
         }
     }
 
-    LRESULT CALLBACK NativeEventProc::QuantumWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+    LRESULT NativeEventProc::QuantumWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     {
         if (Window::NativeWindow^ window = GetNativeWindow(hwnd))
         {

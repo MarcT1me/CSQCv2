@@ -5,11 +5,6 @@
 
 namespace MirageAPI::DirectX
 {
-    DX12StructuredBuffer::~DX12StructuredBuffer()
-    {
-        this->!DX12StructuredBuffer();
-    }
-
     void DX12StructuredBuffer::!DX12StructuredBuffer()
     {
         ReleaseSRV();

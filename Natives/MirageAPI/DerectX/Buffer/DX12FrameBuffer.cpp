@@ -1,37 +1,31 @@
 ﻿#include "pch.h"
 #include "DX12FrameBuffer.h"
 
-#include "..\DX12Helpers.h"
-#include "..\DX12Context.h"
-#include "..\CommandList\DX12CommandList.h"
+#include "../DX12DescriptorHeap.h"
+#include "../CommandList/DX12CommandList.h"
 
 namespace MirageAPI::DirectX
 {
     DX12FrameBuffer::DX12FrameBuffer(
         ID3D12Resource* resource,
-        unsigned int width,
-        unsigned int height,
+        UINT width,
+        UINT height,
+        DX12ResourceFormat format,
         DX12DescriptorHeap^ rtvHeap,
-        unsigned int rtvDescriptorIndex,
-        DX12ResourceFormat format
+        UINT rtvDescriptorIndex
     ) : DX12Resource(
-            DX12ResourceConfig::RenderTargetConfig(width, height, format),
-            width * height * GetResourceFormatSize(format)
+            DX12ResourceConfig::RenderTargetConfig(width, height, format)
         ),
-        m_rtvDescriptorIndex(rtvDescriptorIndex),
-        m_rtvHeap(rtvHeap)
+        m_rtvHeap(rtvHeap),
+        m_rtvDescriptorIndex(rtvDescriptorIndex)
     {
         m_nativeResource = resource;
     }
 
     DX12FrameBuffer::DX12FrameBuffer(
         DX12ResourceConfig config
-    ) : DX12Resource(config, config.Width * config.Height * GetResourceFormatSize(config.Format))
+    ) : DX12Resource(config)
     {
-        auto device = DX12Context::GetDevice();
-        if (!device)
-            throw gcnew System::Exception("DX12 device not initialized");
-
         D3D12_HEAP_PROPERTIES heapProps = {
             D3D12_HEAP_TYPE_DEFAULT,
             D3D12_CPU_PAGE_PROPERTY_UNKNOWN,
@@ -45,7 +39,7 @@ namespace MirageAPI::DirectX
         desc.Height = config.Height;
         desc.DepthOrArraySize = 1;
         desc.MipLevels = 1;
-        desc.Format = static_cast<DXGI_FORMAT>(m_format);
+        desc.Format = static_cast<DXGI_FORMAT>(m_resourceFormat);
         desc.SampleDesc = {1, 0};
         desc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
         desc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
@@ -55,7 +49,7 @@ namespace MirageAPI::DirectX
 
         if (static_cast<int>(config.Flags & DX12ResourceFlags::AllowRenderTarget) != 0)
         {
-            clearValue.Format = static_cast<DXGI_FORMAT>(m_format);
+            clearValue.Format = static_cast<DXGI_FORMAT>(m_resourceFormat);
             clearValue.Color[0] = 0.0f;
             clearValue.Color[1] = 0.0f;
             clearValue.Color[2] = 0.0f;
@@ -64,7 +58,7 @@ namespace MirageAPI::DirectX
         }
         else if (static_cast<int>(config.Flags & DX12ResourceFlags::AllowDepthStencil) != 0)
         {
-            clearValue.Format = static_cast<DXGI_FORMAT>(m_format);
+            clearValue.Format = static_cast<DXGI_FORMAT>(m_resourceFormat);
             clearValue.DepthStencil.Depth = 1.0f;
             clearValue.DepthStencil.Stencil = 0;
             clearValuePtr = &clearValue;
@@ -79,20 +73,8 @@ namespace MirageAPI::DirectX
             clearValuePtr,
             IID_PPV_ARGS(&buffer)
         );
-        if (FAILED(hr))
-        {
-            throw gcnew System::Exception(
-                "Failed to create buffer: " + hr
-            );
-        }
+        DX12_CHECK(device, hr, "Failed to create buffer");
         m_nativeResource = buffer;
-
-        m_rtvHeap = DX12Context::GetDescriptorHeap(DX12DescriptorHeapType::RTV, 256, true);
-    }
-
-    DX12FrameBuffer::~DX12FrameBuffer()
-    {
-        this->!DX12FrameBuffer();
     }
 
     DX12FrameBuffer::!DX12FrameBuffer()
@@ -106,10 +88,7 @@ namespace MirageAPI::DirectX
 
     D3D12_CPU_DESCRIPTOR_HANDLE DX12FrameBuffer::RTVHandle::get()
     {
-        if (m_rtvHeap == nullptr || !m_rtvHeap->IsValid || m_rtvDescriptorIndex == UINT_MAX)
-        {
-            throw gcnew System::InvalidOperationException("Invalid RTV handle");
-        }
+        m_rtvHeap->Validate();
 
         D3D12_CPU_DESCRIPTOR_HANDLE handle = m_rtvHeap->NativeHeap->GetCPUDescriptorHandleForHeapStart();
         handle.ptr += m_rtvDescriptorIndex * m_rtvHeap->DescriptorSize;
@@ -118,7 +97,8 @@ namespace MirageAPI::DirectX
 
     void DX12FrameBuffer::TransitionState(
         DX12CommandList^ commandList,
-        DX12ResourceState newState)
+        DX12ResourceState newState
+    )
     {
         if (m_currentState == newState) return;
 
@@ -129,7 +109,7 @@ namespace MirageAPI::DirectX
         barrier.Transition.StateAfter = static_cast<D3D12_RESOURCE_STATES>(newState);
         barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 
-        commandList->NativeCommandList->ResourceBarrier(1, &barrier);
+        commandList->NativeList->ResourceBarrier(1, &barrier);
         m_currentState = newState;
     }
 }

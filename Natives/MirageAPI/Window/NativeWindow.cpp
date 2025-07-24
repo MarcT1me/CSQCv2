@@ -1,8 +1,6 @@
 ﻿#include "pch.h"
 #include "NativeWindow.h"
 
-#include <msclr/marshal_cppstd.h>
-
 #include "../Events/NativeEventProc.h"
 
 namespace MirageAPI::Window

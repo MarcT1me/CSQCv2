@@ -8,9 +8,11 @@ namespace MirageAPI::DirectX
     {
     public:
         DX12IndexBuffer(
-            unsigned int elementCount,
+            UINT elementCount,
             DX12ResourceFormat format
-        );
+        ) : DX12Buffer(DX12ResourceConfig::IndexBufferConfig(elementCount, format))
+        {
+        }
 
         void Bind(ID3D12GraphicsCommandList* commandList);
     };

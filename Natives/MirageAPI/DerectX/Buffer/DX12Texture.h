@@ -1,40 +1,62 @@
 ﻿#pragma once
 
+// Mirage ecosystem
 #include "DX12Buffer.h"
 
 namespace MirageAPI::DirectX
 {
     ref class DX12DescriptorHeap;
+}
 
+// texture
+namespace MirageAPI::DirectX
+{
     public ref class DX12Texture : public DX12Resource
     {
     internal:
+        // description
         DX12TextureType m_textureType;
-        unsigned int m_width;
-        unsigned int m_height;
-        unsigned int m_mipLevels;
-        unsigned int m_srvIndex = UINT_MAX;
+        UINT m_width;
+        UINT m_height;
+        UINT m_mipLevels;
+        // heap
+        UINT m_srvIndex = UINT_MAX;
         DX12DescriptorHeap^ m_srvHeap = nullptr;
 
     public:
+        // constructors and deconstructors
         DX12Texture(
             DX12ResourceConfig config
         );
 
-        ~DX12Texture();
+        ~DX12Texture() { this->!DX12Texture(); }
         !DX12Texture();
 
-        void TransitionState(
-            DX12CommandList^ commandList,
-            DX12ResourceState newState
-        ) override;
+        // other properties
+        property DX12TextureType TextureType
+        {
+            DX12TextureType get() { return m_textureType; }
+        }
+        property UINT Width
+        {
+            UINT get() { return m_width; }
+        }
+        property UINT Height
+        {
+            UINT get() { return m_height; }
+        }
+        property UINT MipLevels
+        {
+            UINT get() { return m_mipLevels; }
+        }
+        property DX12DescriptorHeap^ SRVHeap
+        {
+            DX12DescriptorHeap^ get() { return m_srvHeap; }
+            void set(DX12DescriptorHeap^ value) { m_srvHeap = value; }
+        }
 
-        property DX12TextureType TextureType { DX12TextureType get() { return m_textureType; } }
-        property int Width { int get() { return static_cast<int>(m_width); } }
-        property int Height { int get() { return static_cast<int>(m_height); } }
-        property bool HasMipmaps { bool get() { return m_mipLevels > 1; } }
-
-        void UploadData(array<System::Byte>^ data);
+        // texture operations
+        virtual void UploadData(array<System::Byte>^ data);
 
         D3D12_SHADER_RESOURCE_VIEW_DESC CreateSRVDesc();
         void CreateSRV();

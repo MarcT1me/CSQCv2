@@ -16,7 +16,7 @@ namespace MirageAPI::DirectX
         bool DepthClipEnable;
         bool MultisampleEnable;
         bool AntialiasedLineEnable;
-        unsigned int ForcedSampleCount;
+        UINT ForcedSampleCount;
         bool ConservativeRasterEnabled;
         
         static property DX12RasterizerConfig Default

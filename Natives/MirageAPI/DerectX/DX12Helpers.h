@@ -1,7 +1,5 @@
 ﻿#pragma once
 
-#include <d3d12.h>
-
 #include "DX12Context.h"
 
 namespace MirageAPI::DirectX
@@ -11,9 +9,9 @@ namespace MirageAPI::DirectX
         ID3D12Resource* pDestinationResource,
         ID3D12Resource* pIntermediate,
         UINT64 IntermediateOffset,
-        unsigned int FirstSubresource,
-        unsigned int NumSubresources,
-        const D3D12_SUBRESOURCE_DATA* pSrcData)
+        UINT FirstSubresource,
+        UINT NumSubresources
+    )
     {
         // Получаем описание ресурса
         D3D12_RESOURCE_DESC desc = pDestinationResource->GetDesc();
@@ -73,7 +71,9 @@ namespace MirageAPI::DirectX
         return requiredSize;
     }
 
-    inline unsigned int GetResourceFormatSize(DX12ResourceFormat format)
+    inline UINT GetResourceFormatSize(
+        DX12ResourceFormat format
+    )
     {
         switch (format)
         {

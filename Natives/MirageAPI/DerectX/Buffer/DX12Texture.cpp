@@ -1,9 +1,8 @@
 ﻿#include "pch.h"
 #include "DX12Texture.h"
 
-#include "..\DX12Context.h"
+#include "../DX12DescriptorHeap.h"
 #include "DX12UploadBuffer.h"
-#include "..\DX12Helpers.h"
 #include "..\CommandList\DX12CommandList.h"
 
 namespace MirageAPI::DirectX
@@ -32,13 +31,11 @@ namespace MirageAPI::DirectX
         m_height(config.Height),
         m_mipLevels(config.MipLevels)
     {
-        auto device = GetContextDevice();
-
         D3D12_RESOURCE_DESC desc = {};
         desc.Dimension = GetTextureDimension(m_textureType);
         desc.Width = m_width;
         desc.Height = m_height;
-        desc.DepthOrArraySize = 1;
+        desc.DepthOrArraySize = config.Depth;
         desc.MipLevels = m_mipLevels;
         desc.Format = static_cast<DXGI_FORMAT>(config.Format);
         desc.SampleDesc = {1, 0};
@@ -53,6 +50,7 @@ namespace MirageAPI::DirectX
         };
 
         D3D12_CLEAR_VALUE* clearValuePtr = nullptr;
+        // TODO: clear value
 
         ID3D12Resource* texture = nullptr;
         HRESULT hr = device->CreateCommittedResource(
@@ -63,21 +61,8 @@ namespace MirageAPI::DirectX
             clearValuePtr,
             IID_PPV_ARGS(&texture)
         );
-        if (hr == DXGI_ERROR_DEVICE_REMOVED)
-        {
-            HRESULT reason = device->GetDeviceRemovedReason();
-            throw gcnew System::Exception("Device removed during buffer creation: " + reason);
-        }
-        if (FAILED(hr))
-        {
-            throw gcnew System::Exception("Failed to create buffer: " + hr);
-        }
+        DX12_CHECK(device, hr, "Failed to create texture");
         m_nativeResource = texture;
-    }
-
-    DX12Texture::~DX12Texture()
-    {
-        this->!DX12Texture();
     }
 
     void DX12Texture::!DX12Texture()
@@ -85,23 +70,18 @@ namespace MirageAPI::DirectX
         ReleaseSRV();
     }
 
-    void DX12Texture::TransitionState(
-        DX12CommandList^ commandList,
-        DX12ResourceState newState
-    )
-    {
-    }
+    // texture operations
 
     void DX12Texture::UploadData(array<System::Byte>^ data)
     {
+        // validate texture himself and data
+        Validate();
         if (!data || data->Length == 0)
-        {
-            throw gcnew System::Exception("Invalid texture data");
-        }
+            throw gcnew System::ArgumentException("Invalid texture data");
 
         const UINT64 uploadBufferSize = GetRequiredIntermediateSize(m_nativeResource, 0, 1);
 
-        // Проверка размера данных
+        // check data sizes
         if (data->Length != m_size)
         {
             throw gcnew System::Exception(
@@ -109,64 +89,47 @@ namespace MirageAPI::DirectX
             );
         }
 
-        // Создаем временный upload буфер
+        // creating one-time upload buffer
         auto uploadBuffer = gcnew DX12UploadBuffer(uploadBufferSize);
 
-        // Копируем данные в upload буфер
-        void* pUploadData = uploadBuffer->Map();
+        // copying into upload buffer
         {
+            void* pUploadData = uploadBuffer->Map();
             pin_ptr<System::Byte> pinnedData = &data[0];
 
-            // Копируем только актуальные данные без выравнивания
-            const UINT expectedDataSize = m_width * m_height * GetResourceFormatSize(m_format);
-            const size_t copySize = std::min(static_cast<size_t>(expectedDataSize),
-                                             static_cast<size_t>(data->Length));
+            const size_t copySize = std::min(
+                static_cast<size_t>(m_size),
+                static_cast<size_t>(data->Length)
+            );
 
             memcpy(pUploadData, pinnedData, copySize);
+            uploadBuffer->Unmap();
         }
-        uploadBuffer->Unmap();
 
         auto commandList = gcnew DX12CommandList(DX12CommandListType::Direct);
         commandList->Reset();
 
-        // Барьер перехода
+        // barrier
         D3D12_RESOURCE_BARRIER barrier = {};
         barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
         barrier.Transition.pResource = m_nativeResource;
         barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
         barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_DEST;
         barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-        commandList->NativeCommandList->ResourceBarrier(1, &barrier);
-
-        // Подготавливаем данные для копирования
-        UINT rowPitch = m_width * GetResourceFormatSize(m_format);
-        UINT slicePitch = rowPitch * m_height;
-
-        // Автоматическое выравнивание
-        if (rowPitch % D3D12_TEXTURE_DATA_PITCH_ALIGNMENT != 0)
-        {
-            rowPitch = (rowPitch + D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1) &
-                ~(D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1);
-        }
-
-        D3D12_SUBRESOURCE_DATA subresource_data;
-        subresource_data.pData = pUploadData; // Используем данные из upload-буфера
-        subresource_data.RowPitch = rowPitch;
-        subresource_data.SlicePitch = slicePitch;
+        commandList->NativeList->ResourceBarrier(1, &barrier);
 
         // Копируем данные
         UpdateSubresources(
-            commandList->NativeCommandList,
+            commandList->NativeList,
             m_nativeResource,
             uploadBuffer->NativeResource,
-            0, 0, 1,
-            &subresource_data
+            0, 0, 1
         );
 
         // Возвращаем в исходное состояние
         barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
         barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
-        commandList->NativeCommandList->ResourceBarrier(1, &barrier);
+        commandList->NativeList->ResourceBarrier(1, &barrier);
 
         // Выполняем команды
         commandList->Close();
@@ -174,7 +137,7 @@ namespace MirageAPI::DirectX
         commandList->WaitForCompletion();
 
         // Проверяем состояние устройства
-        HRESULT hr = DX12Context::GetDevice()->GetDeviceRemovedReason();
+        HRESULT hr = device->GetDeviceRemovedReason();
         if (FAILED(hr))
         {
             throw gcnew System::Exception("Device removed after texture upload: " + hr);
@@ -188,7 +151,7 @@ namespace MirageAPI::DirectX
     D3D12_SHADER_RESOURCE_VIEW_DESC DX12Texture::CreateSRVDesc()
     {
         D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-        srvDesc.Format = static_cast<DXGI_FORMAT>(m_format);
+        srvDesc.Format = static_cast<DXGI_FORMAT>(m_resourceFormat);
         srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
         srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
         srvDesc.Texture2D.MipLevels = m_mipLevels;
@@ -202,17 +165,12 @@ namespace MirageAPI::DirectX
     {
         if (m_srvIndex != UINT_MAX) return;
 
-        auto srvHeap = DX12Context::GetDescriptorHeap(DX12DescriptorHeapType::CBV_SRV_UAV, 256, true);
-        if (!srvHeap || !srvHeap->IsValid)
-        {
-            throw gcnew System::InvalidOperationException("Invalid SRV descriptor heap");
-        }
+        m_srvHeap->Validate();
 
-        m_srvIndex = srvHeap->Allocate();
-        auto device = DX12Context::GetDevice();
+        m_srvIndex = m_srvHeap->Allocate();
 
-        D3D12_CPU_DESCRIPTOR_HANDLE handle = srvHeap->NativeHeap->GetCPUDescriptorHandleForHeapStart();
-        handle.ptr += m_srvIndex * srvHeap->DescriptorSize;
+        D3D12_CPU_DESCRIPTOR_HANDLE handle = m_srvHeap->NativeHeap->GetCPUDescriptorHandleForHeapStart();
+        handle.ptr += m_srvIndex * m_srvHeap->DescriptorSize;
 
         D3D12_SHADER_RESOURCE_VIEW_DESC desc = CreateSRVDesc();
         device->CreateShaderResourceView(
@@ -226,9 +184,7 @@ namespace MirageAPI::DirectX
     {
         if (m_srvIndex == UINT_MAX) return;
 
-        auto srvHeap = DX12Context::GetDescriptorHeap(DX12DescriptorHeapType::CBV_SRV_UAV, 256, true);
-
-        srvHeap->Free(m_srvIndex);
+        m_srvHeap->Free(m_srvIndex);
         m_srvIndex = UINT_MAX;
     }
 }

@@ -14,7 +14,6 @@ namespace MirageAPI::DirectX
     public value struct DX12WindowContextConfig
     {
         DX12ResourceFormat Format;
-        DX12RTVHeapFlags RTVHeapFlags;
         
         bool EnableDebugLayer;
         bool AllowTearing;
@@ -46,7 +45,6 @@ namespace MirageAPI::DirectX
                 settings.BufferCount = 2;
                 settings.Format = DX12ResourceFormat::RGBA8_UNORM;
                 settings.SwapEffect = DX12SwapEffect::FlipDiscard;
-                settings.RTVHeapFlags = DX12RTVHeapFlags::None;
                 settings.SampleCount = 1;
                 
                 settings.EnableDebugLayer = false;

@@ -5,42 +5,51 @@
 
 namespace MirageAPI::DirectX
 {
+    ref class DX12CommandList;
     ref class DX12DescriptorHeap;
 
     public ref class DX12FrameBuffer : public DX12Resource
     {
-        UINT m_rtvDescriptorIndex = UINT_MAX;
-        DX12DescriptorHeap^ m_rtvHeap;
-
     internal:
+        // heap
+        DX12DescriptorHeap^ m_rtvHeap;
+        UINT m_rtvDescriptorIndex = UINT_MAX;
+
+        // constructors and deconstructors
         DX12FrameBuffer(
             ID3D12Resource* resource,
-            unsigned int width,
-            unsigned int height,
+            UINT width,
+            UINT height,
+            DX12ResourceFormat format,
             DX12DescriptorHeap^ rtvHeap,
-            unsigned int rtvDescriptorIndex,
-            DX12ResourceFormat format
+            UINT rtvDescriptorIndex
         );
 
     public:
         DX12FrameBuffer(DX12ResourceConfig config);
 
-        ~DX12FrameBuffer();
+        ~DX12FrameBuffer() { this->!DX12FrameBuffer(); }
         !DX12FrameBuffer();
 
-        void TransitionState(
-            DX12CommandList^ commandList,
-            DX12ResourceState newState
-        ) override;
-
-        virtual property DX12ResourceType ResourceType
+        // other properties
+        property UINT DescriptorIndex
         {
-            DX12ResourceType get() override { return DX12ResourceType::FrameBuffer; }
+            UINT get() { return m_rtvDescriptorIndex; }
         }
-
+        property DX12DescriptorHeap^ RTVHeap
+        {
+            DX12DescriptorHeap^ get() { return m_rtvHeap; }
+            void set(DX12DescriptorHeap^ value) { m_rtvHeap = value; }
+        }
         property D3D12_CPU_DESCRIPTOR_HANDLE RTVHandle
         {
             D3D12_CPU_DESCRIPTOR_HANDLE get();
         }
+
+        // buffer operations
+        virtual void TransitionState(
+            DX12CommandList^ commandList,
+            DX12ResourceState newState
+        );
     };
 }

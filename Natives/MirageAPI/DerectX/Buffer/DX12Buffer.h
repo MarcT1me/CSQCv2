@@ -1,33 +1,43 @@
 ﻿#pragma once
 
-#include "..\Resource\DX12Resource.h"
-#include "..\Resource\DX12ResourceConfig.h"
+// Mirage ecosystem
+#include "../Resource/DX12Resource.h"
+#include "../Resource/DX12ResourceConfig.h"
 
+namespace MirageAPI::DirectX
+{
+    ref class DX12CommandList;
+}
+
+// buffer
 namespace MirageAPI::DirectX
 {
     public ref class DX12Buffer abstract : public DX12Resource
     {
     internal:
-        unsigned int m_elementCount;
-        unsigned int m_stride;
+        // description
+        UINT m_elementCount;
+        UINT m_stride;
 
     public:
+        // constructors and deconstructors
         DX12Buffer(DX12ResourceConfig config);
 
-        void TransitionState(
+        // other properties
+        property UINT ElementCount
+        {
+            UINT get() { return m_elementCount; }
+        }
+        property UINT Stride
+        {
+            UINT get() { return m_stride; }
+        }
+
+        // buffer operations
+        virtual void TransitionState(
             DX12CommandList^ commandList,
             DX12ResourceState newState
-            ) override;
-
-        property unsigned int ElementCount
-        {
-            unsigned int get() { return m_elementCount; }
-        }
-
-        property unsigned int Stride
-        {
-            unsigned int get() { return m_stride; }
-        }
+        );
 
         virtual void UploadData(
             array<System::Byte>^ data

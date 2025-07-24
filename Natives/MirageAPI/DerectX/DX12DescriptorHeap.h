@@ -1,68 +1,80 @@
 ﻿#pragma once
+#include "DX12Object.h"
 
 namespace MirageAPI::DirectX
 {
-    public ref class DX12DescriptorHeap
+    public ref class DX12DescriptorHeap : public DX12Object
     {
-    internal:
+        // native
         ID3D12DescriptorHeap* m_heap = nullptr;
-        
-        unsigned int m_capacity;
-        unsigned int m_descriptorSize;
-        unsigned int m_nextFreeIndex = 0;
-        
-        System::Collections::Generic::List<unsigned int>^ m_freeList =
-            gcnew System::Collections::Generic::List<unsigned int>();
+
+        // free queue
+        System::Collections::Generic::List<UINT>^ m_freeList =
+            gcnew System::Collections::Generic::List<UINT>();
+
+    internal:
+        // description
+        UINT m_capacity;
+        UINT m_descriptorSize;
+        UINT m_nextFreeIndex = 0;
 
     public:
+        // constructors and deconstructors
         DX12DescriptorHeap(
             DX12DescriptorHeapType heapType,
-            unsigned int capacity,
+            UINT capacity,
             bool shaderVisible
         );
-        ~DX12DescriptorHeap();
+
+        ~DX12DescriptorHeap() { this->!DX12DescriptorHeap(); }
         !DX12DescriptorHeap();
 
-        property bool IsValid
+        property ID3D12DescriptorHeap* NativeHeap
         {
-            bool get() { return m_heap != nullptr; }
+            ID3D12DescriptorHeap* get() { return m_heap; }
+        }
+        property UINT DescriptorSize
+        {
+            UINT get() { return m_descriptorSize; }
+        }
+        property UINT Capacity
+        {
+            UINT get() { return m_capacity; }
+        }
+        property UINT FreeCount
+        {
+            UINT get() { return m_capacity - m_nextFreeIndex + m_freeList->Count; }
         }
 
-        void Validate()
+        UINT Allocate();
+        void Free(UINT index);
+        void Reset();
+
+        void Validate() override
         {
             if (m_heap == nullptr)
             {
-                System::Diagnostics::Debug::WriteLine(
-                    "Descriptor heap validation failed: m_heap is null. " +
-                    "Capacity: " + m_capacity + ", DescriptorSize: " + m_descriptorSize);
-
                 throw gcnew System::InvalidOperationException(
-                    "Descriptor heap is not initialized");
+                    "Descriptor heap is not initialized: " +
+                    "Capacity: " + m_capacity + ", DescriptorSize: " + m_descriptorSize
+                );
             }
 
             if (m_descriptorSize == 0)
             {
                 throw gcnew System::InvalidOperationException(
-                    "Invalid descriptor size (0)");
+                    "Invalid descriptor size: " +
+                    "Capacity: " + m_capacity + ", DescriptorSize: " + m_descriptorSize
+                );
             }
 
             if (m_capacity == 0)
             {
                 throw gcnew System::InvalidOperationException(
-                    "Invalid heap capacity (0)");
+                    "Invalid heap capacity: " +
+                    "Capacity: " + m_capacity + ", DescriptorSize: " + m_descriptorSize
+                );
             }
-        }
-
-        unsigned int Allocate();
-        void Free(unsigned int index);
-        void Reset();
-
-        property ID3D12DescriptorHeap* NativeHeap { ID3D12DescriptorHeap* get() { return m_heap; } }
-        property unsigned int DescriptorSize { unsigned int get() { return m_descriptorSize; } }
-        property unsigned int Capacity { unsigned int get() { return m_capacity; } }
-        property unsigned int FreeCount
-        {
-            unsigned int get() { return m_capacity - m_nextFreeIndex + m_freeList->Count; }
         }
     };
 }

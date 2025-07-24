@@ -7,9 +7,7 @@ namespace MirageAPI::DirectX
     public ref class DX12UploadBuffer : public DX12Buffer
     {
     public:
-        DX12UploadBuffer(
-            unsigned int size
-        ) : DX12Buffer(DX12ResourceConfig::UploadBufferConfig(size))
+        DX12UploadBuffer(UINT size) : DX12Buffer(DX12ResourceConfig::UploadBufferConfig(size))
         {
         }
     };

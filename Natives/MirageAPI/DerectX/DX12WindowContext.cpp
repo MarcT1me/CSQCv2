@@ -1,7 +1,6 @@
 ﻿#include "pch.h"
 #include "DX12WindowContext.h"
 
-#include "DX12Context.h"
 #include "DX12DescriptorHeap.h"
 
 namespace MirageAPI::DirectX
@@ -15,7 +14,6 @@ namespace MirageAPI::DirectX
         m_height(height),
         m_config(config)
     {
-        auto device = GetContextDevice();
         m_windowCommandList = gcnew DX12WindowCommandList();
 
         // Создание фабрики DXGI
@@ -65,7 +63,7 @@ namespace MirageAPI::DirectX
 
         IDXGISwapChain1* tempSwapChain;
         hr = factory->CreateSwapChainForHwnd(
-            m_windowCommandList->m_commandQueue,
+            m_windowCommandList->NativeQueue,
             hwnd,
             &swapChainDesc,
             nullptr,
@@ -80,7 +78,6 @@ namespace MirageAPI::DirectX
         hr = tempSwapChain->QueryInterface(IID_PPV_ARGS(&swapChain));
         tempSwapChain->Release();
         factory->Release();
-
         DX12_CHECK(device, hr, "QueryInterface for swap chain failed");
         m_swapChain = swapChain;
 
@@ -107,25 +104,15 @@ namespace MirageAPI::DirectX
     void DX12WindowContext::CreateFrameBuffers()
     {
         if (!m_swapChain)
-        {
             throw gcnew System::InvalidOperationException("Swap chain not initialized");
-        }
 
         auto rtvHeap = gcnew DX12DescriptorHeap(
             DX12DescriptorHeapType::RTV,
             m_bufferCount,
             false
         );
-
-        if (m_rtvHeap == nullptr)
-        {
-            throw gcnew System::NullReferenceException("GetDescriptorHeap returned null for RTV type");
-        }
-
+        rtvHeap->Validate();
         m_rtvHeap = rtvHeap;
-        m_rtvHeap->Validate();
-        
-        auto device = GetContextDevice();
 
         // Создаем фрейм-буферы
         m_frameBuffers = gcnew array<DX12FrameBuffer^>(m_bufferCount);
@@ -133,60 +120,45 @@ namespace MirageAPI::DirectX
 
         for (UINT i = 0; i < m_bufferCount; i++)
         {
+            // creating resource
             ID3D12Resource* renderTarget = nullptr;
             if (FAILED(m_swapChain->GetBuffer(i, IID_PPV_ARGS(&renderTarget))))
-            {
-                delete m_rtvHeap;
                 throw gcnew System::Exception("GetBuffer failed");
-            }
 
-            DX12ResourceFormat format = DX12ResourceFormat::RGBA8_UNORM;
-
-            D3D12_RENDER_TARGET_VIEW_DESC desc = {};
-            desc.Format = static_cast<DXGI_FORMAT>(format);
-            desc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-            device->CreateRenderTargetView(renderTarget, &desc, rtvHandle);
-
+            // creating buffer
             m_frameBuffers[i] = gcnew DX12FrameBuffer(
                 renderTarget,
                 m_width,
                 m_height,
+                m_config->Format,
                 m_rtvHeap,
-                m_rtvHeap->Allocate(),
-                format
+                i
             );
 
+            // create RTV for heap
+            D3D12_RENDER_TARGET_VIEW_DESC desc = {};
+            desc.Format = static_cast<DXGI_FORMAT>(m_config->Format);
+            desc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+
+            device->CreateRenderTargetView(
+                renderTarget,
+                &desc,
+                m_frameBuffers[i]->RTVHandle
+            );
+
+            // attach rtv to heap
             rtvHandle.ptr += m_rtvHeap->DescriptorSize;
         }
     }
 
     DX12WindowContext::!DX12WindowContext()
     {
-        if (disposed) return;
+        Validate();
 
         WaitForGpuCompletion();
 
-        if (m_frameBuffers != nullptr)
-        {
-            for each (auto frameBuffer in m_frameBuffers)
-            {
-                if (frameBuffer != nullptr)
-                    delete frameBuffer;
-            }
-            m_frameBuffers = nullptr;
-        }
-
-        if (m_windowCommandList != nullptr)
-        {
-            delete m_windowCommandList;
-            m_windowCommandList = nullptr;
-        }
-
-        if (m_rtvHeap != nullptr)
-        {
-            delete m_rtvHeap;
-            m_rtvHeap = nullptr;
-        }
+        FreeFrameBuffers();
+        FreeRTVHeap();
 
         if (m_swapChain)
         {
@@ -206,18 +178,15 @@ namespace MirageAPI::DirectX
             m_fenceEvent = nullptr;
         }
 
-        disposed = true;
+        if (m_windowCommandList != nullptr)
+        {
+            delete m_windowCommandList;
+            m_windowCommandList = nullptr;
+        }
     }
 
-    void DX12WindowContext::Resize(int width, int height)
+    void DX12WindowContext::FreeFrameBuffers()
     {
-        if (width <= 0 || height <= 0) return;
-
-        m_width = width;
-        m_height = height;
-
-        WaitForGpuCompletion();
-
         if (m_frameBuffers != nullptr)
         {
             for each (auto frameBuffer in m_frameBuffers)
@@ -227,27 +196,36 @@ namespace MirageAPI::DirectX
             }
             m_frameBuffers = nullptr;
         }
+    }
 
+    void DX12WindowContext::FreeRTVHeap()
+    {
         if (m_rtvHeap != nullptr)
         {
             delete m_rtvHeap;
             m_rtvHeap = nullptr;
         }
+    }
 
-        DXGI_SWAP_CHAIN_DESC desc;
-        m_swapChain->GetDesc(&desc);
+    void DX12WindowContext::Resize(int width, int height)
+    {
+        if (width <= 0 || height <= 0) return;
+
+        WaitForGpuCompletion();
+
+        FreeFrameBuffers();
+        FreeRTVHeap();
+
+        m_width = width;
+        m_height = height;
 
         HRESULT hr = m_swapChain->ResizeBuffers(
             m_bufferCount,
-            width, height,
-            desc.BufferDesc.Format,
-            desc.Flags);
-
-        if (FAILED(hr))
-        {
-            throw gcnew System::Exception("Swap chain resize failed: " + hr);
-        }
-
+            m_width, m_height,
+            static_cast<DXGI_FORMAT>(m_config->Format),
+            m_config->AllowTearing ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0
+        );
+        DX12_CHECK(device, hr, "Swap chain resize failed");
         m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
 
         CreateFrameBuffers();
@@ -296,31 +274,29 @@ namespace MirageAPI::DirectX
 
         D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = CurrentFrameBuffer->RTVHandle;
 
-        m_windowCommandList->NativeCommandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
+        m_windowCommandList->NativeList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
     }
 
     void DX12WindowContext::WaitForGpuCompletion()
     {
         if (m_width == 0 || m_height == 0) return;
 
-        const UINT64 fenceValue = m_fenceValue;
-        if (SUCCEEDED(DX12Context::GetCommandQueue()->Signal(m_fence, fenceValue)))
-        {
-            m_fenceValue++;
+        const UINT64 fenceValue = m_fenceValue; // save last fence value
 
-            if (m_fence->GetCompletedValue() < fenceValue)
-            {
-                if (SUCCEEDED(m_fence->SetEventOnCompletion(fenceValue, m_fenceEvent)))
-                {
-                    WaitForSingleObject(m_fenceEvent, INFINITE);
-                }
-            }
+        // signal queue
+        DX12_CHECK(device, m_windowCommandList->NativeQueue->Signal(m_fence, fenceValue), "Native Queue signal err");
+        m_fenceValue++;
+
+        if (m_fence->GetCompletedValue() < fenceValue)
+        {
+            DX12_CHECK(device, m_fence->SetEventOnCompletion(fenceValue, m_fenceEvent), "Event on completion err");
+            WaitForSingleObject(m_fenceEvent, INFINITE);
         }
     }
 
     void DX12WindowContext::EndFrame()
     {
-        if (!m_swapChain || !m_windowCommandList || !m_windowCommandList->NativeCommandList)
+        if (!m_swapChain || !m_windowCommandList || !m_windowCommandList->NativeList)
             return;
 
         // Переход в состояние презентации
@@ -328,10 +304,9 @@ namespace MirageAPI::DirectX
         m_windowCommandList->Close();
 
         // Выполняем командный список
-        ID3D12CommandList* commandLists[] = {m_windowCommandList->NativeCommandList};
-        DX12Context::GetCommandQueue()->ExecuteCommandLists(1, commandLists);
+        m_windowCommandList->Execute();
 
-        DX12Context::GetCommandQueue()->Signal(m_fence, m_fenceValue);
+        m_windowCommandList->NativeQueue->Signal(m_fence, m_fenceValue);
     }
 
     void DX12WindowContext::Present()

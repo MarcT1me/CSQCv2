@@ -11,8 +11,6 @@ namespace MirageAPI::DirectX
         bool shaderVisible
     ) : m_capacity(capacity)
     {
-        auto device = GetContextDevice();
-
         D3D12_DESCRIPTOR_HEAP_DESC heapDesc = {};
         heapDesc.Type = static_cast<D3D12_DESCRIPTOR_HEAP_TYPE>(type);
         heapDesc.NumDescriptors = capacity;
@@ -32,7 +30,7 @@ namespace MirageAPI::DirectX
             else if (hr == E_INVALIDARG)
                 errorMsg = "Invalid arguments for descriptor heap creation";
             else
-                errorMsg = "Failed to create descriptor heap, HRESULT: 0x" + hr;
+                errorMsg = "Failed to create descriptor heap, HRESULT: " + hr;
 
             throw gcnew System::Exception(errorMsg);
         }
@@ -55,8 +53,6 @@ namespace MirageAPI::DirectX
             throw gcnew System::Exception("Invalid descriptor size (0)");
         }
     }
-
-    DX12DescriptorHeap::~DX12DescriptorHeap() { this->!DX12DescriptorHeap(); }
 
     DX12DescriptorHeap::!DX12DescriptorHeap()
     {
@@ -91,8 +87,8 @@ namespace MirageAPI::DirectX
         if (m_nextFreeIndex >= m_capacity)
         {
             throw gcnew System::InvalidOperationException(
-                "Descriptor heap overflow. Capacity: " + m_capacity +
-                ", NextIndex: " + m_nextFreeIndex);
+                "Descriptor heap overflow. " +
+                "Capacity: " + m_capacity + ", NextIndex: " + m_nextFreeIndex);
         }
 
         return m_nextFreeIndex++;

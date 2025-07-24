@@ -3,9 +3,6 @@
 
 #include <iostream>
 #include <ostream>
-#include <msclr/marshal_cppstd.h>
-
-#include "..\DX12Context.h"
 
 namespace MirageAPI::DirectX
 {
@@ -75,20 +72,12 @@ namespace MirageAPI::DirectX
         DX12PipelineStateConfig config
     ) : m_descriptorRanges(gcnew System::Collections::Generic::List<System::IntPtr>())
     {
-        auto device = DX12Context::GetDevice();
-        if (!device)
-        {
-            throw gcnew System::InvalidOperationException(
-                "DirectX 12 device not initialized. Call DX12Context::Initialize() first."
-            );
-        }
-
         if (config.RootParams)
         {
             m_rootParametersLength = config.RootParams->Length;
             m_rootParameters = new D3D12_ROOT_PARAMETER[m_rootParametersLength];
 
-            for (int i = 0; i < m_rootParametersLength; i++)
+            for (UINT i = 0; i < m_rootParametersLength; i++)
                 m_rootParameters[i] = GenerateRootParameterDesc(config.RootParams[i]);
         }
 
@@ -103,7 +92,7 @@ namespace MirageAPI::DirectX
         samplerDesc.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
         samplerDesc.MinLOD = 0.0f;
         samplerDesc.MaxLOD = D3D12_FLOAT32_MAX;
-        samplerDesc.ShaderRegister = 0; // register(s0)
+        samplerDesc.ShaderRegister = 0;
         samplerDesc.RegisterSpace = 0;
         samplerDesc.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
@@ -211,7 +200,7 @@ namespace MirageAPI::DirectX
         m_inputLayoutsLength = config.InputLayouts->Length;
         m_inputLayoutsArr = new D3D12_INPUT_ELEMENT_DESC[m_inputLayoutsLength];
         m_semanticNames = new std::string[m_inputLayoutsLength];
-        for (int i = 0; i < m_inputLayoutsLength; i++)
+        for (UINT i = 0; i < m_inputLayoutsLength; i++)
         {
             DX12InputElement inputLayout = config.InputLayouts[i];
             m_semanticNames[i] = msclr::interop::marshal_as<std::string>(inputLayout.SemanticName);
@@ -264,7 +253,14 @@ namespace MirageAPI::DirectX
             delete[] m_semanticNames;
             m_semanticNames = nullptr;
         }
-        m_descriptorRanges->Clear();
+        if (m_descriptorRanges)
+        {
+            for each (auto desc in m_descriptorRanges)
+            {
+                delete desc;
+            }
+            m_descriptorRanges->Clear();
+        }
         if (m_rootParameters)
         {
             for (unsigned int i = 0; i < m_rootParametersLength; i++)

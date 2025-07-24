@@ -2,12 +2,13 @@
 
 #include "DX12ContextConfig.h"
 
+#include "DX12Object.h"
 #include "CommandList/DX12WindowCommandList.h"
 #include "Buffer/DX12FrameBuffer.h"
 
 namespace MirageAPI::DirectX
 {
-    public ref class DX12WindowContext
+    public ref class DX12WindowContext : public DX12Object
     {
     internal:
         IDXGISwapChain3* m_swapChain = nullptr;
@@ -19,24 +20,28 @@ namespace MirageAPI::DirectX
         DX12DescriptorHeap^ m_rtvHeap;
         array<DX12FrameBuffer^>^ m_frameBuffers;
         UINT m_frameIndex = 0;
-        UINT m_rtvDescriptorSize = 0;
         UINT m_bufferCount = 2;
-        
+
         DX12WindowCommandList^ m_windowCommandList;
 
         int m_width = 0;
         int m_height = 0;
         int m_vsync = 0;
         DX12WindowContextConfig^ m_config;
-        
-        bool disposed = false;
 
         void CreateFrameBuffers();
         void WaitForGpuCompletion();
 
+        void FreeFrameBuffers();
+        void FreeRTVHeap();
+
     public:
-        DX12WindowContext(HWND hwnd, int width, int height,
-                          DX12WindowContextConfig^ config);
+        DX12WindowContext(
+            HWND hwnd,
+            int width, int height,
+            DX12WindowContextConfig^ config
+        );
+
         ~DX12WindowContext() { this->!DX12WindowContext(); }
         !DX12WindowContext();
 
@@ -52,7 +57,7 @@ namespace MirageAPI::DirectX
         {
             DX12FrameBuffer^ get()
             {
-                return m_frameBuffers != nullptr && m_frameIndex < m_frameBuffers->Length
+                return m_frameBuffers != nullptr && m_frameIndex < static_cast<UINT>(m_frameBuffers->Length)
                            ? m_frameBuffers[m_frameIndex]
                            : nullptr;
             }
