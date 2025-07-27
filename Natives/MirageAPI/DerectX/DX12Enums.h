@@ -2,6 +2,8 @@
 
 namespace MirageAPI::DirectX
 {
+    // primitives
+
     public enum class DX12PrimitiveTopologyType
     {
         Undefined = D3D12_PRIMITIVE_TOPOLOGY_TYPE_UNDEFINED,
@@ -20,6 +22,47 @@ namespace MirageAPI::DirectX
         TriangleList = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,
         TriangleStrip = D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP,
     };
+
+    // shaders
+
+    public enum class DX12ShaderType
+    {
+        Vertex,
+        Pixel,
+        Geometry,
+        Compute,
+        Domain,
+        Hull
+    };
+
+    [System::Flags]
+    public enum class DX12ShaderCompileFlags : unsigned int
+    {
+        None = 0,
+        Debug = D3DCOMPILE_DEBUG,
+        SkipOptimization = D3DCOMPILE_SKIP_OPTIMIZATION,
+        WarningsAreErrors = D3DCOMPILE_WARNINGS_ARE_ERRORS,
+        EnableBackwardsCompatibility = D3DCOMPILE_ENABLE_BACKWARDS_COMPATIBILITY,
+
+        OptimizationLevel0 = D3DCOMPILE_OPTIMIZATION_LEVEL0,
+        OptimizationLevel1 = D3DCOMPILE_OPTIMIZATION_LEVEL1,
+        OptimizationLevel2 = D3DCOMPILE_OPTIMIZATION_LEVEL2,
+        OptimizationLevel3 = D3DCOMPILE_OPTIMIZATION_LEVEL3,
+    };
+
+    public enum class DX12ShaderVisibility
+    {
+        Amplification = D3D12_SHADER_VISIBILITY_AMPLIFICATION,
+        Vertex = D3D12_SHADER_VISIBILITY_VERTEX,
+        Pixel = D3D12_SHADER_VISIBILITY_PIXEL,
+        Geometry = D3D12_SHADER_VISIBILITY_GEOMETRY,
+        Mesh = D3D12_SHADER_VISIBILITY_MESH,
+        Domain = D3D12_SHADER_VISIBILITY_DOMAIN,
+        Hull = D3D12_SHADER_VISIBILITY_HULL,
+        All = D3D12_SHADER_VISIBILITY_ALL
+    };
+
+    // resources
 
     public enum class DX12TextureType
     {
@@ -77,43 +120,6 @@ namespace MirageAPI::DirectX
 
         // 16 байт на пиксель
         RGBA32_FLOAT = DXGI_FORMAT_R32G32B32A32_FLOAT
-    };
-
-    public enum class DX12ShaderType
-    {
-        Vertex,
-        Pixel,
-        Geometry,
-        Compute,
-        Domain,
-        Hull
-    };
-
-    [System::Flags]
-    public enum class DX12ShaderCompileFlags : unsigned int
-    {
-        None = 0,
-        Debug = D3DCOMPILE_DEBUG,
-        SkipOptimization = D3DCOMPILE_SKIP_OPTIMIZATION,
-        WarningsAreErrors = D3DCOMPILE_WARNINGS_ARE_ERRORS,
-        EnableBackwardsCompatibility = D3DCOMPILE_ENABLE_BACKWARDS_COMPATIBILITY,
-
-        OptimizationLevel0 = D3DCOMPILE_OPTIMIZATION_LEVEL0,
-        OptimizationLevel1 = D3DCOMPILE_OPTIMIZATION_LEVEL1,
-        OptimizationLevel2 = D3DCOMPILE_OPTIMIZATION_LEVEL2,
-        OptimizationLevel3 = D3DCOMPILE_OPTIMIZATION_LEVEL3,
-    };
-
-    public enum class DX12ShaderVisibility
-    {
-        Amplification = D3D12_SHADER_VISIBILITY_AMPLIFICATION,
-        Vertex = D3D12_SHADER_VISIBILITY_VERTEX,
-        Pixel = D3D12_SHADER_VISIBILITY_PIXEL,
-        Geometry = D3D12_SHADER_VISIBILITY_GEOMETRY,
-        Mesh = D3D12_SHADER_VISIBILITY_MESH,
-        Domain = D3D12_SHADER_VISIBILITY_DOMAIN,
-        Hull = D3D12_SHADER_VISIBILITY_HULL,
-        All = D3D12_SHADER_VISIBILITY_ALL
     };
 
     public enum class DX12ResourceType
@@ -192,6 +198,8 @@ namespace MirageAPI::DirectX
         VideoEncodeReferenceOnly = D3D12_RESOURCE_FLAG_VIDEO_ENCODE_REFERENCE_ONLY,
     };
 
+    // Heap
+
     public enum class DX12DescriptorHeapType
     {
         CBV_SRV_UAV,
@@ -207,6 +215,8 @@ namespace MirageAPI::DirectX
         Readback = D3D12_HEAP_TYPE_READBACK,
         Upload = D3D12_HEAP_TYPE_UPLOAD,
     };
+
+    // other
 
     public enum class DX12CommandListType
     {
@@ -291,5 +301,15 @@ namespace MirageAPI::DirectX
         None = D3D12_CULL_MODE_NONE,
         Back = D3D12_CULL_MODE_BACK,
         Front = D3D12_CULL_MODE_FRONT,
+    };
+
+    [System::Flags]
+    public enum class DX12ContextInitFlags : unsigned int
+    {
+        None = 0,
+        Debug = 1,
+        UseAdapter = 2,
+        UseWarpAdapter = 4,
+        UseHighPerformanceAdapter = 8
     };
 }

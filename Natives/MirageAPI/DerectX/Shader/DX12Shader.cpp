@@ -5,7 +5,7 @@
 #include <vcclr.h>
 #include <msclr/marshal_cppstd.h>
 
-namespace MirageAPI::DirectX
+namespace MirageAPI::DirectX::Shader
 {
     DX12Shader::DX12Shader(
         ID3DBlob* bytecode,

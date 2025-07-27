@@ -1,11 +1,14 @@
 ﻿#include "pch.h"
 #include "DX12Resource.h"
 
-namespace MirageAPI::DirectX
+namespace MirageAPI::DirectX::Resource
 {
     void DX12Resource::!DX12Resource()
     {
+        Validate();
+        
         Unmap();
+        
         if (m_nativeResource && m_nativeResource->Release() == 0)
             m_nativeResource = nullptr;
     }
@@ -23,7 +26,7 @@ namespace MirageAPI::DirectX
             return pData;
 
         // checking what's going on
-        DX12_CHECK(device, hr, "Any err in resource map operation");
+        CheckHResult(hr, "Any err in resource map operation");
 
         return nullptr; // if is not an error but whatever not a success
     }

@@ -4,6 +4,9 @@ using OpenTK.Mathematics;
 using Engine.Graphic.Window;
 using Engine.Logging;
 using MirageAPI.DirectX;
+using MirageAPI.DirectX.Shader;
+using MirageAPI.DirectX.Pipeline;
+using MirageAPI.DirectX.Resource;
 using System.Reflection;
 using System.Text;
 using Engine.Asset;
@@ -373,7 +376,7 @@ public class GameWindow : Window
         base.Render();
 
         // Подготовка трубы и стыковка с CommandList
-        var commandList = NativeWindow.DXContext.CommandList;
+        var commandList = NativeWindow.DXContext.CmdList;
         commandList.PipelineState = _pipelineState;
 
         // Загружаем текстуру в шейдер, если есть 

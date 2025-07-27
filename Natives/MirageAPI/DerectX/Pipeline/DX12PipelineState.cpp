@@ -4,9 +4,9 @@
 #include <iostream>
 #include <ostream>
 
-namespace MirageAPI::DirectX
+namespace MirageAPI::DirectX::Pipeline
 {
-    D3D12_ROOT_PARAMETER DX12PipelineState::GenerateRootParameterDesc(DX12PipelineParameter param)
+    inline D3D12_ROOT_PARAMETER DX12PipelineState::GenerateRootParameterDesc(DX12PipelineParameter param)
     {
         D3D12_ROOT_PARAMETER d3dParam;
         d3dParam.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
@@ -229,10 +229,10 @@ namespace MirageAPI::DirectX
         m_pso = pso;
     }
 
-    DX12PipelineState::~DX12PipelineState() { this->!DX12PipelineState(); }
-
     DX12PipelineState::!DX12PipelineState()
     {
+        Validate();
+        
         if (m_pso)
         {
             m_pso->Release();

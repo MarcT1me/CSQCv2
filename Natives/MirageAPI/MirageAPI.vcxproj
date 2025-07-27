@@ -106,28 +106,27 @@
     </ItemDefinitionGroup>
     <!--  Headers-->
     <ItemGroup>
-        <ClInclude Include="DerectX\Buffer\DX12ConstantBuffer.h" />
-        <ClInclude Include="DerectX\Buffer\DX12StructuredBuffer.h" />
-        <ClInclude Include="DerectX\DX12DescriptorHeap.h" />
-        <ClInclude Include="DerectX\DX12Object.h" />
-        <ClInclude Include="DerectX\extensions.h" />
-        <ClInclude Include="DerectX\Pipeline\DX12BlendConfig.h" />
+        <ClInclude Include="DerectX\DX12DescriptorHeap.h"/>
+        <ClInclude Include="DerectX\DX12Object.h"/>
+        <ClInclude Include="DerectX\Pipeline\DX12BlendConfig.h"/>
         <ClInclude Include="DerectX\Pipeline\DX12PipelineState.h"/>
         <ClInclude Include="DerectX\Pipeline\DX12PipelineStateConfig.h"/>
-        <ClInclude Include="DerectX\Pipeline\DX12RasterizerConfig.h" />
-        <ClInclude Include="DerectX\Pipeline\DX12PipelineParameter.h" />
+        <ClInclude Include="DerectX\Pipeline\DX12RasterizerConfig.h"/>
+        <ClInclude Include="DerectX\Pipeline\DX12PipelineParameter.h"/>
+        <ClInclude Include="DerectX\Resource\Buffer\DX12Buffer.h"/>
+        <ClInclude Include="DerectX\Resource\Buffer\DX12ConstantBuffer.h"/>
+        <ClInclude Include="DerectX\Resource\Buffer\DX12IndexBuffer.h"/>
+        <ClInclude Include="DerectX\Resource\Buffer\DX12StructuredBuffer.h"/>
+        <ClInclude Include="DerectX\Resource\Buffer\DX12UploadBuffer.h"/>
+        <ClInclude Include="DerectX\Resource\Buffer\DX12VertexBuffer.h"/>
+        <ClInclude Include="DerectX\Resource\Texture\DX12FrameBuffer.h"/>
+        <ClInclude Include="DerectX\Resource\Texture\DX12Texture.h"/>
         <ClInclude Include="pch.h"/>
         <ClInclude Include="Resource.h"/>
         <ClInclude Include="DerectX\DX12Enums.h"/>
         <ClInclude Include="DerectX\DX12Context.h"/>
         <ClInclude Include="DerectX\Resource\DX12Resource.h"/>
         <ClInclude Include="DerectX\Resource\DX12ResourceConfig.h"/>
-        <ClInclude Include="DerectX\Buffer\DX12Buffer.h"/>
-        <ClInclude Include="DerectX\Buffer\DX12FrameBuffer.h"/>
-        <ClInclude Include="DerectX\Buffer\DX12IndexBuffer.h"/>
-        <ClInclude Include="DerectX\Buffer\DX12Texture.h"/>
-        <ClInclude Include="DerectX\Buffer\DX12UploadBuffer.h"/>
-        <ClInclude Include="DerectX\Buffer\DX12VertexBuffer.h"/>
         <ClInclude Include="DerectX\DX12WindowContext.h"/>
         <ClInclude Include="DerectX\DX12ContextConfig.h"/>
         <ClInclude Include="DerectX\DX12Helpers.h"/>
@@ -144,22 +143,22 @@
     <!--  Source-->
     <ItemGroup>
         <ClCompile Include="AssemblyInfo.cpp"/>
-        <ClCompile Include="DerectX\Buffer\DX12Buffer.cpp"/>
-        <ClCompile Include="DerectX\Buffer\DX12ConstantBuffer.cpp" />
-        <ClCompile Include="DerectX\Buffer\DX12FrameBuffer.cpp"/>
-        <ClCompile Include="DerectX\Buffer\DX12IndexBuffer.cpp"/>
-        <ClCompile Include="DerectX\Buffer\DX12StructuredBuffer.cpp" />
-        <ClCompile Include="DerectX\Buffer\DX12Texture.cpp"/>
-        <ClCompile Include="DerectX\Buffer\DX12UploadBuffer.cpp"/>
-        <ClCompile Include="DerectX\Buffer\DX12VertexBuffer.cpp"/>
         <ClCompile Include="DerectX\CommandList\DX12CommandList.cpp"/>
         <ClCompile Include="DerectX\CommandList\DX12WindowCommandList.cpp"/>
         <ClCompile Include="DerectX\DX12Context.cpp"/>
-        <ClCompile Include="DerectX\DX12DescriptorHeap.cpp" />
-        <ClCompile Include="DerectX\DX12Object.cpp" />
+        <ClCompile Include="DerectX\DX12DescriptorHeap.cpp"/>
+        <ClCompile Include="DerectX\DX12Object.cpp"/>
         <ClCompile Include="DerectX\DX12WindowContext.cpp"/>
         <ClCompile Include="DerectX\Pipeline\DX12PipelineState.cpp"/>
+        <ClCompile Include="DerectX\Resource\Buffer\DX12Buffer.cpp"/>
+        <ClCompile Include="DerectX\Resource\Buffer\DX12ConstantBuffer.cpp"/>
+        <ClCompile Include="DerectX\Resource\Buffer\DX12IndexBuffer.cpp"/>
+        <ClCompile Include="DerectX\Resource\Buffer\DX12StructuredBuffer.cpp"/>
+        <ClCompile Include="DerectX\Resource\Buffer\DX12UploadBuffer.cpp"/>
+        <ClCompile Include="DerectX\Resource\Buffer\DX12VertexBuffer.cpp"/>
         <ClCompile Include="DerectX\Resource\DX12Resource.cpp"/>
+        <ClCompile Include="DerectX\Resource\Texture\DX12FrameBuffer.cpp"/>
+        <ClCompile Include="DerectX\Resource\Texture\DX12Texture.cpp"/>
         <ClCompile Include="DerectX\Shader\DX12Shader.cpp"/>
         <ClCompile Include="DerectX\Shader\DX12ShaderCompiler.cpp"/>
         <ClCompile Include="Events\NativeEventProc.cpp"/>

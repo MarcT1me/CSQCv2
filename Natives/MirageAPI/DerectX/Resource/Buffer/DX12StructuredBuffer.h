@@ -9,7 +9,7 @@ namespace MirageAPI::DirectX
 }
 
 // buffer
-namespace MirageAPI::DirectX
+namespace MirageAPI::DirectX::Resource
 {
     public ref class DX12StructuredBuffer : public DX12Buffer
     {

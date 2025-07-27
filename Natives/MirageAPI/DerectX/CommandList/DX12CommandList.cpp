@@ -3,10 +3,10 @@
 
 #include "../Pipeline/DX12PipelineState.h"
 #include "../DX12DescriptorHeap.h"
-#include "../Buffer/DX12Texture.h"
-#include "../Buffer/DX12FrameBuffer.h"
+#include "../Resource/Texture/DX12Texture.h"
+#include "../Resource/Texture/DX12FrameBuffer.h"
 
-namespace MirageAPI::DirectX
+namespace MirageAPI::DirectX::CommandList
 {
     DX12CommandList::DX12CommandList(
         DX12CommandListType type
@@ -18,7 +18,7 @@ namespace MirageAPI::DirectX
             static_cast<D3D12_COMMAND_LIST_TYPE>(m_type),
             IID_PPV_ARGS(&commandAllocator)
         );
-        DX12_CHECK(device, hr, "Failed to create command allocator");
+        CheckHResult(hr, "Failed to create command allocator");
         m_commandAllocator = commandAllocator;
 
         // command list
@@ -30,7 +30,7 @@ namespace MirageAPI::DirectX
             nullptr,
             IID_PPV_ARGS(&commandList)
         );
-        DX12_CHECK(device, hr, "Failed to create command list");
+        CheckHResult(hr, "Failed to create command list");
         m_commandList = commandList;
         m_commandList->Close(); // instantly close
 
@@ -46,7 +46,7 @@ namespace MirageAPI::DirectX
             &queueDesc,
             IID_PPV_ARGS(&commandQueue)
         );
-        DX12_CHECK(device, hr, "Failed to create command queue.");
+        CheckHResult(hr, "Failed to create command queue.");
         m_commandQueue = commandQueue;
     }
 
@@ -71,7 +71,7 @@ namespace MirageAPI::DirectX
         m_descriptorHeap = heap;
     }
 
-    void DX12CommandList::PipelineState::set(DX12PipelineState^ pipelineState)
+    void DX12CommandList::PipelineState::set(Pipeline::DX12PipelineState^ pipelineState)
     {
         m_commandList->SetPipelineState(pipelineState->NativePSO);
         m_commandList->SetGraphicsRootSignature(pipelineState->RootSignature);
@@ -84,15 +84,15 @@ namespace MirageAPI::DirectX
     {
         Validate();
 
-        m_commandAllocator->Reset();
-        m_commandList->Reset(m_commandAllocator, nullptr);
+        CheckHResult(m_commandAllocator->Reset(), "reset command allocator");
+        CheckHResult(m_commandList->Reset(m_commandAllocator, nullptr), "reset command list");
     }
 
     void DX12CommandList::Close()
     {
         Validate();
 
-        m_commandList->Close();
+        CheckHResult(m_commandList->Close(), "close command list");
     }
 
     void DX12CommandList::Execute()
@@ -112,7 +112,7 @@ namespace MirageAPI::DirectX
         HRESULT hr = device->CreateFence(
             0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)
         );
-        DX12_CHECK(device, hr, "some error in a command queue executing waiting");
+        CheckHResult(hr, "some error in a command queue executing waiting");
 
         // fence event
         HANDLE eventHandle = CreateEvent(nullptr, FALSE, FALSE, nullptr);
@@ -165,6 +165,8 @@ namespace MirageAPI::DirectX
         DX12PrimitiveTopology topology
     )
     {
+        Validate();
+
         m_commandList->IASetPrimitiveTopology(static_cast<D3D12_PRIMITIVE_TOPOLOGY>(topology));
     }
 
@@ -175,6 +177,8 @@ namespace MirageAPI::DirectX
         UINT startInstance
     )
     {
+        Validate();
+
         m_commandList->DrawInstanced(
             vertexCount,
             count,
@@ -184,7 +188,7 @@ namespace MirageAPI::DirectX
     }
 
     void DX12CommandList::ClearRenderTargetView(
-        DX12FrameBuffer^ frameBuffer,
+        Resource::DX12FrameBuffer^ frameBuffer,
         float r, float g, float b, float a
     )
     {
@@ -196,7 +200,7 @@ namespace MirageAPI::DirectX
 
     // bindings
 
-    void DX12CommandList::SetTexture(UINT rootIndex, DX12Texture^ texture)
+    void DX12CommandList::SetTexture(UINT rootIndex, Resource::DX12Texture^ texture)
     {
         Validate();
         m_descriptorHeap->Validate();
@@ -215,6 +219,8 @@ namespace MirageAPI::DirectX
 
     void DX12CommandList::SetRootConstants(UINT rootIndex, UINT constantSize, float data[], UINT offset)
     {
+        Validate();
+
         m_commandList->SetGraphicsRoot32BitConstants(
             rootIndex,
             constantSize,
@@ -223,26 +229,34 @@ namespace MirageAPI::DirectX
         );
     }
 
-    void DX12CommandList::BindBuffer(DX12IndexBuffer^ indexBuffer)
+    void DX12CommandList::BindBuffer(Resource::DX12IndexBuffer^ indexBuffer)
     {
+        Validate();
+
         indexBuffer->Bind(m_commandList);
     }
 
-    void DX12CommandList::BindBuffer(DX12VertexBuffer^ vertexBuffer)
+    void DX12CommandList::BindBuffer(Resource::DX12VertexBuffer^ vertexBuffer)
     {
+        Validate();
+
         vertexBuffer->Bind(m_commandList);
     }
 
-    void DX12CommandList::BindBuffer(UINT rootIndex, DX12ConstantBuffer^ constantBuffer)
+    void DX12CommandList::BindBuffer(UINT rootIndex, Resource::DX12ConstantBuffer^ constantBuffer)
     {
+        Validate();
+
         m_commandList->SetGraphicsRootConstantBufferView(
             rootIndex,
             constantBuffer->GPUAddress
         );
     }
 
-    void DX12CommandList::BindBuffer(UINT rootIndex, DX12StructuredBuffer^ structuredBuffer)
+    void DX12CommandList::BindBuffer(UINT rootIndex, Resource::DX12StructuredBuffer^ structuredBuffer)
     {
+        Validate();
+
         m_commandList->SetGraphicsRootShaderResourceView(
             rootIndex,
             structuredBuffer->GPUAddress
@@ -256,6 +270,10 @@ namespace MirageAPI::DirectX
         if (!m_descriptorHeap)
         {
             throw gcnew System::InvalidOperationException("Command List has not a Descriptor Heap");
+        }
+        if (!m_pipelineState)
+        {
+            throw gcnew System::InvalidOperationException("Command List has not a Pipeline State");
         }
     }
 }

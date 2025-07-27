@@ -4,7 +4,7 @@
 
 #include "DX12Shader.h"
 
-namespace MirageAPI::DirectX
+namespace MirageAPI::DirectX::Shader
 {
     public ref class DX12ShaderCompiler
     {

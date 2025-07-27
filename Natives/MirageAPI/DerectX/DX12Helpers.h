@@ -4,6 +4,56 @@
 
 namespace MirageAPI::DirectX
 {
+    public ref class DXException : public System::Exception
+    {
+    public:
+        DXException(System::String^ msg) : Exception(gcnew System::String(msg))
+        {
+        }
+    };
+    
+    public ref class HRException : public DXException
+    {
+        HRESULT m_hr;
+
+    public:
+        HRException(HRESULT hr, System::String^ msg) : DXException(gcnew System::String(msg)), m_hr(hr)
+        {
+        }
+
+        HRESULT HR() { return m_hr; }
+    };
+    
+    inline ID3D12Device* GetContextDevice(bool autoThrow = true)
+    {
+        if (DX12Context::s_device == nullptr && autoThrow)
+            throw gcnew DXException("DX12 device not initialized");
+        return DX12Context::s_device;
+    }
+    
+    inline IDXGIFactory4* GetContextFactory(bool autoThrow = true)
+    {
+        if (DX12Context::s_factory == nullptr && autoThrow)
+            throw gcnew DXException("DX12 factory not initialized");
+        return DX12Context::s_factory;
+    }
+
+    inline void CheckHResult(HRESULT hr, const char* msg, bool checkDevice = true)
+    {
+        if (FAILED(hr))
+        {
+            if (checkDevice && hr == DXGI_ERROR_DEVICE_REMOVED)
+                throw gcnew HRException(
+                    hr, gcnew System::String(msg) + gcnew System::String(
+                        ": Device removed (" + GetContextDevice()->GetDeviceRemovedReason() + ")"
+                    ));
+            throw gcnew HRException(
+                hr, gcnew System::String(msg) + gcnew System::String(
+                    ": " + DX12Context::s_device->GetDeviceRemovedReason()
+                ));
+        }
+    }
+
     inline void UpdateSubresources(
         ID3D12GraphicsCommandList* pCmdList,
         ID3D12Resource* pDestinationResource,
@@ -49,26 +99,6 @@ namespace MirageAPI::DirectX
 
             pCmdList->CopyTextureRegion(&dst, 0, 0, 0, &src, nullptr);
         }
-    }
-
-    inline UINT64 GetRequiredIntermediateSize(
-        ID3D12Resource* destinationResource,
-        UINT firstSubresource,
-        UINT numSubresources
-    )
-    {
-        D3D12_RESOURCE_DESC desc = destinationResource->GetDesc();
-        UINT64 requiredSize = 0;
-
-        ID3D12Device* device;
-        destinationResource->GetDevice(IID_PPV_ARGS(&device));
-        device->GetCopyableFootprints(
-            &desc, firstSubresource, numSubresources, 0,
-            nullptr, nullptr, nullptr, &requiredSize
-        );
-        device->Release();
-
-        return requiredSize;
     }
 
     inline UINT GetResourceFormatSize(

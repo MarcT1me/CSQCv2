@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 // Mirage ecosystem
-#include "DX12Buffer.h"
+#include "../Buffer/DX12Buffer.h"
 
 namespace MirageAPI::DirectX
 {
@@ -9,7 +9,7 @@ namespace MirageAPI::DirectX
 }
 
 // texture
-namespace MirageAPI::DirectX
+namespace MirageAPI::DirectX::Resource
 {
     public ref class DX12Texture : public DX12Resource
     {
@@ -20,7 +20,7 @@ namespace MirageAPI::DirectX
         UINT m_height;
         UINT m_mipLevels;
         // heap
-        UINT m_srvIndex = UINT_MAX;
+        UINT m_srvDescriptorIndex = UINT_MAX;
         DX12DescriptorHeap^ m_srvHeap = nullptr;
 
     public:
@@ -54,15 +54,19 @@ namespace MirageAPI::DirectX
             DX12DescriptorHeap^ get() { return m_srvHeap; }
             void set(DX12DescriptorHeap^ value) { m_srvHeap = value; }
         }
+        property D3D12_CPU_DESCRIPTOR_HANDLE SRVHandle
+        {
+            D3D12_CPU_DESCRIPTOR_HANDLE get();
+        }
 
         // texture operations
         virtual void UploadData(array<System::Byte>^ data);
 
-        D3D12_SHADER_RESOURCE_VIEW_DESC CreateSRVDesc();
+        const D3D12_SHADER_RESOURCE_VIEW_DESC* CreateSRVDesc();
         void CreateSRV();
         void ReleaseSRV();
 
-        property UINT SRVIndex { UINT get() { return m_srvIndex; } }
-        property bool HasSRV { bool get() { return m_srvIndex != UINT_MAX; } }
+        property UINT SRVIndex { UINT get() { return m_srvDescriptorIndex; } }
+        property bool HasSRV { bool get() { return m_srvDescriptorIndex != UINT_MAX; } }
     };
 }

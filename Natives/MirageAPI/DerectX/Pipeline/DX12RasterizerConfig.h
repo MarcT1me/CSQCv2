@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-namespace MirageAPI::DirectX
+namespace MirageAPI::DirectX::Pipeline
 {
     public value struct DX12RasterizerConfig
     {

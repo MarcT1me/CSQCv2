@@ -1,9 +1,9 @@
 ﻿#include "pch.h"
 #include "DX12StructuredBuffer.h"
 
-#include "../DX12DescriptorHeap.h"
+#include "../../DX12DescriptorHeap.h"
 
-namespace MirageAPI::DirectX
+namespace MirageAPI::DirectX::Resource
 {
     void DX12StructuredBuffer::!DX12StructuredBuffer()
     {

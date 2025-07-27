@@ -2,7 +2,7 @@
 
 #include <d3d12.h>
 
-namespace MirageAPI::DirectX
+namespace MirageAPI::DirectX::Shader
 {
     public ref class DX12Shader
     {

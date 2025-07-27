@@ -5,7 +5,7 @@
 #include "DX12ResourceConfig.h"
 
 // resource
-namespace MirageAPI::DirectX
+namespace MirageAPI::DirectX::Resource
 {
     public ref class DX12Resource abstract : public DX12Object
     {

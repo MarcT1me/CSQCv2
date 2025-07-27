@@ -2,7 +2,7 @@
 
 #include "DX12Buffer.h"
 
-namespace MirageAPI::DirectX
+namespace MirageAPI::DirectX::Resource
 {
     public ref class DX12UploadBuffer : public DX12Buffer
     {

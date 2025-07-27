@@ -1,13 +1,13 @@
 ﻿#include "pch.h"
 #include "DX12Texture.h"
 
-#include "../DX12DescriptorHeap.h"
-#include "DX12UploadBuffer.h"
-#include "..\CommandList\DX12CommandList.h"
+#include "../../DX12DescriptorHeap.h"
+#include "../Buffer/DX12UploadBuffer.h"
+#include "../../CommandList/DX12CommandList.h"
 
-namespace MirageAPI::DirectX
+namespace MirageAPI::DirectX::Resource
 {
-    D3D12_RESOURCE_DIMENSION GetTextureDimension(DX12TextureType texType)
+    inline D3D12_RESOURCE_DIMENSION GetTextureDimension(DX12TextureType texType)
     {
         switch (texType)
         {
@@ -22,7 +22,27 @@ namespace MirageAPI::DirectX
             throw gcnew System::ArgumentException("Unknown texture type");
         }
     }
+    
+    inline UINT64 GetRequiredIntermediateSize(
+        ID3D12Resource* destinationResource,
+        UINT firstSubresource,
+        UINT numSubresources
+    )
+    {
+        D3D12_RESOURCE_DESC desc = destinationResource->GetDesc();
+        UINT64 requiredSize = 0;
 
+        ID3D12Device* device;
+        destinationResource->GetDevice(IID_PPV_ARGS(&device));
+        device->GetCopyableFootprints(
+            &desc, firstSubresource, numSubresources, 0,
+            nullptr, nullptr, nullptr, &requiredSize
+        );
+        device->Release();
+
+        return requiredSize;
+    }
+    
     DX12Texture::DX12Texture(
         DX12ResourceConfig config
     ) : DX12Resource(config),
@@ -31,6 +51,15 @@ namespace MirageAPI::DirectX
         m_height(config.Height),
         m_mipLevels(config.MipLevels)
     {
+        // creating heap info
+        D3D12_HEAP_PROPERTIES heapProps = {
+            D3D12_HEAP_TYPE_DEFAULT,
+            D3D12_CPU_PAGE_PROPERTY_UNKNOWN,
+            D3D12_MEMORY_POOL_UNKNOWN,
+            0, 0
+        };
+        
+        // creating resource description
         D3D12_RESOURCE_DESC desc = {};
         desc.Dimension = GetTextureDimension(m_textureType);
         desc.Width = m_width;
@@ -38,36 +67,42 @@ namespace MirageAPI::DirectX
         desc.DepthOrArraySize = config.Depth;
         desc.MipLevels = m_mipLevels;
         desc.Format = static_cast<DXGI_FORMAT>(config.Format);
+        desc.Flags = static_cast<D3D12_RESOURCE_FLAGS>(config.Flags);
+        // constant
         desc.SampleDesc = {1, 0};
         desc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-        desc.Flags = static_cast<D3D12_RESOURCE_FLAGS>(config.Flags);
-
-        D3D12_HEAP_PROPERTIES heapProps = {
-            D3D12_HEAP_TYPE_DEFAULT,
-            D3D12_CPU_PAGE_PROPERTY_UNKNOWN,
-            D3D12_MEMORY_POOL_UNKNOWN,
-            0, 0
-        };
 
         D3D12_CLEAR_VALUE* clearValuePtr = nullptr;
         // TODO: clear value
 
+        // creating texture himself
         ID3D12Resource* texture = nullptr;
-        HRESULT hr = device->CreateCommittedResource(
-            &heapProps,
-            D3D12_HEAP_FLAG_NONE,
-            &desc,
-            D3D12_RESOURCE_STATE_COMMON,
-            clearValuePtr,
-            IID_PPV_ARGS(&texture)
+        CheckHResult(
+            device->CreateCommittedResource(
+                &heapProps,
+                D3D12_HEAP_FLAG_NONE,
+                &desc,
+                D3D12_RESOURCE_STATE_COMMON,
+                clearValuePtr,
+                IID_PPV_ARGS(&texture)
+            ),
+            "Failed to create texture"
         );
-        DX12_CHECK(device, hr, "Failed to create texture");
         m_nativeResource = texture;
     }
 
     void DX12Texture::!DX12Texture()
     {
         ReleaseSRV();
+    }
+
+    D3D12_CPU_DESCRIPTOR_HANDLE DX12Texture::SRVHandle::get()
+    {
+        m_srvHeap->Validate();
+
+        D3D12_CPU_DESCRIPTOR_HANDLE handle = m_srvHeap->StartCPUHandle;
+        handle.ptr += m_srvDescriptorIndex * m_srvHeap->DescriptorSize;
+        return handle;
     }
 
     // texture operations
@@ -106,7 +141,7 @@ namespace MirageAPI::DirectX
             uploadBuffer->Unmap();
         }
 
-        auto commandList = gcnew DX12CommandList(DX12CommandListType::Direct);
+        auto commandList = gcnew CommandList::DX12CommandList(DX12CommandListType::Direct);
         commandList->Reset();
 
         // barrier
@@ -148,7 +183,7 @@ namespace MirageAPI::DirectX
         delete uploadBuffer;
     }
 
-    D3D12_SHADER_RESOURCE_VIEW_DESC DX12Texture::CreateSRVDesc()
+    const D3D12_SHADER_RESOURCE_VIEW_DESC* DX12Texture::CreateSRVDesc()
     {
         D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
         srvDesc.Format = static_cast<DXGI_FORMAT>(m_resourceFormat);
@@ -158,33 +193,29 @@ namespace MirageAPI::DirectX
         srvDesc.Texture2D.MostDetailedMip = 0;
         srvDesc.Texture2D.PlaneSlice = 0;
         srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
-        return srvDesc;
+        return &srvDesc;
     }
 
     void DX12Texture::CreateSRV()
     {
-        if (m_srvIndex != UINT_MAX) return;
+        if (m_srvDescriptorIndex != UINT_MAX) return;
 
         m_srvHeap->Validate();
 
-        m_srvIndex = m_srvHeap->Allocate();
-
-        D3D12_CPU_DESCRIPTOR_HANDLE handle = m_srvHeap->NativeHeap->GetCPUDescriptorHandleForHeapStart();
-        handle.ptr += m_srvIndex * m_srvHeap->DescriptorSize;
-
-        D3D12_SHADER_RESOURCE_VIEW_DESC desc = CreateSRVDesc();
+        m_srvDescriptorIndex = m_srvHeap->Allocate();
+        
         device->CreateShaderResourceView(
             m_nativeResource,
-            &desc,
-            handle
+            CreateSRVDesc(),
+            SRVHandle
         );
     }
 
     void DX12Texture::ReleaseSRV()
     {
-        if (m_srvIndex == UINT_MAX) return;
+        if (m_srvDescriptorIndex == UINT_MAX) return;
 
-        m_srvHeap->Free(m_srvIndex);
-        m_srvIndex = UINT_MAX;
+        m_srvHeap->Free(m_srvDescriptorIndex);
+        m_srvDescriptorIndex = UINT_MAX;
     }
 }

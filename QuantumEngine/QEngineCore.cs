@@ -2,6 +2,7 @@
 using Engine.Asset;
 using Engine.Asset.Defaults;
 using Engine.Configuration;
+using MirageAPI.DirectX;
 
 namespace Engine;
 
@@ -26,8 +27,13 @@ public class QEngineCore(Assembly? appLibAssembly) : EngineCore(appLibAssembly)
     protected override void InitializeModeSpecific()
     {
         Logger.Info("Initialize MirageAPI::DirectX12");
-        MirageAPI.DirectX.DX12Context.Initialize(BaseConfig.DebugMode);
-        
+
+        DX12ContextInitFlags flags = DX12ContextInitFlags.None;
+        flags |= BaseConfig.DebugMode ? DX12ContextInitFlags.Debug : DX12ContextInitFlags.None;
+        flags |= DX12ContextInitFlags.UseAdapter | DX12ContextInitFlags.UseHighPerformanceAdapter;
+
+        DX12Context.Initialize(flags);
+
         AssetManager.RegisterAssetType(new AssetType("image", new ImageAssetLoader()));
     }
 
@@ -40,7 +46,7 @@ public class QEngineCore(Assembly? appLibAssembly) : EngineCore(appLibAssembly)
     public static void Uninitialize()
     {
         Logger.Info("Deinitialize MirageAPI::DirectX12");
-        MirageAPI.DirectX.DX12Context.Deinitialize();
+        DX12Context.Deinitialize();
         Logger.Separator();
         Logger.Success("QuantumEngine uninitialized");
     }

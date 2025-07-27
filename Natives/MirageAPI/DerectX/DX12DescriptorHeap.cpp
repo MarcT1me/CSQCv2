@@ -1,8 +1,6 @@
 ﻿#include "pch.h"
 #include "DX12DescriptorHeap.h"
 
-#include "DX12Context.h"
-
 namespace MirageAPI::DirectX
 {
     DX12DescriptorHeap::DX12DescriptorHeap(
@@ -38,10 +36,11 @@ namespace MirageAPI::DirectX
         if (heap == nullptr)
         {
             throw gcnew System::NullReferenceException(
-                "Descriptor heap creation returned null pointer");
+                "Descriptor heap creation returned null pointer"
+            );
         }
-
         m_heap = heap;
+        
         m_descriptorSize = device->GetDescriptorHandleIncrementSize(
             static_cast<D3D12_DESCRIPTOR_HEAP_TYPE>(type)
         );

@@ -1,11 +1,10 @@
 ﻿#include "pch.h"
 #include "DX12ShaderCompiler.h"
 
-#include <iostream>
 #include <ostream>
 #include <comdef.h>
 
-namespace MirageAPI::DirectX
+namespace MirageAPI::DirectX::Shader
 {
     DX12Shader^ DX12ShaderCompiler::CompileShaderFromFile(
         const wchar_t* filename,

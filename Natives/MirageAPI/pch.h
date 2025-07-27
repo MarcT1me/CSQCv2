@@ -26,7 +26,6 @@
 // DX12 enums
 #include "DerectX/DX12Enums.h"
 // and misk
-#include "DerectX/extensions.h"
 #include "DerectX/DX12Helpers.h"
 #include "DerectX/DX12Context.h"
 

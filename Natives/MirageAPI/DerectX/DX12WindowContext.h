@@ -4,7 +4,7 @@
 
 #include "DX12Object.h"
 #include "CommandList/DX12WindowCommandList.h"
-#include "Buffer/DX12FrameBuffer.h"
+#include "Resource/Texture/DX12FrameBuffer.h"
 
 namespace MirageAPI::DirectX
 {
@@ -18,11 +18,11 @@ namespace MirageAPI::DirectX
         UINT64 m_fenceValue = 1;
 
         DX12DescriptorHeap^ m_rtvHeap;
-        array<DX12FrameBuffer^>^ m_frameBuffers;
+        array<Resource::DX12FrameBuffer^>^ m_frameBuffers;
         UINT m_frameIndex = 0;
         UINT m_bufferCount = 2;
 
-        DX12WindowCommandList^ m_windowCommandList;
+        CommandList::DX12WindowCommandList^ m_windowCommandList;
 
         int m_width = 0;
         int m_height = 0;
@@ -30,7 +30,12 @@ namespace MirageAPI::DirectX
         DX12WindowContextConfig^ m_config;
 
         void CreateFrameBuffers();
+        
         void WaitForGpuCompletion();
+        void SignalCommandQueue();
+        void IncreaseFenceValue();
+        void UpdateFrameIndex();
+        void WaitForGpuAndSignal();
 
         void FreeFrameBuffers();
         void FreeRTVHeap();
@@ -53,9 +58,9 @@ namespace MirageAPI::DirectX
         void EndFrame();
         void Present();
 
-        property DX12FrameBuffer^ CurrentFrameBuffer
+        property Resource::DX12FrameBuffer^ CurrentFrameBuffer
         {
-            DX12FrameBuffer^ get()
+            Resource::DX12FrameBuffer^ get()
             {
                 return m_frameBuffers != nullptr && m_frameIndex < static_cast<UINT>(m_frameBuffers->Length)
                            ? m_frameBuffers[m_frameIndex]
@@ -63,7 +68,7 @@ namespace MirageAPI::DirectX
             }
         }
 
-        property DX12WindowCommandList^ CommandList { DX12WindowCommandList^ get() { return m_windowCommandList; } }
+        property CommandList::DX12WindowCommandList^ CmdList { CommandList::DX12WindowCommandList^ get() { return m_windowCommandList; } }
         property DX12DescriptorHeap^ RTVHeap { DX12DescriptorHeap^ get() { return m_rtvHeap; } }
 
         property int VSync

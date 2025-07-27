@@ -1,9 +1,9 @@
 ﻿#include "pch.h"
 #include "DX12Buffer.h"
 
-#include "../CommandList/DX12CommandList.h"
+#include "../../CommandList/DX12CommandList.h"
 
-namespace MirageAPI::DirectX
+namespace MirageAPI::DirectX::Resource
 {
     DX12Buffer::DX12Buffer(
         DX12ResourceConfig config
@@ -35,26 +35,27 @@ namespace MirageAPI::DirectX
 
         // creating resource himself
         ID3D12Resource* buffer = nullptr;
-        HRESULT hr = device->CreateCommittedResource(
-            &heapProps,
-            static_cast<D3D12_HEAP_FLAGS>(D3D12_HEAP_FLAG_NONE),
-            &desc,
-            static_cast<D3D12_RESOURCE_STATES>(config.InitialState),
-            nullptr,
-            IID_PPV_ARGS(&buffer)
+        CheckHResult(
+            device->CreateCommittedResource(
+                &heapProps,
+                static_cast<D3D12_HEAP_FLAGS>(D3D12_HEAP_FLAG_NONE),
+                &desc,
+                static_cast<D3D12_RESOURCE_STATES>(config.InitialState),
+                nullptr,
+                IID_PPV_ARGS(&buffer)
+            ),
+            "Failed to create buffer"
         );
-        DX12_CHECK(device, hr, "Failed to create buffer");
-
         m_nativeResource = buffer;
     }
 
     void DX12Buffer::TransitionState(
-        DX12CommandList^ commandList,
+        CommandList::DX12CommandList^ commandList,
         DX12ResourceState newState
     )
     {
         Validate();
-        
+
         if (m_currentState == newState)
             return;
 
@@ -74,7 +75,7 @@ namespace MirageAPI::DirectX
     )
     {
         Validate();
-        
+
         if (!m_nativeResource || data->Length != m_size) return;
 
         if (void* pData = this->Map())

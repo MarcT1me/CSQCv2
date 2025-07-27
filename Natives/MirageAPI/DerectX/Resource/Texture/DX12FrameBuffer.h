@@ -1,13 +1,20 @@
 ﻿#pragma once
 
-#include "..\Resource\DX12Resource.h"
-#include "..\Resource\DX12ResourceConfig.h"
+#include "..\DX12Resource.h"
+#include "..\DX12ResourceConfig.h"
 
 namespace MirageAPI::DirectX
 {
-    ref class DX12CommandList;
     ref class DX12DescriptorHeap;
+}
 
+namespace MirageAPI::DirectX::CommandList
+{
+    ref class DX12CommandList;
+}
+
+namespace MirageAPI::DirectX::Resource
+{
     public ref class DX12FrameBuffer : public DX12Resource
     {
     internal:
@@ -21,8 +28,7 @@ namespace MirageAPI::DirectX
             UINT width,
             UINT height,
             DX12ResourceFormat format,
-            DX12DescriptorHeap^ rtvHeap,
-            UINT rtvDescriptorIndex
+            DX12DescriptorHeap^ rtvHeap
         );
 
     public:
@@ -48,8 +54,12 @@ namespace MirageAPI::DirectX
 
         // buffer operations
         virtual void TransitionState(
-            DX12CommandList^ commandList,
+            CommandList::DX12CommandList^ commandList,
             DX12ResourceState newState
         );
+
+        virtual const D3D12_RENDER_TARGET_VIEW_DESC* CreateRTVDesc();
+        void CreateRTV();
+        void ReleaseRTV();
     };
 }

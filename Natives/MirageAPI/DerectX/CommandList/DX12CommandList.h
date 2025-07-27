@@ -2,21 +2,29 @@
 
 // Mirage ecosystem
 #include "../DX12Object.h"
-#include "../Buffer/DX12IndexBuffer.h"
-#include "../Buffer/DX12VertexBuffer.h"
-#include "../Buffer/DX12ConstantBuffer.h"
-#include "../Buffer/DX12StructuredBuffer.h"
+#include "../Resource/Buffer/DX12IndexBuffer.h"
+#include "../Resource/Buffer/DX12VertexBuffer.h"
+#include "../Resource/Buffer/DX12ConstantBuffer.h"
+#include "../Resource/Buffer/DX12StructuredBuffer.h"
 
 namespace MirageAPI::DirectX
 {
-    ref class DX12PipelineState;
     ref class DX12DescriptorHeap;
+}
+
+namespace MirageAPI::DirectX::Pipeline
+{
+    ref class DX12PipelineState;
+}
+
+namespace MirageAPI::DirectX::Resource
+{
     ref class DX12FrameBuffer;
     ref class DX12Texture;
 }
 
 // command list
-namespace MirageAPI::DirectX
+namespace MirageAPI::DirectX::CommandList
 {
     public ref class DX12CommandList : public DX12Object
     {
@@ -31,7 +39,7 @@ namespace MirageAPI::DirectX
         DX12CommandListType m_type;
 
         DX12DescriptorHeap^ m_descriptorHeap = nullptr; // heap
-        DX12PipelineState^ m_pipelineState = nullptr; // pipeline
+        Pipeline::DX12PipelineState^ m_pipelineState = nullptr; // pipeline
 
     public:
         // constructors and deconstructors
@@ -65,10 +73,10 @@ namespace MirageAPI::DirectX
             DX12DescriptorHeap^ get() { return m_descriptorHeap; }
             void set(DX12DescriptorHeap^ value);
         }
-        property DX12PipelineState^ PipelineState
+        property Pipeline::DX12PipelineState^ PipelineState
         {
-            DX12PipelineState^ get() { return m_pipelineState; }
-            void set(DX12PipelineState^ value);
+            Pipeline::DX12PipelineState^ get() { return m_pipelineState; }
+            void set(Pipeline::DX12PipelineState^ value);
         }
 
         // command list operations
@@ -99,18 +107,18 @@ namespace MirageAPI::DirectX
             UINT startInstance
         );
         void ClearRenderTargetView(
-            DX12FrameBuffer^ frameBuffer,
+            Resource::DX12FrameBuffer^ frameBuffer,
             float r, float g, float b, float a
         );
 
         // bindings
-        void SetTexture(UINT rootIndex, DX12Texture^ texture);
+        void SetTexture(UINT rootIndex, Resource::DX12Texture^ texture);
         void SetRootConstants(UINT rootIndex, UINT constantSize, float data[], UINT offset);
 
-        void BindBuffer(DX12IndexBuffer^ indexBuffer);
-        void BindBuffer(DX12VertexBuffer^ vertexBuffer);
-        void BindBuffer(UINT rootIndex, DX12ConstantBuffer^ constantBuffer);
-        void BindBuffer(UINT rootIndex, DX12StructuredBuffer^ structuredBuffer);
+        void BindBuffer(Resource::DX12IndexBuffer^ indexBuffer);
+        void BindBuffer(Resource::DX12VertexBuffer^ vertexBuffer);
+        void BindBuffer(UINT rootIndex, Resource::DX12ConstantBuffer^ constantBuffer);
+        void BindBuffer(UINT rootIndex, Resource::DX12StructuredBuffer^ structuredBuffer);
 
         // other
         void Validate() override;

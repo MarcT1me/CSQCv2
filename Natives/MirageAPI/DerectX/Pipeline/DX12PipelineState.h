@@ -5,7 +5,7 @@
 #include "../DX12Object.h"
 #include "DX12PipelineStateConfig.h"
 
-namespace MirageAPI::DirectX
+namespace MirageAPI::DirectX::Pipeline
 {
     public ref class DX12PipelineState : public DX12Object
     {
@@ -23,7 +23,7 @@ namespace MirageAPI::DirectX
 
     public:
         DX12PipelineState(DX12PipelineStateConfig config);
-        ~DX12PipelineState();
+        ~DX12PipelineState() { this->!DX12PipelineState(); }
         !DX12PipelineState();
 
         property ID3D12PipelineState* NativePSO { 

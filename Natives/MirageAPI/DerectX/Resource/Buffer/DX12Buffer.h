@@ -1,16 +1,16 @@
 ﻿#pragma once
 
 // Mirage ecosystem
-#include "../Resource/DX12Resource.h"
-#include "../Resource/DX12ResourceConfig.h"
+#include "../DX12Resource.h"
+#include "../DX12ResourceConfig.h"
 
-namespace MirageAPI::DirectX
+namespace MirageAPI::DirectX::CommandList
 {
     ref class DX12CommandList;
 }
 
 // buffer
-namespace MirageAPI::DirectX
+namespace MirageAPI::DirectX::Resource
 {
     public ref class DX12Buffer abstract : public DX12Resource
     {
@@ -35,7 +35,7 @@ namespace MirageAPI::DirectX
 
         // buffer operations
         virtual void TransitionState(
-            DX12CommandList^ commandList,
+            CommandList::DX12CommandList^ commandList,
             DX12ResourceState newState
         );
 

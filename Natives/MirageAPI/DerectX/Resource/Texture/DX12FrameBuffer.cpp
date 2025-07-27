@@ -1,23 +1,21 @@
 ﻿#include "pch.h"
 #include "DX12FrameBuffer.h"
 
-#include "../DX12DescriptorHeap.h"
-#include "../CommandList/DX12CommandList.h"
+#include "../../DX12DescriptorHeap.h"
+#include "../../CommandList/DX12CommandList.h"
 
-namespace MirageAPI::DirectX
+namespace MirageAPI::DirectX::Resource
 {
     DX12FrameBuffer::DX12FrameBuffer(
         ID3D12Resource* resource,
         UINT width,
         UINT height,
         DX12ResourceFormat format,
-        DX12DescriptorHeap^ rtvHeap,
-        UINT rtvDescriptorIndex
+        DX12DescriptorHeap^ rtvHeap
     ) : DX12Resource(
             DX12ResourceConfig::RenderTargetConfig(width, height, format)
         ),
-        m_rtvHeap(rtvHeap),
-        m_rtvDescriptorIndex(rtvDescriptorIndex)
+        m_rtvHeap(rtvHeap)
     {
         m_nativeResource = resource;
     }
@@ -73,7 +71,7 @@ namespace MirageAPI::DirectX
             clearValuePtr,
             IID_PPV_ARGS(&buffer)
         );
-        DX12_CHECK(device, hr, "Failed to create buffer");
+        CheckHResult(hr, "Failed to create buffer");
         m_nativeResource = buffer;
     }
 
@@ -90,13 +88,13 @@ namespace MirageAPI::DirectX
     {
         m_rtvHeap->Validate();
 
-        D3D12_CPU_DESCRIPTOR_HANDLE handle = m_rtvHeap->NativeHeap->GetCPUDescriptorHandleForHeapStart();
+        D3D12_CPU_DESCRIPTOR_HANDLE handle = m_rtvHeap->StartCPUHandle;
         handle.ptr += m_rtvDescriptorIndex * m_rtvHeap->DescriptorSize;
         return handle;
     }
 
     void DX12FrameBuffer::TransitionState(
-        DX12CommandList^ commandList,
+        CommandList::DX12CommandList^ commandList,
         DX12ResourceState newState
     )
     {
@@ -111,5 +109,33 @@ namespace MirageAPI::DirectX
 
         commandList->NativeList->ResourceBarrier(1, &barrier);
         m_currentState = newState;
+    }
+    
+    const D3D12_RENDER_TARGET_VIEW_DESC* DX12FrameBuffer::CreateRTVDesc()
+    {
+        return nullptr;
+    }
+
+    void DX12FrameBuffer::CreateRTV()
+    {
+        if (m_rtvDescriptorIndex != UINT_MAX) return;
+
+        m_rtvHeap->Validate();
+
+        m_rtvDescriptorIndex = m_rtvHeap->Allocate();
+        
+        device->CreateRenderTargetView(
+            m_nativeResource,
+            CreateRTVDesc(),
+            RTVHandle
+        );
+    }
+
+    void DX12FrameBuffer::ReleaseRTV()
+    {
+        if (m_rtvDescriptorIndex == UINT_MAX) return;
+
+        m_rtvHeap->Free(m_rtvDescriptorIndex);
+        m_rtvDescriptorIndex = UINT_MAX;
     }
 }

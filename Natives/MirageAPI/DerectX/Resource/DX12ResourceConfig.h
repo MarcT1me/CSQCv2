@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-namespace MirageAPI::DirectX
+namespace MirageAPI::DirectX::Resource
 {
     public value struct DX12ResourceConfig
     {

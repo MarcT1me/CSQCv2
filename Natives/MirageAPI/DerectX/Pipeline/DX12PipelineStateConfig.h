@@ -5,7 +5,7 @@
 #include "DX12BlendConfig.h"
 #include "DX12PipelineParameter.h"
 
-namespace MirageAPI::DirectX
+namespace MirageAPI::DirectX::Pipeline
 {
     public value struct DX12InputElement
     {
@@ -19,8 +19,8 @@ namespace MirageAPI::DirectX
 
     public value struct DX12PipelineStateConfig
     {
-        DX12Shader^ VertexShader;
-        DX12Shader^ PixelShader;
+        Shader::DX12Shader^ VertexShader;
+        Shader::DX12Shader^ PixelShader;
         
         array<DX12InputElement>^ InputLayouts;
         array<DX12PipelineParameter>^ RootParams;

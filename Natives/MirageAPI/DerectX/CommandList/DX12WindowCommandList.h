@@ -2,7 +2,7 @@
 
 #include "DX12CommandList.h"
 
-namespace MirageAPI::DirectX
+namespace MirageAPI::DirectX::CommandList
 {
     public ref class DX12WindowCommandList sealed : public DX12CommandList
     {

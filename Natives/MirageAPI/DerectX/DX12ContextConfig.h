@@ -4,7 +4,6 @@ namespace MirageAPI::DirectX
 {
     public enum class DX12SwapEffect
     {
-        None = 0,
         Discard = DXGI_SWAP_EFFECT_DISCARD,
         FlipDiscard = DXGI_SWAP_EFFECT_FLIP_DISCARD,
         FlipSequential = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL,
@@ -17,6 +16,7 @@ namespace MirageAPI::DirectX
         
         bool EnableDebugLayer;
         bool AllowTearing;
+        bool UseWarpAdapter;
         
         UINT m_width;
         UINT m_height;
