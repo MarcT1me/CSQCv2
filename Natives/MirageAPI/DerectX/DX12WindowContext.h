@@ -3,6 +3,7 @@
 #include "DX12ContextConfig.h"
 
 #include "DX12Object.h"
+#include "CommandList/DX12CommandQueue.h"
 #include "CommandList/DX12WindowCommandList.h"
 #include "Resource/Texture/DX12FrameBuffer.h"
 
@@ -13,15 +14,14 @@ namespace MirageAPI::DirectX
     internal:
         IDXGISwapChain3* m_swapChain = nullptr;
 
-        ID3D12Fence* m_fence = nullptr;
-        HANDLE m_fenceEvent = nullptr;
-        UINT64 m_fenceValue = 1;
-
+        DX12Fence^ m_fence = nullptr;
         DX12DescriptorHeap^ m_rtvHeap;
+        
         array<Resource::DX12FrameBuffer^>^ m_frameBuffers;
         UINT m_frameIndex = 0;
         UINT m_bufferCount = 2;
 
+        CommandList::DX12CommandQueue^ m_commandQueue;
         CommandList::DX12WindowCommandList^ m_windowCommandList;
 
         int m_width = 0;
@@ -31,12 +31,8 @@ namespace MirageAPI::DirectX
 
         void CreateFrameBuffers();
         
-        void WaitForGpuCompletion();
-        void SignalCommandQueue();
-        void IncreaseFenceValue();
         void UpdateFrameIndex();
-        void WaitForGpuAndSignal();
-
+        
         void FreeFrameBuffers();
         void FreeRTVHeap();
 

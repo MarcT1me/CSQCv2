@@ -43,7 +43,7 @@ namespace MirageAPI::DirectX::Resource
             DX12ResourceConfig config = BufferConfig(DX12ResourceType::VertexBuffer, elementCount);
             config.Stride = stride;
 
-            config.InitialState = DX12ResourceState::VertexAndConstantBuffer;
+            config.InitialState = DX12ResourceState::GenericRead;
             config.HeapType = DX12HeapType::Upload;
             return config;
         }

@@ -32,7 +32,6 @@ namespace MirageAPI::DirectX::CommandList
         // native
         ID3D12CommandAllocator* m_commandAllocator = nullptr;
         ID3D12GraphicsCommandList* m_commandList = nullptr;
-        ID3D12CommandQueue* m_commandQueue = nullptr;
 
     internal:
         // descriptions
@@ -40,6 +39,9 @@ namespace MirageAPI::DirectX::CommandList
 
         DX12DescriptorHeap^ m_descriptorHeap = nullptr; // heap
         Pipeline::DX12PipelineState^ m_pipelineState = nullptr; // pipeline
+
+        void UpdatePipelineState();
+        void UpdateDescriptorHeap();
 
     public:
         // constructors and deconstructors
@@ -59,31 +61,25 @@ namespace MirageAPI::DirectX::CommandList
         {
             ID3D12GraphicsCommandList* get() { return m_commandList; }
         }
-        property ID3D12CommandQueue* NativeQueue
-        {
-            ID3D12CommandQueue* get() { return m_commandQueue; }
-        }
         // other properties
         property DX12CommandListType Type
         {
             DX12CommandListType get() { return m_type; }
         }
-        property DX12DescriptorHeap^ DescriptorHeap
-        {
-            DX12DescriptorHeap^ get() { return m_descriptorHeap; }
-            void set(DX12DescriptorHeap^ value);
-        }
         property Pipeline::DX12PipelineState^ PipelineState
         {
             Pipeline::DX12PipelineState^ get() { return m_pipelineState; }
-            void set(Pipeline::DX12PipelineState^ value);
+            void set(Pipeline::DX12PipelineState^ value) { m_pipelineState = value; }
+        }
+        property DX12DescriptorHeap^ DescriptorHeap
+        {
+            DX12DescriptorHeap^ get() { return m_descriptorHeap; }
+            void set(DX12DescriptorHeap^ value) { m_descriptorHeap = value; }
         }
 
         // command list operations
         virtual void Reset();
         virtual void Close();
-        void Execute();
-        void WaitForCompletion();
 
         // Viewport and other
         void SetViewport(
@@ -112,15 +108,16 @@ namespace MirageAPI::DirectX::CommandList
         );
 
         // bindings
-        void SetTexture(UINT rootIndex, Resource::DX12Texture^ texture);
-        void SetRootConstants(UINT rootIndex, UINT constantSize, float data[], UINT offset);
-
+        void BindBuffer(Resource::DX12FrameBuffer^ frameBuffer);
         void BindBuffer(Resource::DX12IndexBuffer^ indexBuffer);
         void BindBuffer(Resource::DX12VertexBuffer^ vertexBuffer);
+
         void BindBuffer(UINT rootIndex, Resource::DX12ConstantBuffer^ constantBuffer);
         void BindBuffer(UINT rootIndex, Resource::DX12StructuredBuffer^ structuredBuffer);
 
+        void SetRootConstants(UINT rootIndex, UINT constantSize, float data[], UINT offset);
+
         // other
-        void Validate() override;
+        void ValidateMembers();
     };
 }

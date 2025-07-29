@@ -49,7 +49,7 @@ namespace MirageAPI::DirectX
                     ));
             throw gcnew HRException(
                 hr, gcnew System::String(msg) + gcnew System::String(
-                    ": " + DX12Context::s_device->GetDeviceRemovedReason()
+                    ": " + hr
                 ));
         }
     }

@@ -72,6 +72,7 @@ namespace MirageAPI::DirectX::Pipeline
         DX12PipelineStateConfig config
     ) : m_descriptorRanges(gcnew System::Collections::Generic::List<System::IntPtr>())
     {
+        // generating root params
         if (config.RootParams)
         {
             m_rootParametersLength = config.RootParams->Length;
@@ -81,6 +82,7 @@ namespace MirageAPI::DirectX::Pipeline
                 m_rootParameters[i] = GenerateRootParameterDesc(config.RootParams[i]);
         }
 
+        // sampler settings
         D3D12_STATIC_SAMPLER_DESC samplerDesc = {};
         samplerDesc.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
         samplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
@@ -96,6 +98,7 @@ namespace MirageAPI::DirectX::Pipeline
         samplerDesc.RegisterSpace = 0;
         samplerDesc.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
+        // creating root signature
         D3D12_ROOT_SIGNATURE_DESC rootSignatureDesc = {
             m_rootParametersLength, m_rootParameters,
             1, &samplerDesc,
@@ -145,13 +148,13 @@ namespace MirageAPI::DirectX::Pipeline
         }
         m_rootSignature = rootSignature;
 
-        // 2. Создаем PSO
+        // creating pso
         D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
         psoDesc.pRootSignature = m_rootSignature;
         psoDesc.VS = config.VertexShader->GetNativeBytecode();
         psoDesc.PS = config.PixelShader->GetNativeBytecode();
 
-        // Ручная настройка растеризатора
+        // rasterizer settings
         psoDesc.RasterizerState.FillMode = static_cast<D3D12_FILL_MODE>(config.RasterizerState.FillMode);
         psoDesc.RasterizerState.CullMode = static_cast<D3D12_CULL_MODE>(config.RasterizerState.CullMode);
 
@@ -169,7 +172,7 @@ namespace MirageAPI::DirectX::Pipeline
                                                          ? D3D12_CONSERVATIVE_RASTERIZATION_MODE_ON
                                                          : D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
 
-        // Ручная настройка блендинга
+        // blend settings
         psoDesc.BlendState.AlphaToCoverageEnable = FALSE;
         psoDesc.BlendState.IndependentBlendEnable = FALSE;
 
@@ -217,22 +220,23 @@ namespace MirageAPI::DirectX::Pipeline
         }
         psoDesc.InputLayout = {m_inputLayoutsArr, m_inputLayoutsLength};
 
+        // pso himself
         ID3D12PipelineState* pso;
-        hr = device->CreateGraphicsPipelineState(
-            &psoDesc,
-            IID_PPV_ARGS(&pso)
+        CheckHResult(
+            device->CreateGraphicsPipelineState(
+                &psoDesc,
+                IID_PPV_ARGS(&pso)
+            ),
+            "Failed to create pipeline state"
         );
-        if (FAILED(hr))
-        {
-            throw gcnew System::Exception("Failed to create pipeline state");
-        }
+        if (!pso) throw gcnew DXException("Failed to create pipeline");
         m_pso = pso;
     }
 
     DX12PipelineState::!DX12PipelineState()
     {
         Validate();
-        
+
         if (m_pso)
         {
             m_pso->Release();

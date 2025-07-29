@@ -153,9 +153,12 @@ namespace MirageAPI::DirectX
         {
             CoUninitialize();
             s_device->Release();
+            s_device = nullptr;
+        }
+        if (s_debugController)
+        {
             s_debugController->Release();
             s_debugController = nullptr;
-            s_device = nullptr;
         }
     }
 }

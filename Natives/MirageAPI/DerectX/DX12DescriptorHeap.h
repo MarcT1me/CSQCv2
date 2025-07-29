@@ -37,6 +37,10 @@ namespace MirageAPI::DirectX
         {
             D3D12_CPU_DESCRIPTOR_HANDLE get() { return m_heap->GetCPUDescriptorHandleForHeapStart(); }
         }
+        property D3D12_GPU_DESCRIPTOR_HANDLE StartGPUHandle
+        {
+            D3D12_GPU_DESCRIPTOR_HANDLE get() { return m_heap->GetGPUDescriptorHandleForHeapStart(); }
+        }
         property UINT DescriptorSize
         {
             UINT get() { return m_descriptorSize; }

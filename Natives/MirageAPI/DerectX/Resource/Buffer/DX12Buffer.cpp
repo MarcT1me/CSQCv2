@@ -21,12 +21,13 @@ namespace MirageAPI::DirectX::Resource
         };
 
         // creating resource description
-        D3D12_RESOURCE_DESC desc = {};
-        desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-        desc.Width = m_elementCount;
+        D3D12_RESOURCE_DESC desc;
+        desc.Width = m_size;
         desc.Format = static_cast<DXGI_FORMAT>(config.Format);
         desc.Flags = static_cast<D3D12_RESOURCE_FLAGS>(config.Flags);
         // constant
+        desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+        desc.Alignment = 0;
         desc.Height = 1;
         desc.DepthOrArraySize = 1;
         desc.MipLevels = 1;

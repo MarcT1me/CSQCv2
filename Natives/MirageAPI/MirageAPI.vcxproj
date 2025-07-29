@@ -106,7 +106,9 @@
     </ItemDefinitionGroup>
     <!--  Headers-->
     <ItemGroup>
+        <ClInclude Include="DerectX\CommandList\DX12CommandQueue.h" />
         <ClInclude Include="DerectX\DX12DescriptorHeap.h"/>
+        <ClInclude Include="DerectX\DX12Fence.h" />
         <ClInclude Include="DerectX\DX12Object.h"/>
         <ClInclude Include="DerectX\Pipeline\DX12BlendConfig.h"/>
         <ClInclude Include="DerectX\Pipeline\DX12PipelineState.h"/>
@@ -144,9 +146,11 @@
     <ItemGroup>
         <ClCompile Include="AssemblyInfo.cpp"/>
         <ClCompile Include="DerectX\CommandList\DX12CommandList.cpp"/>
+        <ClCompile Include="DerectX\CommandList\DX12CommandQueue.cpp" />
         <ClCompile Include="DerectX\CommandList\DX12WindowCommandList.cpp"/>
         <ClCompile Include="DerectX\DX12Context.cpp"/>
         <ClCompile Include="DerectX\DX12DescriptorHeap.cpp"/>
+        <ClCompile Include="DerectX\DX12Fence.cpp" />
         <ClCompile Include="DerectX\DX12Object.cpp"/>
         <ClCompile Include="DerectX\DX12WindowContext.cpp"/>
         <ClCompile Include="DerectX\Pipeline\DX12PipelineState.cpp"/>

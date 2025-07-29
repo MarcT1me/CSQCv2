@@ -18,6 +18,7 @@ namespace MirageAPI::DirectX::Resource
         DX12TextureType m_textureType;
         UINT m_width;
         UINT m_height;
+        UINT m_depth;
         UINT m_mipLevels;
         // heap
         UINT m_srvDescriptorIndex = UINT_MAX;
@@ -45,6 +46,10 @@ namespace MirageAPI::DirectX::Resource
         {
             UINT get() { return m_height; }
         }
+        property UINT Depth
+        {
+            UINT get() { return m_depth; }
+        }
         property UINT MipLevels
         {
             UINT get() { return m_mipLevels; }
@@ -54,15 +59,19 @@ namespace MirageAPI::DirectX::Resource
             DX12DescriptorHeap^ get() { return m_srvHeap; }
             void set(DX12DescriptorHeap^ value) { m_srvHeap = value; }
         }
-        property D3D12_CPU_DESCRIPTOR_HANDLE SRVHandle
+        property D3D12_CPU_DESCRIPTOR_HANDLE SRVHandleForCPU
         {
             D3D12_CPU_DESCRIPTOR_HANDLE get();
+        }
+        property D3D12_GPU_DESCRIPTOR_HANDLE SRVHandleForGPU
+        {
+            D3D12_GPU_DESCRIPTOR_HANDLE get();
         }
 
         // texture operations
         virtual void UploadData(array<System::Byte>^ data);
 
-        const D3D12_SHADER_RESOURCE_VIEW_DESC* CreateSRVDesc();
+        D3D12_SHADER_RESOURCE_VIEW_DESC CreateSRVDesc();
         void CreateSRV();
         void ReleaseSRV();
 

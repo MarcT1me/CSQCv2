@@ -5,7 +5,7 @@
 # test files
 *_test_*.*
 
-AppLib/Assets/IMG.png
+IMG.png
 
 ### Archives
 # It's better to unpack these files and commit the raw source because

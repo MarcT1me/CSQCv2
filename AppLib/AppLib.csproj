@@ -26,6 +26,9 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Content Include="Assets\Embeded\IMG.png">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
         <None Remove="Assets\**\*.*"/>
         <Content Include="Assets\**\*.*">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -38,6 +41,16 @@
         </EmbeddedResource>
 
         <Content Remove="Assets\Shaders\*.hlsl"/>
+        
+        <EmbeddedResource Include="Assets\Embeded\*.*">
+            <LogicalName>AppLib.Assets.%(Filename)</LogicalName>
+        </EmbeddedResource>
+
+        <Content Remove="Assets\Embeded\*.*"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Assets\Embeded\" />
     </ItemGroup>
 
 </Project>

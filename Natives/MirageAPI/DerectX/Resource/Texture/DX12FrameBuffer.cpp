@@ -110,11 +110,6 @@ namespace MirageAPI::DirectX::Resource
         commandList->NativeList->ResourceBarrier(1, &barrier);
         m_currentState = newState;
     }
-    
-    const D3D12_RENDER_TARGET_VIEW_DESC* DX12FrameBuffer::CreateRTVDesc()
-    {
-        return nullptr;
-    }
 
     void DX12FrameBuffer::CreateRTV()
     {
@@ -126,7 +121,7 @@ namespace MirageAPI::DirectX::Resource
         
         device->CreateRenderTargetView(
             m_nativeResource,
-            CreateRTVDesc(),
+            nullptr,
             RTVHandle
         );
     }

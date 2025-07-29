@@ -15,7 +15,7 @@ namespace MirageAPI::DirectX
         m_config(config)
     {
         // creating CommandList for window
-        m_windowCommandList = gcnew CommandList::DX12WindowCommandList();
+        m_commandQueue = gcnew CommandList::DX12CommandQueue(DX12CommandListType::Direct);
 
         // needed in swap chain initializations
         auto factory = GetContextFactory();
@@ -29,7 +29,7 @@ namespace MirageAPI::DirectX
         swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
         swapChainDesc.SampleDesc.Count = config->SampleCount;
         swapChainDesc.SwapEffect = static_cast<DXGI_SWAP_EFFECT>(config->SwapEffect);
-        
+
         if (config->SwapQuality)
             swapChainDesc.SampleDesc.Quality = config->SwapQuality;
         if (config->AllowTearing)
@@ -38,7 +38,7 @@ namespace MirageAPI::DirectX
         IDXGISwapChain1* tempSwapChain;
         CheckHResult(
             factory->CreateSwapChainForHwnd(
-                m_windowCommandList->NativeQueue,
+                m_commandQueue->NativeQueue,
                 hwnd,
                 &swapChainDesc,
                 nullptr,
@@ -63,21 +63,10 @@ namespace MirageAPI::DirectX
         CreateFrameBuffers();
 
         // creating fence
-        ID3D12Fence* fence;
-        CheckHResult(
-            device->CreateFence(
-                0,
-                D3D12_FENCE_FLAG_NONE,
-                IID_PPV_ARGS(&fence)
-            ),
-            "Create Fence failed"
-        );
-        m_fence = fence;
+        m_fence = gcnew DX12Fence(1);
+        m_commandQueue->Fence = m_fence;
 
-        // creating fence event
-        m_fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
-        if (!m_fenceEvent)
-            throw gcnew System::Exception("Failed to create fence event");
+        m_windowCommandList = gcnew CommandList::DX12WindowCommandList();
     }
 
     void DX12WindowContext::CreateFrameBuffers()
@@ -87,7 +76,7 @@ namespace MirageAPI::DirectX
             m_bufferCount,
             false
         );
-        
+
         rtvHeap->Validate();
         m_rtvHeap = rtvHeap;
 
@@ -123,17 +112,12 @@ namespace MirageAPI::DirectX
     {
         Validate();
 
-        WaitForGpuAndSignal();
-
-        if (m_fenceEvent)
-        {
-            CloseHandle(m_fenceEvent);
-            m_fenceEvent = nullptr;
-        }
+        m_commandQueue->Signal();
+        m_fence->WaitForCompletion();
 
         if (m_fence)
         {
-            m_fence->Release();
+            delete m_fence;
             m_fence = nullptr;
         }
 
@@ -179,7 +163,10 @@ namespace MirageAPI::DirectX
     {
         if (width <= 0 || height <= 0) return;
 
-        WaitForGpuAndSignal();
+        m_commandQueue->WaitForCompletion();
+        m_commandQueue->Signal();
+        m_fence->WaitForCompletion();
+        m_fence->IncreaseValue();
 
         FreeFrameBuffers();
         FreeRTVHeap();
@@ -187,16 +174,19 @@ namespace MirageAPI::DirectX
         m_width = width;
         m_height = height;
 
+        DXGI_SWAP_CHAIN_DESC desc;
+        m_swapChain->GetDesc(&desc);
+
         CheckHResult(
             m_swapChain->ResizeBuffers(
-                m_bufferCount,
+                desc.BufferCount,
                 m_width, m_height,
-                static_cast<DXGI_FORMAT>(m_config->Format),
-                m_config->AllowTearing ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0
+                desc.BufferDesc.Format,
+                desc.Flags
             ),
             "Swap chain resize failed"
         );
-        m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
+        UpdateFrameIndex();
 
         CreateFrameBuffers();
     }
@@ -224,10 +214,16 @@ namespace MirageAPI::DirectX
     {
         if (m_width == 0 || m_height == 0) return;
 
-        WaitForGpuAndSignal();
+        m_commandQueue->Signal();
+        m_fence->WaitForCompletion();
+        m_fence->IncreaseValue();
 
         m_windowCommandList->Reset();
 
+        m_windowCommandList->UpdatePipelineState();
+        m_windowCommandList->UpdateDescriptorHeap();
+
+        // first (default) commands
         m_windowCommandList->SetViewport(
             m_config->viewportX, m_config->viewportY,
             m_config->viewportWidth != -1 ? m_config->viewportWidth : static_cast<float>(m_width),
@@ -239,12 +235,9 @@ namespace MirageAPI::DirectX
             m_width, m_height
         );
 
-        // Переход в состояние рендеринга
+        // set frame buffer and go into render mode
         CurrentFrameBuffer->TransitionState(m_windowCommandList, DX12ResourceState::RenderTarget);
-
-        D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = CurrentFrameBuffer->RTVHandle;
-
-        m_windowCommandList->NativeList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
+        m_windowCommandList->BindBuffer(CurrentFrameBuffer);
     }
 
     void DX12WindowContext::EndFrame()
@@ -253,13 +246,12 @@ namespace MirageAPI::DirectX
 
         // go into present mode
         CurrentFrameBuffer->TransitionState(m_windowCommandList, DX12ResourceState::Present);
-
-        // execute command list
         m_windowCommandList->Close();
-        m_windowCommandList->Execute();
 
-        // signalize him
-        SignalCommandQueue();
+        // execute command list and signalize him
+        m_commandQueue->ExecuteList(m_windowCommandList);
+        m_commandQueue->WaitForCompletion();
+        m_commandQueue->Signal();
     }
 
     void DX12WindowContext::Present()
@@ -270,46 +262,8 @@ namespace MirageAPI::DirectX
 
         UpdateFrameIndex();
 
-        WaitForGpuCompletion();
-        IncreaseFenceValue();
-    }
-
-    void DX12WindowContext::WaitForGpuAndSignal()
-    {
-        SignalCommandQueue();
-        IncreaseFenceValue();
-        WaitForGpuCompletion();
-    }
-
-    void DX12WindowContext::WaitForGpuCompletion()
-    {
-        if (m_width == 0 || m_height == 0) return;
-
-        // wait for signal if needed
-        if (m_fence->GetCompletedValue() < m_fenceValue)
-        {
-            CheckHResult(
-                m_fence->SetEventOnCompletion(m_fenceValue, m_fenceEvent),
-                "Event on completion err"
-            );
-            WaitForSingleObject(m_fenceEvent, INFINITE);
-        }
-    }
-
-    void DX12WindowContext::IncreaseFenceValue()
-    {
-        m_fenceValue++;
-    }
-
-    void DX12WindowContext::SignalCommandQueue()
-    {
-        if (m_width == 0 || m_height == 0) return;
-
-        // signal queue
-        CheckHResult(
-            m_windowCommandList->NativeQueue->Signal(m_fence, m_fenceValue),
-            "Native Queue signal err"
-        );
+        m_fence->WaitForCompletion();
+        m_fence->IncreaseValue();
     }
 
     void DX12WindowContext::UpdateFrameIndex()

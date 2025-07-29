@@ -3,7 +3,6 @@
 
 #include "../Pipeline/DX12PipelineState.h"
 #include "../DX12DescriptorHeap.h"
-#include "../Resource/Texture/DX12Texture.h"
 #include "../Resource/Texture/DX12FrameBuffer.h"
 
 namespace MirageAPI::DirectX::CommandList
@@ -33,52 +32,32 @@ namespace MirageAPI::DirectX::CommandList
         CheckHResult(hr, "Failed to create command list");
         m_commandList = commandList;
         m_commandList->Close(); // instantly close
-
-        // command queue
-        D3D12_COMMAND_QUEUE_DESC queueDesc;
-        queueDesc.Type = static_cast<D3D12_COMMAND_LIST_TYPE>(m_type);
-        queueDesc.Priority = D3D12_COMMAND_QUEUE_PRIORITY_NORMAL;
-        queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-        queueDesc.NodeMask = 0;
-
-        ID3D12CommandQueue* commandQueue;
-        hr = device->CreateCommandQueue(
-            &queueDesc,
-            IID_PPV_ARGS(&commandQueue)
-        );
-        CheckHResult(hr, "Failed to create command queue.");
-        m_commandQueue = commandQueue;
     }
 
     DX12CommandList::!DX12CommandList()
     {
         Validate();
 
-        if (m_commandQueue && m_commandQueue->Release() == 0)
-            m_commandQueue = nullptr;
         if (m_commandList && m_commandList->Release() == 0)
             m_commandList = nullptr;
         if (m_commandAllocator && m_commandAllocator->Release() == 0)
             m_commandAllocator = nullptr;
     }
 
-    // other properties
-
-    void DX12CommandList::DescriptorHeap::set(DX12DescriptorHeap^ heap)
-    {
-        ID3D12DescriptorHeap* heaps[] = {heap->NativeHeap};
-        m_commandList->SetDescriptorHeaps(1, heaps);
-        m_descriptorHeap = heap;
-    }
-
-    void DX12CommandList::PipelineState::set(Pipeline::DX12PipelineState^ pipelineState)
-    {
-        m_commandList->SetPipelineState(pipelineState->NativePSO);
-        m_commandList->SetGraphicsRootSignature(pipelineState->RootSignature);
-        m_pipelineState = pipelineState;
-    }
-
     // command list operations
+
+    void DX12CommandList::UpdatePipelineState()
+    {
+        m_commandList->SetPipelineState(m_pipelineState->NativePSO);
+        m_commandList->SetGraphicsRootSignature(m_pipelineState->RootSignature);
+    }
+
+    void DX12CommandList::UpdateDescriptorHeap()
+    {
+        ID3D12DescriptorHeap* heaps[] = {m_descriptorHeap->NativeHeap};
+        m_commandList->SetDescriptorHeaps(1, heaps);
+        m_commandList->SetGraphicsRootDescriptorTable(0, m_descriptorHeap->StartGPUHandle);
+    }
 
     void DX12CommandList::Reset()
     {
@@ -93,41 +72,6 @@ namespace MirageAPI::DirectX::CommandList
         Validate();
 
         CheckHResult(m_commandList->Close(), "close command list");
-    }
-
-    void DX12CommandList::Execute()
-    {
-        Validate();
-
-        ID3D12CommandList* ppCommandLists[] = {m_commandList};
-        m_commandQueue->ExecuteCommandLists(1, ppCommandLists);
-    }
-
-    void DX12CommandList::WaitForCompletion()
-    {
-        Validate();
-
-        // creating one-time fence
-        ID3D12Fence* fence;
-        HRESULT hr = device->CreateFence(
-            0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)
-        );
-        CheckHResult(hr, "some error in a command queue executing waiting");
-
-        // fence event
-        HANDLE eventHandle = CreateEvent(nullptr, FALSE, FALSE, nullptr);
-        if (!eventHandle) return;
-
-        // waiting for ends of all operations
-        if (m_commandQueue->Signal(fence, 1) && fence->GetCompletedValue() < 1)
-        {
-            fence->SetEventOnCompletion(1, eventHandle);
-            WaitForSingleObject(eventHandle, INFINITE);
-        }
-
-        // close operation
-        CloseHandle(eventHandle);
-        fence->Release();
     }
 
     // Viewport and other
@@ -200,52 +144,34 @@ namespace MirageAPI::DirectX::CommandList
 
     // bindings
 
-    void DX12CommandList::SetTexture(UINT rootIndex, Resource::DX12Texture^ texture)
+    void DX12CommandList::BindBuffer(Resource::DX12FrameBuffer^ frameBuffer)
     {
-        Validate();
-        m_descriptorHeap->Validate();
-
-        // installing descriptor heaps in this command list
-        ID3D12DescriptorHeap* heaps[] = {m_descriptorHeap->NativeHeap};
-        m_commandList->SetDescriptorHeaps(1, heaps);
-
-        // calculate GPU descriptor
-        D3D12_GPU_DESCRIPTOR_HANDLE handle = m_descriptorHeap->NativeHeap->GetGPUDescriptorHandleForHeapStart();
-        handle.ptr += texture->SRVIndex * m_descriptorHeap->DescriptorSize;
-
-        // installing descriptor heap table
-        m_commandList->SetGraphicsRootDescriptorTable(rootIndex, handle);
-    }
-
-    void DX12CommandList::SetRootConstants(UINT rootIndex, UINT constantSize, float data[], UINT offset)
-    {
-        Validate();
-
-        m_commandList->SetGraphicsRoot32BitConstants(
-            rootIndex,
-            constantSize,
-            data,
-            offset
+        D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = frameBuffer->RTVHandle;
+        m_commandList->OMSetRenderTargets(
+            1,
+            &rtvHandle,
+            FALSE,
+            nullptr
         );
     }
 
     void DX12CommandList::BindBuffer(Resource::DX12IndexBuffer^ indexBuffer)
     {
-        Validate();
+        ValidateMembers();
 
         indexBuffer->Bind(m_commandList);
     }
 
     void DX12CommandList::BindBuffer(Resource::DX12VertexBuffer^ vertexBuffer)
     {
-        Validate();
+        ValidateMembers();
 
         vertexBuffer->Bind(m_commandList);
     }
 
     void DX12CommandList::BindBuffer(UINT rootIndex, Resource::DX12ConstantBuffer^ constantBuffer)
     {
-        Validate();
+        ValidateMembers();
 
         m_commandList->SetGraphicsRootConstantBufferView(
             rootIndex,
@@ -255,7 +181,7 @@ namespace MirageAPI::DirectX::CommandList
 
     void DX12CommandList::BindBuffer(UINT rootIndex, Resource::DX12StructuredBuffer^ structuredBuffer)
     {
-        Validate();
+        ValidateMembers();
 
         m_commandList->SetGraphicsRootShaderResourceView(
             rootIndex,
@@ -263,9 +189,21 @@ namespace MirageAPI::DirectX::CommandList
         );
     }
 
+    void DX12CommandList::SetRootConstants(UINT rootIndex, UINT constantSize, float data[], UINT offset)
+    {
+        ValidateMembers();
+
+        m_commandList->SetGraphicsRoot32BitConstants(
+            rootIndex,
+            constantSize,
+            data,
+            offset
+        );
+    }
+
     // other
 
-    void DX12CommandList::Validate()
+    void DX12CommandList::ValidateMembers()
     {
         if (!m_descriptorHeap)
         {

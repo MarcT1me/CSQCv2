@@ -6,11 +6,13 @@ namespace MirageAPI::DirectX::Resource
     void DX12Resource::!DX12Resource()
     {
         Validate();
-        
-        Unmap();
-        
-        if (m_nativeResource && m_nativeResource->Release() == 0)
-            m_nativeResource = nullptr;
+
+        if (m_nativeResource)
+        {
+            Unmap();
+            if (m_nativeResource->Release() == 0)
+                m_nativeResource = nullptr;
+        }
     }
 
     void* DX12Resource::Map()
@@ -20,15 +22,13 @@ namespace MirageAPI::DirectX::Resource
         // mapping data to range
         void* pData = nullptr;
         D3D12_RANGE range = {0, m_size};
-        HRESULT hr = m_nativeResource->Map(0, &range, &pData);
-        
-        if (SUCCEEDED(hr))
-            return pData;
 
-        // checking what's going on
-        CheckHResult(hr, "Any err in resource map operation");
+        CheckHResult(
+            m_nativeResource->Map(0, &range, &pData),
+            "Any err in resource map operation"
+        );
 
-        return nullptr; // if is not an error but whatever not a success
+        return pData;
     }
 
     void DX12Resource::Unmap()

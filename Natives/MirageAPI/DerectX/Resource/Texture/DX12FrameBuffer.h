@@ -58,7 +58,6 @@ namespace MirageAPI::DirectX::Resource
             DX12ResourceState newState
         );
 
-        virtual const D3D12_RENDER_TARGET_VIEW_DESC* CreateRTVDesc();
         void CreateRTV();
         void ReleaseRTV();
     };
