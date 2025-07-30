@@ -1,5 +1,4 @@
 ﻿#pragma once
-#include "DX12Object.h"
 
 namespace MirageAPI::DirectX
 {
@@ -55,34 +54,11 @@ namespace MirageAPI::DirectX
         }
 
         UINT Allocate();
+        D3D12_CPU_DESCRIPTOR_HANDLE IndexCPUHandle(UINT index);
+        D3D12_GPU_DESCRIPTOR_HANDLE IndexGPUHandle(UINT index);
         void Free(UINT index);
         void Reset();
 
-        void Validate() override
-        {
-            if (m_heap == nullptr)
-            {
-                throw gcnew System::InvalidOperationException(
-                    "Descriptor heap is not initialized: " +
-                    "Capacity: " + m_capacity + ", DescriptorSize: " + m_descriptorSize
-                );
-            }
-
-            if (m_descriptorSize == 0)
-            {
-                throw gcnew System::InvalidOperationException(
-                    "Invalid descriptor size: " +
-                    "Capacity: " + m_capacity + ", DescriptorSize: " + m_descriptorSize
-                );
-            }
-
-            if (m_capacity == 0)
-            {
-                throw gcnew System::InvalidOperationException(
-                    "Invalid heap capacity: " +
-                    "Capacity: " + m_capacity + ", DescriptorSize: " + m_descriptorSize
-                );
-            }
-        }
+        void Validate() override;
     };
 }

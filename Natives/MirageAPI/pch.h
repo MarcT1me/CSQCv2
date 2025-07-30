@@ -17,16 +17,23 @@
 #include <dxgi1_4.h>
 #include <d3dcompiler.h>
 
-// window enums
-#include "Window/NativeWindowEnums.h"
+#include "rect.h"
 
-// event enums
+// Window
+#include "Window/enums.h"
+
+// Events
 #include "Events/NativeEvents.h"
 
-// DX12 enums
-#include "DerectX/DX12Enums.h"
-// and misk
+// DX12
+#include "DerectX/enums.h"
+#include "DerectX/Command/enums.h"
+#include "DerectX/Pipeline/enums.h"
+#include "DerectX/Resource/enums.h"
+#include "DerectX/Shader/enums.h"
+#include "DerectX/DX12Exception.h"
+#include "DerectX/DX12Device.h"
 #include "DerectX/DX12Helpers.h"
-#include "DerectX/DX12Context.h"
+#include "DerectX/DX12Object.h"
 
 #endif

@@ -10,8 +10,7 @@ namespace MirageAPI::DirectX::Resource
         if (m_nativeResource)
         {
             Unmap();
-            if (m_nativeResource->Release() == 0)
-                m_nativeResource = nullptr;
+            DXSimpleRelease(m_nativeResource);
         }
     }
 

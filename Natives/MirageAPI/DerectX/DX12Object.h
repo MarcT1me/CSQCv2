@@ -12,7 +12,7 @@ namespace MirageAPI::DirectX
         // constructors and deconstructors
         DX12Object()
         {
-            device = GetContextDevice();
+            device = DX12Device::GetNativeDevice(true);
         }
 
         virtual ~DX12Object()

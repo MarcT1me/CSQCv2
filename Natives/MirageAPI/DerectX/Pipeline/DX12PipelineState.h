@@ -2,7 +2,6 @@
 
 #include <string>
 
-#include "../DX12Object.h"
 #include "DX12PipelineStateConfig.h"
 
 namespace MirageAPI::DirectX::Pipeline
@@ -23,13 +22,13 @@ namespace MirageAPI::DirectX::Pipeline
 
     public:
         DX12PipelineState(DX12PipelineStateConfig config);
+        
         ~DX12PipelineState() { this->!DX12PipelineState(); }
         !DX12PipelineState();
 
         property ID3D12PipelineState* NativePSO { 
             ID3D12PipelineState* get() { return m_pso; } 
         }
-    
         property ID3D12RootSignature* RootSignature { 
             ID3D12RootSignature* get() { return m_rootSignature; } 
         }

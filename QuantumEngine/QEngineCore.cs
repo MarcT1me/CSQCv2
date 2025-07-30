@@ -19,6 +19,7 @@ public class QEngineCore(Assembly? appLibAssembly) : EngineCore(appLibAssembly)
         With.Handle(new Catch("Main EngineCore Catch"), _ =>
         {
             QuantumTracer.HandleAssembly([Assembly.GetExecutingAssembly()]);
+
             var core = new QEngineCore(appLibAssembly);
             core.InitializeCore();
         });
@@ -28,11 +29,10 @@ public class QEngineCore(Assembly? appLibAssembly) : EngineCore(appLibAssembly)
     {
         Logger.Info("Initialize MirageAPI::DirectX12");
 
-        DX12ContextInitFlags flags = DX12ContextInitFlags.None;
-        flags |= BaseConfig.DebugMode ? DX12ContextInitFlags.Debug : DX12ContextInitFlags.None;
-        flags |= DX12ContextInitFlags.UseAdapter | DX12ContextInitFlags.UseHighPerformanceAdapter;
+        DX12DeviceInitFlags flags = BaseConfig.DebugMode ? DX12DeviceInitFlags.Debug : DX12DeviceInitFlags.None;
+        flags |= DX12DeviceInitFlags.UseAdapter | DX12DeviceInitFlags.UseHighPerformanceAdapter;
 
-        DX12Context.Initialize(flags);
+        DX12Device.Initialize(flags);
 
         AssetManager.RegisterAssetType(new AssetType("image", new ImageAssetLoader()));
     }
@@ -46,7 +46,7 @@ public class QEngineCore(Assembly? appLibAssembly) : EngineCore(appLibAssembly)
     public static void Uninitialize()
     {
         Logger.Info("Deinitialize MirageAPI::DirectX12");
-        DX12Context.Deinitialize();
+        DX12Device.Deinitialize();
         Logger.Separator();
         Logger.Success("QuantumEngine uninitialized");
     }

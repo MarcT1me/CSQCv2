@@ -1,7 +1,5 @@
 ﻿#pragma once
 
-#include <msclr/marshal_cppstd.h>
-
 #include "DX12Shader.h"
 
 namespace MirageAPI::DirectX::Shader

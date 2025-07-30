@@ -1,9 +1,8 @@
 ﻿#pragma once
 
-#include "NativeWindowEnums.h"
+#include "enums.h"
 #include "../Events/NativeEvents.h"
-#include "../DerectX/DX12WindowContext.h"
-#include "../DerectX/DX12ContextConfig.h"
+#include "../DerectX/Context/DX12Context.h"
 
 namespace MirageAPI::Window
 {
@@ -13,11 +12,11 @@ namespace MirageAPI::Window
         HINSTANCE hInstance = nullptr;
         System::Runtime::InteropServices::GCHandle gch;
 
-        DirectX::DX12WindowContext^ dxContext;
-        
-        bool isFullscreen;
-        unsigned long savedStyle;
-        WindowRect savedRect;
+        DirectX::DX12Context^ dxContext;
+
+        bool IsFullscreen;
+        unsigned long SavedStyle;
+        WindowRect^ SavedRect;
 
     internal:
         // rise methods (overhead...)
@@ -56,14 +55,16 @@ namespace MirageAPI::Window
         static NativeWindow();
 
         NativeWindow(
-            WindowRect^ rect,
+            SimpleRect^ rect,
             System::String^ title,
             float opacity,
+            bool isFullscreen,
             NativeWindow^ parent,
             WindowType wType,
-            DirectX::DX12WindowContextConfig^ dxConfig
+            DirectX::DX12ContextConfig^ dxContextConfig
         );
-        ~NativeWindow();
+        
+        ~NativeWindow() { this->!NativeWindow(); }
         !NativeWindow();
 
         void Establish();
@@ -78,7 +79,7 @@ namespace MirageAPI::Window
 
         void BringToFront();
         void FlashWindow();
-        
+
         void SetTitle(System::String^ title);
         void SetPosition(int x, int y);
         void SetSize(int width, int height);
@@ -88,16 +89,16 @@ namespace MirageAPI::Window
         void HandleResize(int width, int height);
         void Update();
 
-        property WindowRect Rect { WindowRect get(); }
+        property WindowRect CurrentRect { WindowRect get(); }
         property float Opacity { float get(); }
 
         property bool IsMinimized { bool get(); }
         property bool IsMaximized { bool get(); }
 
         property System::IntPtr Handle { System::IntPtr get() { return System::IntPtr(hwnd); } }
-        property DirectX::DX12WindowContext^ DXContext { DirectX::DX12WindowContext^ get() { return dxContext; } }
+        property DirectX::DX12Context^ DXContext { DirectX::DX12Context^ get() { return dxContext; } }
 
-        void SetVSync(bool enabled);
+        void SetVSync(UINT interval);
         void Clear(float r, float g, float b, float a);
 
         // other methods

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include <d3d12.h>
+#include "enums.h"
 
 namespace MirageAPI::DirectX::Shader
 {
@@ -12,12 +12,9 @@ namespace MirageAPI::DirectX::Shader
     public:
         DX12Shader(ID3DBlob* bytecode, DX12ShaderType type);
         DX12Shader(array<System::Byte>^ byteArray, DX12ShaderType type);
-        ~DX12Shader();
+
+        ~DX12Shader() { this->!DX12Shader(); }
         !DX12Shader();
-
-        void SaveToFile(System::String^ filePath);
-
-        static DX12Shader^ LoadFromFile(System::String^ filePath, DX12ShaderType type);
 
         property ID3DBlob* Bytecode
         {
@@ -27,7 +24,12 @@ namespace MirageAPI::DirectX::Shader
         {
             DX12ShaderType get() { return m_type; }
         }
+        property D3D12_SHADER_BYTECODE NativeBytecode
+        {
+            D3D12_SHADER_BYTECODE get();
+        }
 
-        D3D12_SHADER_BYTECODE GetNativeBytecode();
+        void SaveToFile(System::String^ filePath);
+        static DX12Shader^ LoadFromFile(System::String^ filePath, DX12ShaderType type);
     };
 }

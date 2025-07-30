@@ -151,8 +151,8 @@ namespace MirageAPI::DirectX::Pipeline
         // creating pso
         D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
         psoDesc.pRootSignature = m_rootSignature;
-        psoDesc.VS = config.VertexShader->GetNativeBytecode();
-        psoDesc.PS = config.PixelShader->GetNativeBytecode();
+        psoDesc.VS = config.VertexShader->NativeBytecode;
+        psoDesc.PS = config.PixelShader->NativeBytecode;
 
         // rasterizer settings
         psoDesc.RasterizerState.FillMode = static_cast<D3D12_FILL_MODE>(config.RasterizerState.FillMode);
@@ -237,26 +237,12 @@ namespace MirageAPI::DirectX::Pipeline
     {
         Validate();
 
-        if (m_pso)
-        {
-            m_pso->Release();
-            m_pso = nullptr;
-        }
-        if (m_rootSignature)
-        {
-            m_rootSignature->Release();
-            m_rootSignature = nullptr;
-        }
-        if (m_inputLayoutsArr)
-        {
-            delete[] m_inputLayoutsArr;
-            m_inputLayoutsArr = nullptr;
-        }
-        if (m_semanticNames)
-        {
-            delete[] m_semanticNames;
-            m_semanticNames = nullptr;
-        }
+        DXSimpleRelease(m_pso);
+        DXSimpleRelease(m_rootSignature);
+
+        DXSimpleDeleteArr(m_inputLayoutsArr);
+        DXSimpleDeleteArr(m_semanticNames);
+
         if (m_descriptorRanges)
         {
             for each (auto desc in m_descriptorRanges)
@@ -274,8 +260,7 @@ namespace MirageAPI::DirectX::Pipeline
                     delete m_rootParameters[i].DescriptorTable.pDescriptorRanges;
                 }
             }
-            delete[] m_rootParameters;
-            m_rootParameters = nullptr;
+            DXSimpleDeleteArr(m_rootParameters);
         }
     }
 }

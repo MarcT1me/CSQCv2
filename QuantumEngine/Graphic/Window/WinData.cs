@@ -30,12 +30,15 @@ public sealed class WinData
 
     public Vector2i Position { get; internal set; }
     public float Opacity { get; internal set; }
+    public uint VSyncInterval { get; internal set; }
+    public bool Fullscreen { get; internal set; }
 
     public WinData(
         Vector2i size,
         Vector2i? position = null,
         Vector2? resolutionScaling = null,
-        float opacity = 1.0f
+        float opacity = 1.0f,
+        uint vsyncInterval = 1
     )
     {
         _resolutionScaling = resolutionScaling ?? Vector2.One;
@@ -43,5 +46,6 @@ public sealed class WinData
         Size = size;
         Opacity = opacity;
         Position = position ?? new(Window.UseDefault);
+        VSyncInterval = vsyncInterval;
     }
 }

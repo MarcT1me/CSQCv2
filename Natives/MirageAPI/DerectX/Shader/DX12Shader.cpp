@@ -3,7 +3,6 @@
 
 #include <cstdio>
 #include <vcclr.h>
-#include <msclr/marshal_cppstd.h>
 
 namespace MirageAPI::DirectX::Shader
 {
@@ -37,20 +36,22 @@ namespace MirageAPI::DirectX::Shader
         memcpy(m_bytecode->GetBufferPointer(), pinnedData, dataSize);
     }
 
-    DX12Shader::~DX12Shader()
-    {
-        this->!DX12Shader();
-    }
-
     DX12Shader::!DX12Shader()
     {
-        if (m_bytecode)
+        DXSimpleRelease(m_bytecode);
+    }
+
+    D3D12_SHADER_BYTECODE DX12Shader::NativeBytecode::get()
+    {
+        if (!m_bytecode)
         {
-            if (m_bytecode->Release() == 0)
-            {
-                m_bytecode = nullptr;
-            }
+            return {nullptr, 0};
         }
+
+        return {
+            m_bytecode->GetBufferPointer(),
+            m_bytecode->GetBufferSize()
+        };
     }
 
     void DX12Shader::SaveToFile(System::String^ filePath)
@@ -90,18 +91,5 @@ namespace MirageAPI::DirectX::Shader
         fclose(file);
 
         return gcnew DX12Shader(byteArray, type);
-    }
-
-    D3D12_SHADER_BYTECODE DX12Shader::GetNativeBytecode()
-    {
-        if (!m_bytecode)
-        {
-            return {nullptr, 0};
-        }
-
-        return {
-            m_bytecode->GetBufferPointer(),
-            m_bytecode->GetBufferSize()
-        };
     }
 }

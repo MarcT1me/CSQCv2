@@ -1,5 +1,5 @@
-﻿using Engine.Configuration;
-using Engine.Events.QuantumEvents.Window;
+﻿using Engine.Events.QuantumEvents.Window;
+using MirageAPI;
 using MirageAPI.DirectX;
 using OpenTK.Mathematics;
 // engine sub-systems
@@ -57,15 +57,16 @@ public class Window
     public virtual NativeWindow PrepareInstance()
     {
         var win = new NativeWindow(
-            new WindowRect
+            new SimpleRect
             {
-                x = MetaData.WinData.Position.X,
-                y = MetaData.WinData.Position.Y,
-                width = MetaData.WinData.Size.X,
-                height = MetaData.WinData.Size.Y
+                X = MetaData.WinData.Position.X,
+                Y = MetaData.WinData.Position.Y,
+                Width = MetaData.WinData.Size.X,
+                Height = MetaData.WinData.Size.Y
             },
             MetaData.Identifier.GetNameAnyway(),
             MetaData.WinData.Opacity,
+            false,
             ParentWindow?.NativeWindow,
             WindowType.Overlapped,
             CreateDefaultWindowContextConfig()
@@ -73,24 +74,31 @@ public class Window
         return win;
     }
 
-    protected DX12WindowContextConfig CreateDefaultWindowContextConfig()
+    protected DX12ContextConfig CreateDefaultWindowContextConfig()
     {
-        var windowContextConfig = DX12WindowContextConfig.Default;
-        windowContextConfig.EnableDebugLayer = GlData.EnableDebugLayer && BaseConfig.DebugMode;
-        windowContextConfig.AllowTearing = GlData.AllowTearing && BaseConfig.DebugMode;
-        
-        windowContextConfig.BufferCount = GlData.MaxFramesInFlight;
-        windowContextConfig.SwapEffect = GlData.SwapEffect;
-        windowContextConfig.SampleCount = GlData.NumberOfSamples;
-        windowContextConfig.SwapQuality = GlData.SwapQuality;
+        var windowContextConfig = new DX12ContextConfig
+        {
+            Viewport = new SimpleRect
+            {
+                X = MetaData.GlData.Viewport.X,
+                Y = MetaData.GlData.Viewport.Y,
+                Width = MetaData.GlData.Viewport.Z,
+                Height = MetaData.GlData.Viewport.W
+            },
+            ResolutionX = (uint)MetaData.WinData.Resolution.X,
+            ResolutionY = (uint)MetaData.WinData.Resolution.Y,
+            Near = MetaData.GlData.ViewportDepth.X,
+            Far = MetaData.GlData.ViewportDepth.Y,
 
-        windowContextConfig.viewportX = MetaData.GlData.Viewport.X;
-        windowContextConfig.viewportY = MetaData.GlData.Viewport.Y;
-        windowContextConfig.viewportWidth = MetaData.GlData.Viewport.Z;
-        windowContextConfig.viewportHeight = MetaData.GlData.Viewport.W;
+            BufferCount = MetaData.GlData.MaxFramesInFlight,
+            Format = MetaData.GlData.Format,
 
-        windowContextConfig.viewportDepthX = MetaData.GlData.ViewportDepth.X;
-        windowContextConfig.viewportDepthY = MetaData.GlData.ViewportDepth.Y;
+            SampleCount = MetaData.GlData.NumberOfSamples,
+            SwapQuality = MetaData.GlData.SwapQuality,
+
+            SwapEffect = MetaData.GlData.SwapEffect,
+            VSyncInterval = MetaData.WinData.VSyncInterval
+        };
 
         return windowContextConfig;
     }
@@ -105,6 +113,12 @@ public class Window
         NativeWindow.Establish();
     }
 
+    protected void TogleFullscreen()
+    {
+        MetaData.WinData.Fullscreen = !MetaData.WinData.Fullscreen;
+        NativeWindow.ToggleFullscreen();
+    }
+
     protected void SetOpacity(float? opacity = null)
     {
         if (opacity.HasValue)
@@ -115,6 +129,12 @@ public class Window
     protected void UpdateOpacity(float opacity)
     {
         MetaData.WinData.Opacity = opacity;
+    }
+
+    protected void SetPositionAndSize(Vector2i size, Vector2i position)
+    {
+        SetSize(size);
+        SetPosition(position);
     }
 
     protected void SetSize(Vector2i? size = null)
@@ -141,15 +161,16 @@ public class Window
         MetaData.WinData.Position = position;
     }
 
-    protected void SetPositionAndSize(Vector2i size, Vector2i position)
+    protected void SetVsync(uint? interval = 1)
     {
-        SetSize(size);
-        SetPosition(position);
+        if (interval.HasValue)
+            UpdateVsync(interval.Value);
+        NativeWindow.SetVSync(MetaData.WinData.VSyncInterval);
     }
 
-    protected void SetVsync(bool enabled = true)
+    protected void UpdateVsync(uint interval)
     {
-        NativeWindow.SetVSync(enabled);
+        MetaData.WinData.VSyncInterval = interval;
     }
 
     protected void UpdateViewport()
@@ -198,10 +219,9 @@ public class Window
 
     protected virtual void HandleResize(Vector2i size)
     {
-        MetaData.GlData.Viewport.Z = size.X;
-        MetaData.GlData.Viewport.W = size.Y;
         UpdateSize(size);
         UpdateViewport();
+        NativeWindow.HandleResize(MetaData.WinData.Resolution.X, MetaData.WinData.Resolution.Y);
     }
 
     public virtual void PreUpdate()

@@ -1,43 +1,13 @@
 ﻿#pragma once
 
-#include "DX12Context.h"
+#define SimpleDelete(resource) if ((resource)) { delete (resource); (resource) = nullptr; }
+#define CheckNull(resource, exc) if ((resource)) throw (exc)
+
+#define DXSimpleRelease(resource) if ((resource) && (resource)->Release() == 0) (resource) = nullptr;
+#define DXSimpleDeleteArr(resource) if ((resource)) { delete[] (resource); (resource) = nullptr; }
 
 namespace MirageAPI::DirectX
 {
-    public ref class DXException : public System::Exception
-    {
-    public:
-        DXException(System::String^ msg) : Exception(gcnew System::String(msg))
-        {
-        }
-    };
-    
-    public ref class HRException : public DXException
-    {
-        HRESULT m_hr;
-
-    public:
-        HRException(HRESULT hr, System::String^ msg) : DXException(gcnew System::String(msg)), m_hr(hr)
-        {
-        }
-
-        HRESULT HR() { return m_hr; }
-    };
-    
-    inline ID3D12Device* GetContextDevice(bool autoThrow = true)
-    {
-        if (DX12Context::s_device == nullptr && autoThrow)
-            throw gcnew DXException("DX12 device not initialized");
-        return DX12Context::s_device;
-    }
-    
-    inline IDXGIFactory4* GetContextFactory(bool autoThrow = true)
-    {
-        if (DX12Context::s_factory == nullptr && autoThrow)
-            throw gcnew DXException("DX12 factory not initialized");
-        return DX12Context::s_factory;
-    }
-
     inline void CheckHResult(HRESULT hr, const char* msg, bool checkDevice = true)
     {
         if (FAILED(hr))
@@ -45,7 +15,7 @@ namespace MirageAPI::DirectX
             if (checkDevice && hr == DXGI_ERROR_DEVICE_REMOVED)
                 throw gcnew HRException(
                     hr, gcnew System::String(msg) + gcnew System::String(
-                        ": Device removed (" + GetContextDevice()->GetDeviceRemovedReason() + ")"
+                        ": Device removed (" + DX12Device::GetDeviceRemovedReason() + ")"
                     ));
             throw gcnew HRException(
                 hr, gcnew System::String(msg) + gcnew System::String(
@@ -54,56 +24,9 @@ namespace MirageAPI::DirectX
         }
     }
 
-    inline void UpdateSubresources(
-        ID3D12GraphicsCommandList* pCmdList,
-        ID3D12Resource* pDestinationResource,
-        ID3D12Resource* pIntermediate,
-        UINT64 IntermediateOffset,
-        UINT FirstSubresource,
-        UINT NumSubresources
-    )
-    {
-        // Получаем описание ресурса
-        D3D12_RESOURCE_DESC desc = pDestinationResource->GetDesc();
+    inline bool IsDebug() { return DX12Device::IsDebug; }
 
-        // Рассчитываем параметры копирования
-        D3D12_PLACED_SUBRESOURCE_FOOTPRINT layout;
-        UINT64 rowSizeInBytes;
-        UINT64 totalBytes;
-        GetContextDevice()->GetCopyableFootprints(
-            &desc,
-            FirstSubresource,
-            NumSubresources,
-            IntermediateOffset,
-            &layout,
-            nullptr,
-            &rowSizeInBytes,
-            &totalBytes
-        );
-
-        // Копируем данные
-        for (UINT i = 0; i < NumSubresources; ++i)
-        {
-            D3D12_TEXTURE_COPY_LOCATION dst = {
-                pDestinationResource,
-                D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX,
-                FirstSubresource + i
-            };
-
-            D3D12_TEXTURE_COPY_LOCATION src = {
-                pIntermediate,
-                D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT,
-                {layout.Offset + i * layout.Footprint.RowPitch * layout.Footprint.Height}
-            };
-            src.PlacedFootprint = layout;
-
-            pCmdList->CopyTextureRegion(&dst, 0, 0, 0, &src, nullptr);
-        }
-    }
-
-    inline UINT GetResourceFormatSize(
-        DX12ResourceFormat format
-    )
+    inline UINT GetResourceFormatSize(DX12ResourceFormat format)
     {
         switch (format)
         {

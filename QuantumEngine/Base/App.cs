@@ -82,7 +82,7 @@ public abstract class App<TData>
         Logger.Info("App Run started");
 
         bool IsActive() => ObjectStatus.HasFlag(ObjectStatusFlags.Active);
-        
+
         Clock.StartClock();
         while (IsActive())
         {
@@ -147,7 +147,7 @@ public abstract class App<TData>
     public abstract void PostRender();
 
     #endregion
-    
+
     #region Exiting from App
 
     public virtual void OnExitHandling()
@@ -172,7 +172,7 @@ public abstract class App<TData>
     protected void Quit()
     {
         Logger.Separator();
-        
+
         if (!MetaData.ObjectStatus.HasFlag(ObjectStatusFlags.Active)) return;
         MetaData.ObjectStatus &= ~ObjectStatusFlags.Active;
 

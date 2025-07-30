@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 // Mirage ecosystem
-#include "../DX12Object.h"
 #include "DX12ResourceConfig.h"
 
 // resource
@@ -12,12 +11,11 @@ namespace MirageAPI::DirectX::Resource
     protected:
         // native
         ID3D12Resource* m_nativeResource = nullptr;
-
-    internal:
-        // description
+        // descriptions
         DX12ResourceState m_currentState;
         DX12ResourceType m_resourceType;
         DX12ResourceFormat m_resourceFormat;
+        DX12ViewDimension m_viewDimension;
         UINT m_size;
 
     public:
@@ -27,6 +25,7 @@ namespace MirageAPI::DirectX::Resource
         ) : m_currentState(config.InitialState),
             m_resourceType(config.Type),
             m_resourceFormat(config.Format),
+            m_viewDimension(config.Dimension),
             m_size(config.Width * config.Height * config.Stride)
         {
         }
@@ -59,6 +58,10 @@ namespace MirageAPI::DirectX::Resource
         property DX12ResourceFormat ResourceFormat
         {
             DX12ResourceFormat get() { return m_resourceFormat; }
+        }
+        property DX12ViewDimension ViewDimension
+        {
+            DX12ViewDimension get() { return m_viewDimension; }
         }
         property UINT Size
         {

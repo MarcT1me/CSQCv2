@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Text;
 using Engine.Asset;
 using Engine.Asset.Defaults;
+using MirageAPI.DirectX.Command;
 
 namespace AppLib.Game;
 
@@ -249,10 +250,11 @@ public class GameWindow : Window
             (uint)imageData.Size.X,
             (uint)imageData.Size.Y,
             DX12ResourceFormat.RGBA8_UNORM,
+            DX12ResourceFlags.None,
             1,
             1,
             DX12TextureType.Texture2D,
-            DX12ResourceFlags.None
+            DX12ViewDimension.Texture2D
         ));
 
         // Загружаем данные и выделяем память в куче
@@ -272,24 +274,6 @@ public class GameWindow : Window
             rgbaData[j + 1] = rgbData[i + 1];
             rgbaData[j + 2] = rgbData[i + 2];
             rgbaData[j + 3] = 255;
-        }
-
-        return rgbaData;
-    }
-
-    private byte[] ConvertToAlphaBroken(byte[] rgbData)
-    {
-        // Вычисляем размер (добавляем компоненту A)
-        int newSize = rgbData.Length / 3 * 4;
-
-        // Создаём новый буфер и копируем данные
-        byte[] rgbaData = new byte[newSize];
-        for (int i = 0; i < rgbData.Length; i += 4)
-        {
-            rgbaData[i] = rgbData[i];
-            rgbaData[i + 1] = rgbData[i + 1];
-            rgbaData[i + 2] = rgbData[i + 2];
-            rgbaData[i + 3] = 255;
         }
 
         return rgbaData;

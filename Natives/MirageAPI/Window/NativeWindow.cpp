@@ -48,40 +48,43 @@ namespace MirageAPI::Window
     }
 
     NativeWindow::NativeWindow(
-        WindowRect^ rect,
+        SimpleRect^ rect,
         System::String^ title,
         float opacity,
+        bool isFullscreen,
         NativeWindow^ parent,
         WindowType wType,
-        DirectX::DX12WindowContextConfig^ dxConfig
+        DirectX::DX12ContextConfig^ dxContextConfig
     )
     {
         hwnd = CreateWindowEx(
             0, L"QuantumWindowClass",
             msclr::interop::marshal_as<std::wstring>(title).c_str(),
             (parent ? WS_CHILDWINDOW : static_cast<unsigned long>(wType)) | WS_EX_LAYERED,
-            rect->x, rect->y,
-            rect->width, rect->height,
+            rect->X, rect->Y,
+            rect->Width, rect->Height,
             parent ? parent->hwnd : nullptr,
             nullptr,
             hInstance, nullptr
         );
         SetOpacity(opacity);
+        if (isFullscreen)
+            ToggleFullscreen();
 
         gch = System::Runtime::InteropServices::GCHandle::Alloc(this);
         void* native_ptr = System::Runtime::InteropServices::GCHandle::ToIntPtr(gch).ToPointer();
         SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(native_ptr));
 
-        dxContext = gcnew DirectX::DX12WindowContext(hwnd, rect->width, rect->height, dxConfig);
+        dxContext = gcnew DirectX::DX12Context(hwnd, dxContextConfig);
 
-        isFullscreen = false;
-        savedStyle = 0;
-        savedRect = *rect;
+        IsFullscreen = isFullscreen;
+        SavedStyle = GetWindowLongPtr(hwnd, GWL_STYLE);
+        SavedRect = WindowRect::FromSimple(rect);
     }
 
-    NativeWindow::~NativeWindow()
+    NativeWindow::!NativeWindow()
     {
-        delete dxContext;
+        SimpleDelete(dxContext);
 
         if (hwnd)
         {
@@ -92,10 +95,6 @@ namespace MirageAPI::Window
             DestroyWindow(hwnd);
             hwnd = nullptr;
         }
-    }
-
-    NativeWindow::!NativeWindow()
-    {
     }
 
     void NativeWindow::Establish()
@@ -131,10 +130,10 @@ namespace MirageAPI::Window
 
     void NativeWindow::ToggleFullscreen()
     {
-        if (!isFullscreen)
+        if (!IsFullscreen)
         {
-            savedStyle = GetWindowLongPtr(hwnd, GWL_STYLE);
-            savedRect = Rect;
+            SavedStyle = GetWindowLongPtr(hwnd, GWL_STYLE);
+            SavedRect = CurrentRect;
 
             HMONITOR hMonitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
             MONITORINFO monitorInfo;
@@ -145,7 +144,7 @@ namespace MirageAPI::Window
             SetWindowLongPtr(
                 hwnd,
                 GWL_STYLE,
-                savedStyle & ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU)
+                SavedStyle & ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU)
             );
 
             SetWindowPos(
@@ -158,23 +157,23 @@ namespace MirageAPI::Window
                 SWP_FRAMECHANGED | SWP_SHOWWINDOW
             );
 
-            isFullscreen = true;
+            IsFullscreen = true;
         }
         else
         {
-            SetWindowLongPtr(hwnd, GWL_STYLE, savedStyle);
+            SetWindowLongPtr(hwnd, GWL_STYLE, SavedStyle);
 
             SetWindowPos(
                 hwnd,
                 nullptr,
-                savedRect.x,
-                savedRect.y,
-                savedRect.width,
-                savedRect.height,
+                SavedRect->X,
+                SavedRect->Y,
+                SavedRect->Width,
+                SavedRect->Height,
                 SWP_FRAMECHANGED | SWP_NOZORDER | SWP_SHOWWINDOW
             );
 
-            isFullscreen = false;
+            IsFullscreen = false;
         }
     }
 
@@ -209,7 +208,6 @@ namespace MirageAPI::Window
     void NativeWindow::SetSize(int width, int height)
     {
         SetWindowPos(hwnd, nullptr, 0, 0, width, height, SWP_NOZORDER | SWP_NOMOVE);
-        HandleResize(width, height);
     }
 
     void NativeWindow::SetPositionAndSize(int x, int y, int width, int height)
@@ -236,21 +234,21 @@ namespace MirageAPI::Window
         UpdateWindow(hwnd);
     }
 
-    WindowRect NativeWindow::Rect::get()
+    WindowRect NativeWindow::CurrentRect::get()
     {
         RECT winApiRect;
         GetWindowRect(hwnd, &winApiRect);
 
         WindowRect rect;
-        rect.left = winApiRect.left;
-        rect.right = winApiRect.right;
-        rect.top = winApiRect.top;
-        rect.bottom = winApiRect.bottom;
+        rect.Left = winApiRect.left;
+        rect.Right = winApiRect.right;
+        rect.Top = winApiRect.top;
+        rect.Bottom = winApiRect.bottom;
 
-        rect.x = winApiRect.left;
-        rect.y = winApiRect.top;
-        rect.width = winApiRect.right - rect.left;
-        rect.height = winApiRect.bottom - rect.top;
+        rect.X = winApiRect.left;
+        rect.Y = winApiRect.top;
+        rect.Width = winApiRect.right - rect.Left;
+        rect.Height = winApiRect.bottom - rect.Top;
         return rect;
     }
 
@@ -275,9 +273,9 @@ namespace MirageAPI::Window
         return IsZoomed(hwnd) && TRUE;
     }
 
-    void NativeWindow::SetVSync(bool enabled)
+    void NativeWindow::SetVSync(UINT interval)
     {
-        dxContext->VSync = enabled ? 1 : 0;
+        dxContext->VSync = interval;
     }
 
     void NativeWindow::BeginFrame()
