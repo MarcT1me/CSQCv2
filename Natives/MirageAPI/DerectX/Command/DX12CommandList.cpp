@@ -38,20 +38,24 @@ namespace MirageAPI::DirectX::Command
     {
         Validate();
 
-        DXSimpleRelease(m_commandList);
-        DXSimpleRelease(m_commandAllocator);
+        SimpleRelease(m_commandList);
+        SimpleRelease(m_commandAllocator);
     }
 
     // command list operations
 
     void DX12CommandList::UpdatePipelineState()
     {
+        Validate();
         m_commandList->SetPipelineState(m_pipelineState->NativePSO);
         m_commandList->SetGraphicsRootSignature(m_pipelineState->RootSignature);
     }
 
     void DX12CommandList::UpdateDescriptorHeap()
     {
+        Validate();
+        CheckNull(m_descriptorHeap) return;
+
         ID3D12DescriptorHeap* heaps[] = {m_descriptorHeap->NativeHeap};
         m_commandList->SetDescriptorHeaps(1, heaps);
         m_commandList->SetGraphicsRootDescriptorTable(0, m_descriptorHeap->StartGPUHandle);
@@ -137,14 +141,16 @@ namespace MirageAPI::DirectX::Command
         Validate();
 
         const float clearColor[] = {r, g, b, a};
-        m_commandList->ClearRenderTargetView(frameBuffer->RTVHandle, clearColor, 0, nullptr);
+        m_commandList->ClearRenderTargetView(frameBuffer->SRVHandleForCPU, clearColor, 0, nullptr);
     }
 
     // bindings
 
     void DX12CommandList::BindBuffer(Resource::DX12FrameBuffer^ frameBuffer)
     {
-        D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = frameBuffer->RTVHandle;
+        Validate();
+
+        D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = frameBuffer->SRVHandleForCPU;
         m_commandList->OMSetRenderTargets(
             1,
             &rtvHandle,
@@ -155,21 +161,21 @@ namespace MirageAPI::DirectX::Command
 
     void DX12CommandList::BindBuffer(Resource::DX12IndexBuffer^ indexBuffer)
     {
-        ValidateMembers();
+        Validate();
 
         indexBuffer->Bind(m_commandList);
     }
 
     void DX12CommandList::BindBuffer(Resource::DX12VertexBuffer^ vertexBuffer)
     {
-        ValidateMembers();
+        Validate();
 
         vertexBuffer->Bind(m_commandList);
     }
 
     void DX12CommandList::BindBuffer(UINT rootIndex, Resource::DX12ConstantBuffer^ constantBuffer)
     {
-        ValidateMembers();
+        Validate();
 
         m_commandList->SetGraphicsRootConstantBufferView(
             rootIndex,
@@ -179,7 +185,7 @@ namespace MirageAPI::DirectX::Command
 
     void DX12CommandList::BindBuffer(UINT rootIndex, Resource::DX12StructuredBuffer^ structuredBuffer)
     {
-        ValidateMembers();
+        Validate();
 
         m_commandList->SetGraphicsRootShaderResourceView(
             rootIndex,
@@ -189,7 +195,7 @@ namespace MirageAPI::DirectX::Command
 
     void DX12CommandList::SetRootConstants(UINT rootIndex, UINT constantSize, float data[], UINT offset)
     {
-        ValidateMembers();
+        Validate();
 
         m_commandList->SetGraphicsRoot32BitConstants(
             rootIndex,
@@ -197,19 +203,5 @@ namespace MirageAPI::DirectX::Command
             data,
             offset
         );
-    }
-
-    // other
-
-    void DX12CommandList::ValidateMembers()
-    {
-        if (!m_descriptorHeap)
-        {
-            throw gcnew System::InvalidOperationException("Command List has not a Descriptor Heap");
-        }
-        if (!m_pipelineState)
-        {
-            throw gcnew System::InvalidOperationException("Command List has not a Pipeline State");
-        }
     }
 }

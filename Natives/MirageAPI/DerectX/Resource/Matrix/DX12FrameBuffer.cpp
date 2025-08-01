@@ -108,7 +108,7 @@ namespace MirageAPI::DirectX::Resource
         device->CreateRenderTargetView(
             m_nativeResource,
             nullptr,
-            RTVHandle
+            SRVHandleForCPU
         );
     }
 

@@ -21,7 +21,7 @@ public abstract class App<TData>
     public Clock Clock { get; }
 
     // ReSharper disable once StaticMemberInGenericType
-    private static bool _running = true;
+    private static bool _mainloopRunning = true;
     public static App<TData>? Instance { get; private set; }
     public ObjectStatusFlags ObjectStatus => MetaData.ObjectStatus;
 
@@ -52,24 +52,21 @@ public abstract class App<TData>
 
     public static void Mainloop(Type appType)
     {
-        while (_running || (Instance is not null && Instance.ObjectStatus.HasFlag(ObjectStatusFlags.Active)))
+        while (_mainloopRunning)
         {
-            var cth = new Catch("Mainloop iteration Catch");
+            var cth = new Catch("Mainloop");
 
             With.Handle(cth, _ =>
             {
                 Logger.Separator();
                 Logger.Debug("Mainloop Iteration");
 
-                using (Instance = Activator.CreateInstance(appType) as App<TData>)
-                {
-                    if (Instance == null) throw new Exception("App Instance could not be created");
-
-                    Instance.Run();
-                }
+                using var instance = Activator.CreateInstance(appType) as App<TData>;
+                Instance = instance ?? throw new NullReferenceException("App Instance could not be created");
+                cth.TryFunc(instance.Run);
             });
 
-            _running = cth.MetaData.Failures.Count != 0;
+            _mainloopRunning = cth.MetaData.Failures.Count != 0;
         }
     }
 

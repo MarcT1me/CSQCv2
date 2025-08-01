@@ -66,7 +66,7 @@ public class Window
             },
             MetaData.Identifier.GetNameAnyway(),
             MetaData.WinData.Opacity,
-            false,
+            MetaData.WinData.Fullscreen,
             ParentWindow?.NativeWindow,
             WindowType.Overlapped,
             CreateDefaultWindowContextConfig()
@@ -97,7 +97,9 @@ public class Window
             SwapQuality = MetaData.GlData.SwapQuality,
 
             SwapEffect = MetaData.GlData.SwapEffect,
-            VSyncInterval = MetaData.WinData.VSyncInterval
+            VSyncInterval = MetaData.WinData.VSyncInterval,
+
+            FullscreenConfig = DX12FullscreenMode.Windowed(0)
         };
 
         return windowContextConfig;
@@ -221,7 +223,7 @@ public class Window
     {
         UpdateSize(size);
         UpdateViewport();
-        NativeWindow.HandleResize(MetaData.WinData.Resolution.X, MetaData.WinData.Resolution.Y);
+        NativeWindow.DXContext.Resize((uint)MetaData.WinData.Resolution.X, (uint)MetaData.WinData.Resolution.Y);
     }
 
     public virtual void PreUpdate()

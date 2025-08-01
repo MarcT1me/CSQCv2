@@ -58,6 +58,27 @@ public sealed class Catch : MetaObject<CatchMeta>, IContextManager
             return defaultValue;
         }
     }
+    
+    /// <summary>
+    /// Метод для безопасного запуска опасной функции
+    /// </summary>
+    /// <param name="func">Обрабатываемая функция</param>
+    /// <param name="defaultValue">Возвращаемое значение по умолчанию (если случилась ошибка)</param>
+    /// <typeparam name="T">Тип возвращаемый из функции</typeparam>
+    /// <returns>В удачном случае - результат выполнения оригинальной функции, в ином defaultValue</returns>
+    public void TryFunc(Action func)
+    {
+        try
+        {
+            var temp = IsRunning;
+            func();
+            IsRunning = temp;
+        }
+        catch (Exception ex)
+        {
+            OnException(ex);
+        }
+    }
 
     /// <summary>
     /// Обработка ошибок
@@ -77,6 +98,7 @@ public sealed class Catch : MetaObject<CatchMeta>, IContextManager
             Level = MetaData.FailureLevel,
             CatchId = Id
         };
+        failure.CatchId ??= Id;
         MetaData.Failures[new Identifier()] = failure;
 
         if (MetaData.FailureLevel is not (FailureLevel.First or FailureLevel.Second)) return;

@@ -17,6 +17,8 @@
 #include <dxgi1_4.h>
 #include <d3dcompiler.h>
 
+#include "Helpers.h"
+#include "Exceptions.h"
 #include "rect.h"
 
 // Window
@@ -31,7 +33,7 @@
 #include "DerectX/Pipeline/enums.h"
 #include "DerectX/Resource/enums.h"
 #include "DerectX/Shader/enums.h"
-#include "DerectX/DX12Exception.h"
+#include "DerectX/DX12Exceptions.h"
 #include "DerectX/DX12Device.h"
 #include "DerectX/DX12Helpers.h"
 #include "DerectX/DX12Object.h"

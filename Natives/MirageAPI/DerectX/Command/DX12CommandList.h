@@ -116,8 +116,5 @@ namespace MirageAPI::DirectX::Command
         void BindBuffer(UINT rootIndex, Resource::DX12StructuredBuffer^ structuredBuffer);
 
         void SetRootConstants(UINT rootIndex, UINT constantSize, float data[], UINT offset);
-
-        // other
-        void ValidateMembers();
     };
 }

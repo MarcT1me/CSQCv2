@@ -57,12 +57,16 @@ namespace MirageAPI::Window
         DirectX::DX12ContextConfig^ dxContextConfig
     )
     {
+        IsFullscreen = isFullscreen;
+        SavedRect = DoubleRect::FromSimple(rect);
+        SavedStyle = (parent ? WS_CHILDWINDOW : static_cast<unsigned long>(wType)) | WS_EX_LAYERED;
+
         hwnd = CreateWindowEx(
             0, L"QuantumWindowClass",
             msclr::interop::marshal_as<std::wstring>(title).c_str(),
-            (parent ? WS_CHILDWINDOW : static_cast<unsigned long>(wType)) | WS_EX_LAYERED,
-            rect->X, rect->Y,
-            rect->Width, rect->Height,
+            SavedStyle,
+            SavedRect->X, SavedRect->Y,
+            SavedRect->Width, SavedRect->Height,
             parent ? parent->hwnd : nullptr,
             nullptr,
             hInstance, nullptr
@@ -71,15 +75,13 @@ namespace MirageAPI::Window
         if (isFullscreen)
             ToggleFullscreen();
 
-        gch = System::Runtime::InteropServices::GCHandle::Alloc(this);
-        void* native_ptr = System::Runtime::InteropServices::GCHandle::ToIntPtr(gch).ToPointer();
-        SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(native_ptr));
+        {
+            gch = System::Runtime::InteropServices::GCHandle::Alloc(this);
+            void* native_ptr = System::Runtime::InteropServices::GCHandle::ToIntPtr(gch).ToPointer();
+            SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(native_ptr));
+        }
 
         dxContext = gcnew DirectX::DX12Context(hwnd, dxContextConfig);
-
-        IsFullscreen = isFullscreen;
-        SavedStyle = GetWindowLongPtr(hwnd, GWL_STYLE);
-        SavedRect = WindowRect::FromSimple(rect);
     }
 
     NativeWindow::!NativeWindow()
@@ -132,28 +134,21 @@ namespace MirageAPI::Window
     {
         if (!IsFullscreen)
         {
-            SavedStyle = GetWindowLongPtr(hwnd, GWL_STYLE);
-            SavedRect = CurrentRect;
-
-            HMONITOR hMonitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
-            MONITORINFO monitorInfo;
-            monitorInfo.cbSize = sizeof(MONITORINFO);
-            GetMonitorInfo(hMonitor, &monitorInfo);
-            RECT screenRect = monitorInfo.rcMonitor;
+            SavedRect = CurrentWindowRect;
+            DoubleRect screenRect = CurrentMonitorRect;
 
             SetWindowLongPtr(
-                hwnd,
-                GWL_STYLE,
+                hwnd, GWL_STYLE,
                 SavedStyle & ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU)
             );
 
             SetWindowPos(
                 hwnd,
                 HWND_TOP,
-                screenRect.left,
-                screenRect.top,
-                screenRect.right - screenRect.left,
-                screenRect.bottom - screenRect.top,
+                screenRect.Left,
+                screenRect.Top,
+                screenRect.Right - screenRect.Left,
+                screenRect.Bottom - screenRect.Top,
                 SWP_FRAMECHANGED | SWP_SHOWWINDOW
             );
 
@@ -161,7 +156,10 @@ namespace MirageAPI::Window
         }
         else
         {
-            SetWindowLongPtr(hwnd, GWL_STYLE, SavedStyle);
+            SetWindowLongPtr(
+                hwnd, GWL_STYLE,
+                SavedStyle
+            );
 
             SetWindowPos(
                 hwnd,
@@ -170,7 +168,7 @@ namespace MirageAPI::Window
                 SavedRect->Y,
                 SavedRect->Width,
                 SavedRect->Height,
-                SWP_FRAMECHANGED | SWP_NOZORDER | SWP_SHOWWINDOW
+                SWP_FRAMECHANGED | SWP_SHOWWINDOW | SWP_NOZORDER
             );
 
             IsFullscreen = false;
@@ -213,7 +211,6 @@ namespace MirageAPI::Window
     void NativeWindow::SetPositionAndSize(int x, int y, int width, int height)
     {
         SetWindowPos(hwnd, nullptr, x, y, width, height, SWP_NOZORDER);
-        dxContext->Resize(width, height);
     }
 
     void NativeWindow::SetOpacity(float opacity)
@@ -224,31 +221,46 @@ namespace MirageAPI::Window
         SetLayeredWindowAttributes(hwnd, 0, alpha, LWA_ALPHA);
     }
 
-    void NativeWindow::HandleResize(int width, int height)
-    {
-        dxContext->Resize(width, height);
-    }
-
     void NativeWindow::Update()
     {
         UpdateWindow(hwnd);
     }
 
-    WindowRect NativeWindow::CurrentRect::get()
+    DoubleRect NativeWindow::CurrentWindowRect::get()
     {
-        RECT winApiRect;
-        GetWindowRect(hwnd, &winApiRect);
+        RECT winRect;
+        GetWindowRect(hwnd, &winRect);
 
-        WindowRect rect;
-        rect.Left = winApiRect.left;
-        rect.Right = winApiRect.right;
-        rect.Top = winApiRect.top;
-        rect.Bottom = winApiRect.bottom;
+        DoubleRect rect;
+        rect.Left = winRect.left;
+        rect.Right = winRect.right;
+        rect.Top = winRect.top;
+        rect.Bottom = winRect.bottom;
 
-        rect.X = winApiRect.left;
-        rect.Y = winApiRect.top;
-        rect.Width = winApiRect.right - rect.Left;
-        rect.Height = winApiRect.bottom - rect.Top;
+        rect.X = winRect.left;
+        rect.Y = winRect.top;
+        rect.Width = winRect.right - rect.Left;
+        rect.Height = winRect.bottom - rect.Top;
+        return rect;
+    }
+
+    DoubleRect NativeWindow::CurrentMonitorRect::get()
+    {
+        MONITORINFO monitorInfo;
+        monitorInfo.cbSize = sizeof(MONITORINFO);
+        GetMonitorInfo(CurrentMonitor, &monitorInfo);
+        RECT screenRect = monitorInfo.rcMonitor;
+
+        DoubleRect rect;
+        rect.Left = screenRect.left;
+        rect.Right = screenRect.right;
+        rect.Top = screenRect.top;
+        rect.Bottom = screenRect.bottom;
+
+        rect.X = screenRect.left;
+        rect.Y = screenRect.top;
+        rect.Width = screenRect.right - rect.Left;
+        rect.Height = screenRect.bottom - rect.Top;
         return rect;
     }
 

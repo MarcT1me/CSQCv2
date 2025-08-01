@@ -1,14 +1,13 @@
 ﻿#include "pch.h"
 #include "DX12Texture.h"
 
-#include "../../DX12DescriptorHeap.h"
 #include "../Array/DX12UploadBuffer.h"
 #include "../../Command/DX12CommandQueue.h"
 #include "../../Command/DX12CommandList.h"
 
 namespace MirageAPI::DirectX::Resource
 {
-    inline UINT64 GetRequiredIntermediateSize(
+    inline UINT GetRequiredIntermediateSize(
         ID3D12Resource* destinationResource,
         UINT firstSubresource,
         UINT numSubresources
@@ -25,7 +24,7 @@ namespace MirageAPI::DirectX::Resource
         );
         device->Release();
 
-        return requiredSize;
+        return static_cast<UINT>(requiredSize);
     }
 
     DX12Texture::DX12Texture(
@@ -222,7 +221,7 @@ namespace MirageAPI::DirectX::Resource
         if (!data || data->Length == 0)
             throw gcnew System::ArgumentException("Invalid texture data");
 
-        const UINT64 uploadBufferSize = GetRequiredIntermediateSize(m_nativeResource, 0, 1);
+        const UINT uploadBufferSize = GetRequiredIntermediateSize(m_nativeResource, 0, 1);
 
         // check data sizes
         if (data->Length != m_size)

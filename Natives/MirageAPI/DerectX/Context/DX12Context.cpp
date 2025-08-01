@@ -1,8 +1,6 @@
 ﻿#include "pch.h"
 #include "DX12Context.h"
 
-#include "../Resource/Matrix/DX12FrameBuffer.h"
-
 namespace MirageAPI::DirectX
 {
     DX12Context::DX12Context(
@@ -10,17 +8,9 @@ namespace MirageAPI::DirectX
         DX12ContextConfig^ config
     ) : m_config(config)
     {
-        // creating CommandList for window
         m_commandQueue = gcnew Command::DX12CommandQueue(DX12CommandListType::Direct);
-
-        m_swapChain = gcnew DX12SwapChain(
-            hwnd, m_commandQueue, config
-        );
-
-        // creating fence
-        m_fence = gcnew Command::DX12Fence(1);
-        m_commandQueue->Fence = m_fence;
-
+        m_swapChain = gcnew DX12SwapChain(hwnd, m_commandQueue, config);
+        m_commandQueue->Fence = m_fence = gcnew Command::DX12Fence(1);
         m_commandList = gcnew Command::DX12CommandList(DX12CommandListType::Direct);
     }
 
@@ -29,9 +19,14 @@ namespace MirageAPI::DirectX
         Validate();
 
         if (m_commandQueue)
+        {
             m_commandQueue->Signal();
+            m_commandQueue->Wait();
+        }
         if (m_fence)
-            m_fence->WaitForCompletion();
+        {
+            m_fence->Wait();
+        }
 
         SimpleDelete(m_fence);
         SimpleDelete(m_commandList);
@@ -40,6 +35,7 @@ namespace MirageAPI::DirectX
 
     void DX12Context::Resize(UINT width, UINT height)
     {
+        QuantumLog(Debug, System::String::Format("Resizing to {0} x {1}", width, height));
         m_config->ResolutionX = width;
         m_config->ResolutionY = height;
         if (IncorrectSize) return;
@@ -48,8 +44,8 @@ namespace MirageAPI::DirectX
         m_commandQueue->Wait();
         m_fence->Wait();
 
-        m_swapChain->FreeFrameBuffers();
-        m_swapChain->Resize();
+        // update swap chain buffers
+        m_swapChain->UpdateBufferSizes();
     }
 
     void DX12Context::SetViewport(float x, float y, float width, float height)
@@ -66,11 +62,6 @@ namespace MirageAPI::DirectX
         m_config->Far = y;
     }
 
-    void DX12Context::Clear(float r, float g, float b, float a)
-    {
-        m_commandList->ClearRenderTargetView(m_swapChain->CurrentFrameBuffer, r, g, b, a);
-    }
-
     void DX12Context::BeginFrame()
     {
         if (IncorrectSize) return;
@@ -78,8 +69,8 @@ namespace MirageAPI::DirectX
         m_commandQueue->Signal();
         m_fence->Wait();
 
+        // prepare command list
         m_commandList->Reset();
-
         m_commandList->UpdatePipelineState();
         m_commandList->UpdateDescriptorHeap();
 
@@ -93,14 +84,23 @@ namespace MirageAPI::DirectX
             m_config->Far
         );
         m_commandList->SetScissorRect(
-            0, 0,
-            m_config->Viewport->Width,
-            m_config->Viewport->Height
+            static_cast<int>(m_config->Viewport->X),
+            static_cast<int>(m_config->Viewport->Y),
+            static_cast<int>(m_config->Viewport->Width),
+            static_cast<int>(m_config->Viewport->Height)
         );
 
         // set frame buffer and go into render mode
-        auto frameBuffer = m_swapChain->AcquireNextBackBuffer(m_commandList);
-        m_commandList->BindBuffer(frameBuffer);
+        m_commandList->BindBuffer(
+            m_swapChain->AcquireNextBackBuffer(m_commandList)
+        );
+    }
+
+    void DX12Context::Clear(float r, float g, float b, float a)
+    {
+        if (IncorrectSize) return;
+
+        m_commandList->ClearRenderTargetView(m_swapChain->CurrentFrameBuffer, r, g, b, a);
     }
 
     void DX12Context::EndFrame()

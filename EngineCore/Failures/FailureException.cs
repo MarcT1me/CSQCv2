@@ -14,7 +14,7 @@ public class FailureException : Exception
     }
 
     public FailureLevel Level { get; init; } = FailureLevel.Second;
-    public Identifier? CatchId { get; init; }
+    public Identifier? CatchId { get; set; }
     public DateTime Timestamp { get; } = DateTime.UtcNow;
 
     public override string ToString() =>

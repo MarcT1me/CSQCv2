@@ -145,8 +145,8 @@ namespace MirageAPI::DirectX
     void DX12Device::Deinitialize()
     {
         if (s_device) CoUninitialize();
-        DXSimpleRelease(s_device);
-        DXSimpleRelease(s_factory);
-        DXSimpleRelease(s_debugController);
+        SimpleRelease(s_device);
+        SimpleRelease(s_factory);
+        SimpleRelease(s_debugController);
     }
 }

@@ -47,9 +47,13 @@ namespace MirageAPI::DirectX::Resource
             DX12DescriptorHeap^ get() { return m_rtvHeap; }
             void set(DX12DescriptorHeap^ value) { m_rtvHeap = value; }
         }
-        property D3D12_CPU_DESCRIPTOR_HANDLE RTVHandle
+        property D3D12_CPU_DESCRIPTOR_HANDLE SRVHandleForCPU
         {
             D3D12_CPU_DESCRIPTOR_HANDLE get() { return m_rtvHeap->IndexCPUHandle(m_rtvDescriptorIndex); }
+        }
+        property D3D12_GPU_DESCRIPTOR_HANDLE SRVHandleForGPU
+        {
+            D3D12_GPU_DESCRIPTOR_HANDLE get() { return m_rtvHeap->IndexGPUHandle(m_rtvDescriptorIndex); }
         }
 
         // buffer operations

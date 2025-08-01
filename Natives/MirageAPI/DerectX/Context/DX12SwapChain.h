@@ -17,8 +17,8 @@ namespace MirageAPI::DirectX
         DX12ContextConfig^ m_config;
 
     internal:
-        void CreateFrameBuffers();
-        void FreeFrameBuffers();
+        void CreateBuffers();
+        void FreeBuffers();
 
     public:
         DX12SwapChain(HWND hwnd, Command::DX12CommandQueue^ commandQueue, DX12ContextConfig^ config);
@@ -35,10 +35,11 @@ namespace MirageAPI::DirectX
             Resource::DX12FrameBuffer^ get() { return m_currentFrameBuffer; }
         }
 
-        void Resize();
-        void Present();
+        void UpdateBufferSizes();
         void UpdateFrameIndex();
+
         Resource::DX12FrameBuffer^ AcquireNextBackBuffer(Command::DX12CommandList^ commandList);
         void ReleaseBackBufferToPresent(Command::DX12CommandList^ commandList);
+        void Present();
     };
 }

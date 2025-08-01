@@ -47,7 +47,7 @@ namespace MirageAPI::DirectX
 
         if (m_descriptorSize == 0)
         {
-            DXSimpleRelease(m_heap);
+            SimpleRelease(m_heap);
             throw gcnew System::Exception("Invalid descriptor size (0)");
         }
     }
@@ -56,7 +56,7 @@ namespace MirageAPI::DirectX
     {
         Validate();
 
-        DXSimpleRelease(m_heap);
+        SimpleRelease(m_heap);
     }
 
     UINT DX12DescriptorHeap::Allocate()
@@ -112,26 +112,20 @@ namespace MirageAPI::DirectX
 
     void DX12DescriptorHeap::Validate()
     {
-        CheckNull(
+        ThrowIfNull(
             m_heap,
-            gcnew System::InvalidOperationException(
-                "Descriptor heap is not initialized: " +
-                "Capacity: " + m_capacity + ", DescriptorSize: " + m_descriptorSize
-            )
+            "Descriptor heap is not initialized: " +
+            "Capacity: " + m_capacity + ", DescriptorSize: " + m_descriptorSize
         );
-        CheckNull(
+        ThrowIfNull(
             m_descriptorSize,
-            gcnew System::InvalidOperationException(
-                "Invalid descriptor size: " +
-                "Capacity: " + m_capacity + ", DescriptorSize: " + m_descriptorSize
-            )
+            "Invalid descriptor size: " +
+            "Capacity: " + m_capacity + ", DescriptorSize: " + m_descriptorSize
         );
-        CheckNull(
+        ThrowIfNull(
             m_capacity,
-            gcnew System::InvalidOperationException(
-                "Invalid heap capacity: " +
-                "Capacity: " + m_capacity + ", DescriptorSize: " + m_descriptorSize
-            )
+            "Invalid heap capacity: " +
+            "Capacity: " + m_capacity + ", DescriptorSize: " + m_descriptorSize
         );
     }
 }

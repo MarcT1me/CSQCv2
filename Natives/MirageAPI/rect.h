@@ -7,18 +7,18 @@ namespace MirageAPI
         float X, Y, Width, Height;
     };
 
-    public value struct WindowRect
+    public value struct DoubleRect
     {
         int Right, Left, Top, Bottom;
         int X, Y, Width, Height;
 
-        static WindowRect^ FromSimple(SimpleRect^ rect)
+        static DoubleRect^ FromSimple(SimpleRect^ rect)
         {
-            auto wRect = gcnew WindowRect();
+            auto wRect = gcnew DoubleRect();
             wRect->X = wRect->X;
             wRect->Y = wRect->Y;
-            wRect->Width = rect->Width;
-            wRect->Height = rect->Height;
+            wRect->Width = static_cast<int>(rect->Width);
+            wRect->Height = static_cast<int>(rect->Height);
             return wRect;
         }
     };

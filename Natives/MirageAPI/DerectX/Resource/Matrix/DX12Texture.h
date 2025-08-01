@@ -2,17 +2,15 @@
 
 // Mirage ecosystem
 #include "../Array/DX12Buffer.h"
+#include "../../DX12DescriptorHeap.h"
 
-namespace MirageAPI::DirectX
-{
-    ref class DX12DescriptorHeap;
-}
 
 // texture
 namespace MirageAPI::DirectX::Resource
 {
     public ref class DX12Texture : public DX12Resource
     {
+    internal:
         // description
         DX12TextureType m_textureType;
         UINT m_width;
@@ -53,14 +51,18 @@ namespace MirageAPI::DirectX::Resource
         {
             UINT get() { return m_mipLevels; }
         }
-        property UINT DescriptorIndex
-        {
-            UINT get() { return m_srvDescriptorIndex; }
-        }
         property DX12DescriptorHeap^ SRVHeap
         {
             DX12DescriptorHeap^ get() { return m_srvHeap; }
             void set(DX12DescriptorHeap^ value) { m_srvHeap = value; }
+        }
+        property D3D12_CPU_DESCRIPTOR_HANDLE SRVHandleForCPU
+        {
+            D3D12_CPU_DESCRIPTOR_HANDLE get() { return m_srvHeap->IndexCPUHandle(m_srvDescriptorIndex); }
+        }
+        property D3D12_GPU_DESCRIPTOR_HANDLE SRVHandleForGPU
+        {
+            D3D12_GPU_DESCRIPTOR_HANDLE get() { return m_srvHeap->IndexGPUHandle(m_srvDescriptorIndex); }
         }
 
         // texture operations

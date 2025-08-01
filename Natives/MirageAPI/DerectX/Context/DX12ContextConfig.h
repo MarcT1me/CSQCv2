@@ -17,7 +17,7 @@ namespace MirageAPI::DirectX
         LowerFieldFirst = DXGI_MODE_SCANLINE_ORDER_LOWER_FIELD_FIRST,
     };
 
-    public value struct DX12FullscreenMode
+    public ref struct DX12FullscreenMode
     {
         bool IsWindowed;
         UINT RefreshNumerator;
@@ -57,8 +57,8 @@ namespace MirageAPI::DirectX
                 false,
                 vsyncFrameRate,
                 1,
-                DX12FullscreenScaling::Unspecified,
-                DX12FullscreenScanlineOrder::Unspecified
+                DX12FullscreenScaling::Centered,
+                DX12FullscreenScanlineOrder::Progressive
             );
         }
 
@@ -67,7 +67,7 @@ namespace MirageAPI::DirectX
         {
             DXGI_SWAP_CHAIN_FULLSCREEN_DESC desc;
             desc.Windowed = IsWindowed;
-            desc.RefreshRate = DXGI_RATIONAL(RefreshNumerator, RefreshDenominator);
+            desc.RefreshRate = {RefreshNumerator, RefreshDenominator};
             desc.Scaling = static_cast<DXGI_MODE_SCALING>(Scaling);
             desc.ScanlineOrdering = static_cast<DXGI_MODE_SCANLINE_ORDER>(ScanlineOrder);
             return desc;
@@ -82,7 +82,7 @@ namespace MirageAPI::DirectX
         Sequential = DXGI_SWAP_EFFECT_SEQUENTIAL,
     };
 
-    public value struct DX12ContextConfig
+    public ref struct DX12ContextConfig
     {
         SimpleRect^ Viewport;
         float Near;
@@ -111,7 +111,7 @@ namespace MirageAPI::DirectX
             desc.Height = static_cast<UINT>(ResolutionY);
             desc.Format = NativeFormat;
             desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-            desc.SampleDesc = DXGI_SAMPLE_DESC(SampleCount, SwapQuality);
+            desc.SampleDesc = {SampleCount, SwapQuality};
             desc.SwapEffect = static_cast<DXGI_SWAP_EFFECT>(SwapEffect);
             desc.Flags = Flags;
 
@@ -125,7 +125,11 @@ namespace MirageAPI::DirectX
 
         property UINT Flags
         {
-            UINT get() { return IsDebug() ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0; }
+            UINT get()
+            {
+                bool isWindowed = !FullscreenConfig || FullscreenConfig->IsWindowed;
+                return IsDXDebug && isWindowed ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
+            }
         }
     };
 }

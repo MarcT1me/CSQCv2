@@ -100,7 +100,7 @@ public static class ShaderCacheManager
 struct Vertex
 {
     public Vector3 Position;
-    public Vector2 UV;
+    // public Vector2 UV;
 }
 
 public class GameWindow : Window
@@ -119,7 +119,7 @@ public class GameWindow : Window
         : base(winData, glData, name)
     {
         CreatePipelineState();
-        LoadImage();
+        // LoadImage();
         CreateGeometryBuffers();
     }
 
@@ -130,44 +130,43 @@ public class GameWindow : Window
         Logger.Debug("Creating pipeline...");
 
         // Создание конфигураций
-        var config = DX12PipelineStateConfig.Default;
-        // Вершинный и пиксельный шейдер
-        config.VertexShader = _vertexShader;
-        config.PixelShader = _pixelShader;
-        // Данные вершин
-        config.InputLayouts =
-        [
-            new DX12InputElement
-            {
-                SemanticName = "POSITION",
-                Format = DX12ResourceFormat.RGB32_FLOAT,
-                Offset = 0
-            },
-            new DX12InputElement
-            {
-                SemanticName = "TEXCOORD",
-                Format = DX12ResourceFormat.RG32_FLOAT,
-                Offset = 12
-            }
-        ];
-        // Параметры и буферы шейдеров
-        config.RootParams =
-        [
-            new DX12PipelineParameter
-            {
-                Type = DX12ResourceType.Texture,
-                RegisterSlot = 0,
-                RegisterSpace = 0
-            }
-        ];
-        // Создания трубы
-        _pipelineState = new DX12PipelineState(config);
-        NativeWindow.DXContext.CmdList.PipelineState = _pipelineState;
+        var config = new DX12PipelineStateConfig(
+            null, null,
+            // [
+            // new DX12RootParameter(
+            //     DX12ResourceType.Texture,
+            //     DX12ShaderVisibility.Pixel
+            // )
+            // ],
+            // [
+            //     new DX12SamplerConfig(
+            //         0,
+            //         DX12ShaderVisibility.Pixel
+            //     )
+            // ],
+            new DX12RasterizerConfig(),
+            new DX12BlendConfig(true, false),
+            [
+                new DX12InputElement(
+                    "POSITION",
+                    DX12ResourceFormat.RGB32_FLOAT,
+                    0
+                )
+                // new DX12InputElement
+                // (
+                //     "TEXCOORD",
+                //     DX12ResourceFormat.RG32_FLOAT,
+                //     12
+                // )
+            ]
+        );
+        NativeWindow.DXContext.CmdList.PipelineState =
+            _pipelineState = new DX12PipelineState(_vertexShader, _pixelShader, config);
     }
 
     private void LoadShaders()
     {
-        const string shaderName = "TextureShader";
+        const string shaderName = "SimpleShader";
         const string vsEntry = "VS";
         const string psEntry = "PS";
         const string vsTarget = "vs_5_0";
@@ -259,7 +258,7 @@ public class GameWindow : Window
 
         // Загружаем данные и выделяем память в куче
         _texture.UploadData(ConvertToAlpha(imageData.Data));
-        NativeWindow.DXContext.CmdList.DescriptorHeap = _texture.SRVHeap = CreateDescriptorHeap();
+        _texture.SRVHeap = CreateDescriptorHeap();
         _texture.CreateSRV();
     }
 
@@ -281,7 +280,10 @@ public class GameWindow : Window
 
     private DX12DescriptorHeap CreateDescriptorHeap()
     {
-        return _descriptorHeap = new DX12DescriptorHeap(DX12DescriptorHeapType.CBV_SRV_UAV, 1, true);
+        return
+            NativeWindow.DXContext.CmdList.DescriptorHeap =
+                _descriptorHeap =
+                    new DX12DescriptorHeap(DX12DescriptorHeapType.CBV_SRV_UAV, 1, true);
     }
 
     private void CreateGeometryBuffers()
@@ -294,33 +296,33 @@ public class GameWindow : Window
             new()
             {
                 Position = new Vector3(-1.0f, 1.0f, 0.0f),
-                UV = new Vector2(0, 0)
+                // UV = new Vector2(0, 0)
             },
             new()
             {
                 Position = new Vector3(1.0f, 1.0f, 0.0f),
-                UV = new Vector2(1, 0)
+                // UV = new Vector2(1, 0)
             },
             new()
             {
                 Position = new Vector3(-1.0f, -1.0f, 0.0f),
-                UV = new Vector2(0, 1)
+                // UV = new Vector2(0, 1)
             },
 
             new()
             {
                 Position = new Vector3(1.0f, 1.0f, 0.0f),
-                UV = new Vector2(1, 0)
+                // UV = new Vector2(1, 0)
             },
             new()
             {
                 Position = new Vector3(1.0f, -1.0f, 0.0f),
-                UV = new Vector2(1, 1)
+                // UV = new Vector2(1, 1)
             },
             new()
             {
                 Position = new Vector3(-1.0f, -1.0f, 0.0f),
-                UV = new Vector2(0, 1)
+                // UV = new Vector2(0, 1)
             }
         ];
 
@@ -387,6 +389,7 @@ public class GameWindow : Window
         _texture?.ReleaseSRV();
         _texture?.Dispose();
         _descriptorHeap?.Dispose();
+
         _vertexBuffer.Dispose();
         _pipelineState.Dispose();
         _pixelShader.Dispose();

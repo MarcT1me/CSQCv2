@@ -10,22 +10,25 @@ using Logging;
 /// <summary>
 /// Стандартный обработчик ошибок
 /// </summary>
-internal sealed class ConsoleFailureHandler : IFailureHandler
+internal sealed class DefaultFailureHandler : IFailureHandler
 {
     public void OnFailure(FailureException failure)
     {
-        var message = "Default EngineCore failure handler got a failure\n" +
-                      $"Catch: '{failure.CatchId}'\n" +
-                      $"Level: '{failure.Level}'\n" +
-                      $"Message: {failure.Message}";
-
-        if (failure.InnerException != null)
+        if (failure.Level != FailureLevel.Second)
         {
-            message += $"\nInner exception: {failure.InnerException.GetType().Name}";
-            message += $"\n{failure.InnerException.Message}";
-        }
+            var message = "Default EngineCore failure handler got a failure\n" +
+                          $"Catch: '{failure.CatchId}'\n" +
+                          $"Level: '{failure.Level}'\n" +
+                          $"Message: {failure.Message}";
 
-        Logger.Warning(message);
+            if (failure.InnerException != null)
+            {
+                message += $"\nInner exception: {failure.InnerException.GetType().Name}";
+                message += $"\n{failure.InnerException.Message}";
+            }
+
+            Logger.Warning(message);
+        }
 
         failure.Handle();
     }
@@ -41,7 +44,7 @@ public abstract class EngineCore
 {
     public static string RootDirectory = "";
     public static Assembly? AppLibAssembly;
-    public static IFailureHandler DefaultFailureHandler = new ConsoleFailureHandler();
+    public static IFailureHandler DefaultFailureHandler = new DefaultFailureHandler();
 
     protected EngineCore(Assembly? appLibAssembly)
     {

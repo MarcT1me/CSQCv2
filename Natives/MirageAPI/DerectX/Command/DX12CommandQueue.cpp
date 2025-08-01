@@ -29,7 +29,7 @@ namespace MirageAPI::DirectX::Command
     {
         Validate();
 
-        DXSimpleRelease(m_commandQueue);
+        SimpleRelease(m_commandQueue);
     }
 
     void DX12CommandQueue::ExecuteList(DX12CommandList^ commandList)

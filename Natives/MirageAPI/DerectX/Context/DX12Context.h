@@ -56,19 +56,15 @@ namespace MirageAPI::DirectX
         // other
         property bool IncorrectSize
         {
-            bool get()
-            {
-                return ResolutionX <= 0 || ResolutionY <= 0 ||
-                    m_config->Viewport->Width <= 0 || m_config->Viewport->Height <= 0;
-            }
+            bool get() { return ResolutionX <= 0 || ResolutionY <= 0; }
         }
 
         // context methods
         void Resize(UINT width, UINT height);
         void SetViewport(float x, float y, float width, float height);
         void SetViewportDepth(float x, float y);
-        void Clear(float r, float g, float b, float a);
         void BeginFrame();
+        void Clear(float r, float g, float b, float a);
         void EndFrame();
         void Present();
     };

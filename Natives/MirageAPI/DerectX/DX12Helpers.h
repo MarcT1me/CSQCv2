@@ -1,10 +1,6 @@
 ﻿#pragma once
 
-#define SimpleDelete(resource) if ((resource)) { delete (resource); (resource) = nullptr; }
-#define CheckNull(resource, exc) if ((resource)) throw (exc)
-
-#define DXSimpleRelease(resource) if ((resource) && (resource)->Release() == 0) (resource) = nullptr;
-#define DXSimpleDeleteArr(resource) if ((resource)) { delete[] (resource); (resource) = nullptr; }
+#define IsDXDebug DX12Device::IsDebug
 
 namespace MirageAPI::DirectX
 {
@@ -13,18 +9,18 @@ namespace MirageAPI::DirectX
         if (FAILED(hr))
         {
             if (checkDevice && hr == DXGI_ERROR_DEVICE_REMOVED)
+            {
                 throw gcnew HRException(
                     hr, gcnew System::String(msg) + gcnew System::String(
                         ": Device removed (" + DX12Device::GetDeviceRemovedReason() + ")"
                     ));
+            }
             throw gcnew HRException(
                 hr, gcnew System::String(msg) + gcnew System::String(
                     ": " + hr
                 ));
         }
     }
-
-    inline bool IsDebug() { return DX12Device::IsDebug; }
 
     inline UINT GetResourceFormatSize(DX12ResourceFormat format)
     {

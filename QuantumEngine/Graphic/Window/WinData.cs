@@ -38,14 +38,16 @@ public sealed class WinData
         Vector2i? position = null,
         Vector2? resolutionScaling = null,
         float opacity = 1.0f,
-        uint vsyncInterval = 1
+        uint vsyncInterval = 0,
+        bool isFullscreen = true
     )
     {
         _resolutionScaling = resolutionScaling ?? Vector2.One;
 
         Size = size;
         Opacity = opacity;
-        Position = position ?? new(Window.UseDefault);
+        Position = position ?? new Vector2i(Window.UseDefault);
         VSyncInterval = vsyncInterval;
+        Fullscreen = isFullscreen;
     }
 }

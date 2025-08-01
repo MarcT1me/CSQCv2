@@ -32,19 +32,18 @@ namespace MirageAPI::DirectX
 
     public enum class DX12ResourceType
     {
-        Constants,
+        Constants = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS,
+        
         Buffer,
-        ConstantBuffer,
-        StructuredBuffer,
-
+        ConstantBuffer = D3D12_ROOT_PARAMETER_TYPE_CBV,
+        StructuredBuffer = D3D12_ROOT_PARAMETER_TYPE_SRV,
         ReadbackBuffer,
         UploadBuffer,
-
         VertexBuffer,
         IndexBuffer,
 
-        Texture,
-        FrameBuffer,
+        Texture = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE,
+        FrameBuffer = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE,
     };
 
     public enum class DX12ResourceFormat

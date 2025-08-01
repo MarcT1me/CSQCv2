@@ -49,26 +49,26 @@ namespace MirageAPI::DirectX
 
         UpdateFrameIndex();
 
-        CreateFrameBuffers();
+        CreateBuffers();
     }
 
     void DX12SwapChain::!DX12SwapChain()
     {
         Validate();
 
-        FreeFrameBuffers();
+        FreeBuffers();
 
-        DXSimpleRelease(m_swapChain);
+        SimpleRelease(m_swapChain);
     }
 
-    void DX12SwapChain::CreateFrameBuffers()
+    void DX12SwapChain::CreateBuffers()
     {
         m_rtvHeap = gcnew DX12DescriptorHeap(
             DX12DescriptorHeapType::RTV,
             m_config->BufferCount,
             false
         );
-        
+
         // creating frame buffer array
         m_frameBuffers = gcnew array<Resource::DX12FrameBuffer^>(m_config->BufferCount);
 
@@ -80,10 +80,6 @@ namespace MirageAPI::DirectX
             CheckHResult(
                 m_swapChain->GetBuffer(i, IID_PPV_ARGS(&renderTarget)),
                 "GetBuffer failed"
-            );
-            CheckNull(
-                renderTarget,
-                gcnew DXException("Got nullptr render target")
             );
 
             // creating buffer himself
@@ -101,7 +97,7 @@ namespace MirageAPI::DirectX
         }
     }
 
-    void DX12SwapChain::FreeFrameBuffers()
+    void DX12SwapChain::FreeBuffers()
     {
         if (m_frameBuffers)
         {
@@ -116,8 +112,10 @@ namespace MirageAPI::DirectX
         SimpleDelete(m_rtvHeap);
     }
 
-    void DX12SwapChain::Resize()
+    void DX12SwapChain::UpdateBufferSizes()
     {
+        FreeBuffers();
+
         CheckHResult(
             m_swapChain->ResizeBuffers(
                 m_config->BufferCount,
@@ -131,17 +129,7 @@ namespace MirageAPI::DirectX
 
         UpdateFrameIndex();
 
-        CreateFrameBuffers();
-    }
-
-    void DX12SwapChain::Present()
-    {
-        CheckHResult(
-            m_swapChain->Present(m_config->VSyncInterval, 0),
-            "present swap chain"
-        );
-
-        UpdateFrameIndex();
+        CreateBuffers();
     }
 
     void DX12SwapChain::UpdateFrameIndex()
@@ -162,5 +150,14 @@ namespace MirageAPI::DirectX
     void DX12SwapChain::ReleaseBackBufferToPresent(Command::DX12CommandList^ commandList)
     {
         m_currentFrameBuffer->TransitionState(commandList, DX12ResourceState::Present);
+    }
+
+    void DX12SwapChain::Present()
+    {
+        CheckHResult(
+            m_swapChain->Present(m_config->VSyncInterval, 0),
+            "present swap chain"
+        );
+        UpdateFrameIndex();
     }
 }

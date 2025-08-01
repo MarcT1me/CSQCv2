@@ -109,17 +109,15 @@
         <ClInclude Include="DerectX\Command\DX12CommandQueue.h"/>
         <ClInclude Include="DerectX\Command\DX12Fence.h"/>
         <ClInclude Include="DerectX\Command\enums.h"/>
-        <ClInclude Include="DerectX\Context\DX12SwapChain.h"/>
-        <ClInclude Include="DerectX\Context\DX12Context.h"/>
         <ClInclude Include="DerectX\Context\DX12ContextConfig.h"/>
+        <ClInclude Include="DerectX\Context\DX12Context.h"/>
+        <ClInclude Include="DerectX\Context\DX12SwapChain.h"/>
         <ClInclude Include="DerectX\DX12DescriptorHeap.h"/>
+        <ClInclude Include="DerectX\DX12Exceptions.h"/>
         <ClInclude Include="DerectX\DX12Object.h"/>
-        <ClInclude Include="DerectX\DX12Exception.h"/>
-        <ClInclude Include="DerectX\Pipeline\DX12BlendConfig.h"/>
+        <ClInclude Include="DerectX\enums.h"/>
         <ClInclude Include="DerectX\Pipeline\DX12PipelineState.h"/>
         <ClInclude Include="DerectX\Pipeline\DX12PipelineStateConfig.h"/>
-        <ClInclude Include="DerectX\Pipeline\DX12RasterizerConfig.h"/>
-        <ClInclude Include="DerectX\Pipeline\DX12PipelineParameter.h"/>
         <ClInclude Include="DerectX\Pipeline\enums.h"/>
         <ClInclude Include="DerectX\Resource\Array\DX12Buffer.h"/>
         <ClInclude Include="DerectX\Resource\Array\DX12ConstantBuffer.h"/>
@@ -131,10 +129,11 @@
         <ClInclude Include="DerectX\Resource\Matrix\DX12FrameBuffer.h"/>
         <ClInclude Include="DerectX\Resource\Matrix\DX12Texture.h"/>
         <ClInclude Include="DerectX\Shader\enums.h"/>
+        <ClInclude Include="Exceptions.h"/>
+        <ClInclude Include="Helpers.h"/>
         <ClInclude Include="pch.h"/>
         <ClInclude Include="rect.h"/>
         <ClInclude Include="Resource.h"/>
-        <ClInclude Include="DerectX\enums.h"/>
         <ClInclude Include="DerectX\DX12Device.h"/>
         <ClInclude Include="DerectX\Resource\DX12Resource.h"/>
         <ClInclude Include="DerectX\Resource\DX12ResourceConfig.h"/>
@@ -154,8 +153,8 @@
         <ClCompile Include="DerectX\Command\DX12CommandList.cpp"/>
         <ClCompile Include="DerectX\Command\DX12CommandQueue.cpp"/>
         <ClCompile Include="DerectX\Command\DX12Fence.cpp"/>
-        <ClCompile Include="DerectX\Context\DX12SwapChain.cpp"/>
         <ClCompile Include="DerectX\Context\DX12Context.cpp"/>
+        <ClCompile Include="DerectX\Context\DX12SwapChain.cpp"/>
         <ClCompile Include="DerectX\DX12Device.cpp"/>
         <ClCompile Include="DerectX\DX12DescriptorHeap.cpp"/>
         <ClCompile Include="DerectX\Pipeline\DX12PipelineState.cpp"/>
@@ -182,6 +181,12 @@
     </ItemGroup>
     <ItemGroup>
         <Image Include="app.ico"/>
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\..\EngineCore\EngineCore.csproj">
+            <Project>{e414a031-e41c-4da7-8370-162f040cf9db}</Project>
+            <Name>EngineCore</Name>
+        </ProjectReference>
     </ItemGroup>
     <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets"/>
     <ImportGroup Label="ExtensionTargets">

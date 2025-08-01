@@ -38,7 +38,7 @@ namespace MirageAPI::DirectX::Shader
 
     DX12Shader::!DX12Shader()
     {
-        DXSimpleRelease(m_bytecode);
+        SimpleRelease(m_bytecode);
     }
 
     D3D12_SHADER_BYTECODE DX12Shader::NativeBytecode::get()

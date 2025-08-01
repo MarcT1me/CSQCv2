@@ -29,7 +29,7 @@ namespace MirageAPI::DirectX::Command
         if (m_fenceEvent && CloseHandle(m_fenceEvent))
             m_fenceEvent = nullptr;
 
-        DXSimpleRelease(m_fence);
+        SimpleRelease(m_fence);
     }
 
     HANDLE DX12Fence::OnCompletion()
