@@ -1,4 +1,5 @@
 ﻿using Engine.Base;
+using Engine.Graphic.Window;
 
 namespace AppLib.Game;
 
@@ -8,7 +9,8 @@ public class TestApp : Game<TestAppData, GameWindow>
     {
         return new TestAppData
         {
-            Tps = 0
+            Tps = 0,
+            WinData = new WinData(new(1600, 900), resolutionScaling: 1f)
         };
     }
 

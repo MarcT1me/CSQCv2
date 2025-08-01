@@ -1,4 +1,5 @@
-﻿using Engine.Events.QuantumEvents.Window;
+﻿using System.Runtime.CompilerServices;
+using Engine.Events.QuantumEvents.Window;
 using MirageAPI;
 using MirageAPI.DirectX;
 using OpenTK.Mathematics;
@@ -20,6 +21,8 @@ public class Window
 {
     protected readonly NativeWindow NativeWindow;
     public const int UseDefault = unchecked((int)0x80000000);
+
+    private bool _resized; // TODO:: DELETE THIS SHIT
 
     public Window? ActiveWindow { get; protected set; }
 
@@ -210,24 +213,37 @@ public class Window
     public virtual void HandleEvent(QuantumEvent e)
     {
         if (e is { Type: EventType.WindowClose })
+        {
             Dispose();
-        else if (e.Type == EventType.WindowFocusGained)
+        }
+        else if (e is { Type: EventType.WindowFocusGained })
+        {
             ActiveWindow = this;
-        else if (e.Type == EventType.WindowFocusLost && ActiveWindow == this)
+        }
+        else if (e is { Type: EventType.WindowFocusLost } && ActiveWindow == this)
+        {
             ActiveWindow = null;
+        }
         else if (e is WinResizeEvent winResize)
+        {
             HandleResize(winResize.Size);
+            _resized = true;
+        }
     }
 
     protected virtual void HandleResize(Vector2i size)
     {
         UpdateSize(size);
-        UpdateViewport();
-        NativeWindow.DXContext.Resize((uint)MetaData.WinData.Resolution.X, (uint)MetaData.WinData.Resolution.Y);
     }
 
     public virtual void PreUpdate()
     {
+        if (_resized)
+        {
+            UpdateViewport();
+            NativeWindow.DXContext.Resize((uint)MetaData.WinData.Resolution.X, (uint)MetaData.WinData.Resolution.Y);
+            _resized = false;
+        }
     }
 
     public virtual void Update()
