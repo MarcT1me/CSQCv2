@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using Engine.Events.QuantumEvents.Window;
+﻿using Engine.Events.QuantumEvents.Window;
 using MirageAPI;
 using MirageAPI.DirectX;
 using OpenTK.Mathematics;
@@ -21,8 +20,6 @@ public class Window
 {
     protected readonly NativeWindow NativeWindow;
     public const int UseDefault = unchecked((int)0x80000000);
-
-    private bool _resized; // TODO:: DELETE THIS SHIT
 
     public Window? ActiveWindow { get; protected set; }
 
@@ -88,8 +85,8 @@ public class Window
                 Width = MetaData.GlData.Viewport.Z,
                 Height = MetaData.GlData.Viewport.W
             },
-            ResolutionX = (uint)MetaData.WinData.Resolution.X,
-            ResolutionY = (uint)MetaData.WinData.Resolution.Y,
+            ResolutionX = MetaData.WinData.Resolution.X,
+            ResolutionY = MetaData.WinData.Resolution.Y,
             Near = MetaData.GlData.ViewportDepth.X,
             Far = MetaData.GlData.ViewportDepth.Y,
 
@@ -212,38 +209,26 @@ public class Window
 
     public virtual void HandleEvent(QuantumEvent e)
     {
-        if (e is { Type: EventType.WindowClose })
+        switch (e)
         {
-            Dispose();
+            case { Type: EventType.WindowClose }:
+                Dispose();
+                break;
+            case { Type: EventType.WindowFocusGained }:
+                ActiveWindow = this;
+                break;
+            case { Type: EventType.WindowFocusLost } when ActiveWindow == this:
+                ActiveWindow = null;
+                break;
+            case WinResizeEvent winResize:
+                UpdateSize(winResize.Size);
+                NativeWindow.DXContext.SetResolution(MetaData.WinData.Resolution.X, MetaData.WinData.Resolution.Y);
+                break;
         }
-        else if (e is { Type: EventType.WindowFocusGained })
-        {
-            ActiveWindow = this;
-        }
-        else if (e is { Type: EventType.WindowFocusLost } && ActiveWindow == this)
-        {
-            ActiveWindow = null;
-        }
-        else if (e is WinResizeEvent winResize)
-        {
-            HandleResize(winResize.Size);
-            _resized = true;
-        }
-    }
-
-    protected virtual void HandleResize(Vector2i size)
-    {
-        UpdateSize(size);
     }
 
     public virtual void PreUpdate()
     {
-        if (_resized)
-        {
-            UpdateViewport();
-            NativeWindow.DXContext.Resize((uint)MetaData.WinData.Resolution.X, (uint)MetaData.WinData.Resolution.Y);
-            _resized = false;
-        }
     }
 
     public virtual void Update()

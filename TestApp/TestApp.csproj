@@ -21,6 +21,13 @@
         <RuntimeIdentifier>win-x64</RuntimeIdentifier>
 
         <ApplicationIcon>Logo.ico</ApplicationIcon>
+
+        <Version>0.16.3</Version>
+        
+        <Company>QuantumDev</Company>
+        <AssemblyVersion>$(Version)</AssemblyVersion>
+        <FileVersion>$(Version)</FileVersion>
+        <NeutralLanguage>ru-RU</NeutralLanguage>
     </PropertyGroup>
 
     <ItemGroup>

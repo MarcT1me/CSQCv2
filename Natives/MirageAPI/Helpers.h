@@ -11,3 +11,4 @@
 
 #define QuantumLogger Engine::Logging::Logger::
 #define QuantumLog(logLevel, msg) QuantumLogger logLevel((msg))
+#define SFormat System::String::Format

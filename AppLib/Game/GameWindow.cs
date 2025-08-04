@@ -100,7 +100,7 @@ public static class ShaderCacheManager
 struct Vertex
 {
     public Vector3 Position;
-    // public Vector2 UV;
+    public Vector2 UV;
 }
 
 public class GameWindow : Window
@@ -119,7 +119,7 @@ public class GameWindow : Window
         : base(winData, glData, name)
     {
         CreatePipelineState();
-        // LoadImage();
+        LoadImage();
         CreateGeometryBuffers();
     }
 
@@ -131,19 +131,18 @@ public class GameWindow : Window
 
         // Создание конфигураций
         var config = new DX12PipelineStateConfig(
-            null, null,
-            // [
-            // new DX12RootParameter(
-            //     DX12ResourceType.Texture,
-            //     DX12ShaderVisibility.Pixel
-            // )
-            // ],
-            // [
-            //     new DX12SamplerConfig(
-            //         0,
-            //         DX12ShaderVisibility.Pixel
-            //     )
-            // ],
+            [
+            new DX12RootParameter(
+                DX12ResourceType.Texture,
+                DX12ShaderVisibility.Pixel
+            )
+            ],
+            [
+                new DX12SamplerConfig(
+                    0,
+                    DX12ShaderVisibility.Pixel
+                )
+            ],
             new DX12RasterizerConfig(),
             new DX12BlendConfig(true, false),
             [
@@ -151,13 +150,13 @@ public class GameWindow : Window
                     "POSITION",
                     DX12ResourceFormat.RGB32_FLOAT,
                     0
+                ),
+                new DX12InputElement
+                (
+                    "TEXCOORD",
+                    DX12ResourceFormat.RG32_FLOAT,
+                    12
                 )
-                // new DX12InputElement
-                // (
-                //     "TEXCOORD",
-                //     DX12ResourceFormat.RG32_FLOAT,
-                //     12
-                // )
             ]
         );
         NativeWindow.DXContext.CmdList.PipelineState =
@@ -166,7 +165,7 @@ public class GameWindow : Window
 
     private void LoadShaders()
     {
-        const string shaderName = "SimpleShader";
+        const string shaderName = "TextureShader";
         const string vsEntry = "VS";
         const string psEntry = "PS";
         const string vsTarget = "vs_5_0";
@@ -257,7 +256,7 @@ public class GameWindow : Window
         ));
 
         // Загружаем данные и выделяем память в куче
-        _texture.UploadData(ConvertToAlpha(imageData.Data));
+        _texture.UploadData(imageData.Data);
         _texture.SRVHeap = CreateDescriptorHeap();
         _texture.CreateSRV();
     }
@@ -296,33 +295,33 @@ public class GameWindow : Window
             new()
             {
                 Position = new Vector3(-1.0f, 1.0f, 0.0f),
-                // UV = new Vector2(0, 0)
+                UV = new Vector2(0, 0)
             },
             new()
             {
                 Position = new Vector3(1.0f, 1.0f, 0.0f),
-                // UV = new Vector2(1, 0)
+                UV = new Vector2(1, 0)
             },
             new()
             {
                 Position = new Vector3(-1.0f, -1.0f, 0.0f),
-                // UV = new Vector2(0, 1)
+                UV = new Vector2(0, 1)
             },
 
             new()
             {
                 Position = new Vector3(1.0f, 1.0f, 0.0f),
-                // UV = new Vector2(1, 0)
+                UV = new Vector2(1, 0)
             },
             new()
             {
                 Position = new Vector3(1.0f, -1.0f, 0.0f),
-                // UV = new Vector2(1, 1)
+                UV = new Vector2(1, 1)
             },
             new()
             {
                 Position = new Vector3(-1.0f, -1.0f, 0.0f),
-                // UV = new Vector2(0, 1)
+                UV = new Vector2(0, 1)
             }
         ];
 

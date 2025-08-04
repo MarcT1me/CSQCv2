@@ -29,13 +29,13 @@
 
 // DX12
 #include "DerectX/enums.h"
+#include "DerectX/DX12Exceptions.h"
+#include "DerectX/DX12Device.h"
+#include "DerectX/DX12Helpers.h"
 #include "DerectX/Command/enums.h"
 #include "DerectX/Pipeline/enums.h"
 #include "DerectX/Resource/enums.h"
 #include "DerectX/Shader/enums.h"
-#include "DerectX/DX12Exceptions.h"
-#include "DerectX/DX12Device.h"
-#include "DerectX/DX12Helpers.h"
 #include "DerectX/DX12Object.h"
 
 #endif

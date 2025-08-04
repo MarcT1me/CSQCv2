@@ -85,8 +85,8 @@ namespace MirageAPI::DirectX
             // creating buffer himself
             auto buffer = gcnew Resource::DX12FrameBuffer(
                 renderTarget,
-                m_config->ResolutionX,
-                m_config->ResolutionY,
+                static_cast<UINT>(m_config->ResolutionX),
+                static_cast<UINT>(m_config->ResolutionY),
                 m_config->Format,
                 m_rtvHeap
             );
@@ -116,13 +116,16 @@ namespace MirageAPI::DirectX
     {
         FreeBuffers();
 
+        DXGI_SWAP_CHAIN_DESC desc;
+        m_swapChain->GetDesc(&desc);
+
         CheckHResult(
             m_swapChain->ResizeBuffers(
                 m_config->BufferCount,
-                m_config->ResolutionX,
-                m_config->ResolutionY,
-                m_config->NativeFormat,
-                m_config->Flags
+                static_cast<UINT>(m_config->ResolutionX),
+                static_cast<UINT>(m_config->ResolutionY),
+                desc.BufferDesc.Format,
+                desc.Flags
             ),
             "Swap chain resize failed"
         );

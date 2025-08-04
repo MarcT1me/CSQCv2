@@ -69,8 +69,8 @@ namespace MirageAPI::Window
         property System::IntPtr MonitorHandle { System::IntPtr get() { return System::IntPtr(CurrentMonitor); } }
         property DirectX::DX12Context^ DXContext { DirectX::DX12Context^ get() { return dxContext; } }
 
-        property DoubleRect CurrentWindowRect { DoubleRect get(); }
-        property DoubleRect CurrentMonitorRect { DoubleRect get(); }
+        property DoubleRect^ CurrentWindowRect { DoubleRect^ get(); }
+        property DoubleRect^ CurrentMonitorRect { DoubleRect^ get(); }
         property float Opacity { float get(); }
 
         property bool IsMinimized { bool get(); }

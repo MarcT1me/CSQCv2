@@ -10,13 +10,12 @@ public class TestApp : Game<TestAppData, GameWindow>
         return new TestAppData
         {
             Tps = 0,
-            WinData = new WinData(new(1600, 900), resolutionScaling: 1f)
+            WinData = new WinData(new(1600, 900))
         };
     }
 
     protected override GameWindow CreateMainWindow()
     {
-        var n = MetaData.Identifier.GetNameAnyway();
-        return new GameWindow(MetaData.WinData, MetaData.GlData, n);
+        return new GameWindow(MetaData.WinData, MetaData.GlData, MetaData.Identifier.GetNameAnyway());
     }
 }

@@ -20,6 +20,11 @@ namespace MirageAPI::DirectX
         // config
         DX12ContextConfig^ m_config;
 
+        DoubleRect^ m_winRect;
+        bool m_isResized;
+
+        void HandleResize();
+
     public:
         // constructors and deconstructors
         DX12Context(
@@ -45,13 +50,13 @@ namespace MirageAPI::DirectX
             UINT get() { return m_config->VSyncInterval; }
             void set(UINT value) { m_config->VSyncInterval = value; }
         }
-        property UINT ResolutionX
+        property int ResolutionX
         {
-            UINT get() { return m_config->ResolutionX; }
+            int get() { return m_config->ResolutionX; }
         }
-        property UINT ResolutionY
+        property int ResolutionY
         {
-            UINT get() { return m_config->ResolutionY; }
+            int get() { return m_config->ResolutionY; }
         }
         // other
         property bool IncorrectSize
@@ -60,7 +65,8 @@ namespace MirageAPI::DirectX
         }
 
         // context methods
-        void Resize(UINT width, UINT height);
+        void SetResolution(int width, int height);
+        void SetWinRect(DoubleRect^ winRect);
         void SetViewport(float x, float y, float width, float height);
         void SetViewportDepth(float x, float y);
         void BeginFrame();

@@ -21,12 +21,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Folder Include="EngineData\Assets\"/>
+        <PackageReference Include="ini-parser" Version="2.5.2"/>
+        <PackageReference Include="OpenTK.Mathematics" Version="4.9.4"/>
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="ini-parser" Version="2.5.2"/>
-        <PackageReference Include="OpenTK.Mathematics" Version="4.9.4"/>
+        <Folder Include="EngineData\Assets\"/>
     </ItemGroup>
 
     <ItemGroup>

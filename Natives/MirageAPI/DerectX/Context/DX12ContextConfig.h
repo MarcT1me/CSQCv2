@@ -87,8 +87,8 @@ namespace MirageAPI::DirectX
         SimpleRect^ Viewport;
         float Near;
         float Far;
-        UINT ResolutionX;
-        UINT ResolutionY;
+        int ResolutionX;
+        int ResolutionY;
 
         UINT BufferCount;
         DX12ResourceFormat Format;

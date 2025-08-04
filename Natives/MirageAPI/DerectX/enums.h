@@ -134,7 +134,7 @@ namespace MirageAPI::DirectX
         VideoProcessRead = D3D12_RESOURCE_STATE_VIDEO_PROCESS_READ,
         VideoProcessWrite = D3D12_RESOURCE_STATE_VIDEO_PROCESS_WRITE,
     };
-    
+
     [System::Flags]
     public enum class DX12DeviceInitFlags : unsigned int
     {

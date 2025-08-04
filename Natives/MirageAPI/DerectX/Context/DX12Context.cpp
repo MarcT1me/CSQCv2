@@ -33,19 +33,29 @@ namespace MirageAPI::DirectX
         SimpleDelete(m_commandQueue);
     }
 
-    void DX12Context::Resize(UINT width, UINT height)
+    void DX12Context::SetWinRect(DoubleRect^ winRect)
     {
-        QuantumLog(Debug, System::String::Format("Resizing to {0} x {1}", width, height));
+        m_winRect = winRect;
+    }
+
+    void DX12Context::SetResolution(int width, int height)
+    {
         m_config->ResolutionX = width;
         m_config->ResolutionY = height;
-        if (IncorrectSize) return;
+        m_isResized = true;
+    }
 
+    void DX12Context::HandleResize()
+    {
         // wait last frame
-        m_commandQueue->Wait();
-        m_fence->Wait();
+        m_commandQueue->WaitForCompletion();
+        m_commandQueue->Signal();
+        m_fence->WaitForCompletion();
+        m_fence->IncreaseValue();
 
         // update swap chain buffers
         m_swapChain->UpdateBufferSizes();
+        m_isResized = false;
     }
 
     void DX12Context::SetViewport(float x, float y, float width, float height)
@@ -66,8 +76,11 @@ namespace MirageAPI::DirectX
     {
         if (IncorrectSize) return;
 
+        if (m_isResized) HandleResize();
+
         m_commandQueue->Signal();
-        m_fence->Wait();
+        m_fence->WaitForCompletion();
+        m_fence->IncreaseValue();
 
         // prepare command list
         m_commandList->Reset();
@@ -78,16 +91,19 @@ namespace MirageAPI::DirectX
         m_commandList->SetViewport(
             m_config->Viewport->X,
             m_config->Viewport->Y,
-            m_config->Viewport->Width,
-            m_config->Viewport->Height,
+            m_config->Viewport->Width == -1
+                ? static_cast<float>(m_winRect->Width)
+                : m_config->Viewport->Width,
+            m_config->Viewport->Height == -1
+                ? static_cast<float>(m_winRect->Height)
+                : m_config->Viewport->Height,
             m_config->Near,
             m_config->Far
         );
         m_commandList->SetScissorRect(
-            static_cast<int>(m_config->Viewport->X),
-            static_cast<int>(m_config->Viewport->Y),
-            static_cast<int>(m_config->Viewport->Width),
-            static_cast<int>(m_config->Viewport->Height)
+            0, 0,
+            m_winRect->Width,
+            m_winRect->Height
         );
 
         // set frame buffer and go into render mode
@@ -114,7 +130,8 @@ namespace MirageAPI::DirectX
         m_commandList->Close();
         // and execute him
         m_commandQueue->ExecuteList(m_commandList);
-        m_commandQueue->Wait();
+        m_commandQueue->WaitForCompletion();
+        m_commandQueue->Signal();
     }
 
     void DX12Context::Present()
@@ -123,6 +140,7 @@ namespace MirageAPI::DirectX
 
         m_swapChain->Present();
 
-        m_fence->Wait();
+        m_fence->WaitForCompletion();
+        m_fence->IncreaseValue();
     }
 }
