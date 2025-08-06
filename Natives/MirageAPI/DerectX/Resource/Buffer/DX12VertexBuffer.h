@@ -9,8 +9,9 @@ namespace MirageAPI::DirectX::Resource
     public:
         DX12VertexBuffer(
             UINT elementCount,
-            UINT stride
-        ) : DX12Buffer(DX12ResourceConfig::VertexBufferConfig(elementCount, stride))
+            UINT stride,
+            DX12ResourceFlags flags
+        ) : DX12Buffer(DX12ResourceConfig::VertexBufferConfig(elementCount, stride, flags))
         {
         }
 

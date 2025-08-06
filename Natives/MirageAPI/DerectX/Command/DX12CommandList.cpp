@@ -3,7 +3,7 @@
 
 #include "../Pipeline/DX12PipelineState.h"
 #include "../DX12DescriptorHeap.h"
-#include "../Resource/Matrix/DX12FrameBuffer.h"
+#include "../Resource/Texture/DX12RenderTarget.h"
 
 namespace MirageAPI::DirectX::Command
 {
@@ -134,23 +134,23 @@ namespace MirageAPI::DirectX::Command
     }
 
     void DX12CommandList::ClearRenderTargetView(
-        Resource::DX12FrameBuffer^ frameBuffer,
+        Resource::DX12RenderTarget^ frameBuffer,
         float r, float g, float b, float a
     )
     {
         Validate();
 
         const float clearColor[] = {r, g, b, a};
-        m_commandList->ClearRenderTargetView(frameBuffer->SRVHandleForCPU, clearColor, 0, nullptr);
+        m_commandList->ClearRenderTargetView(frameBuffer->RTVHandleForCPU, clearColor, 0, nullptr);
     }
 
     // bindings
 
-    void DX12CommandList::BindBuffer(Resource::DX12FrameBuffer^ frameBuffer)
+    void DX12CommandList::BindBuffer(Resource::DX12RenderTarget^ frameBuffer)
     {
         Validate();
 
-        D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = frameBuffer->SRVHandleForCPU;
+        D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = frameBuffer->RTVHandleForCPU;
         m_commandList->OMSetRenderTargets(
             1,
             &rtvHandle,

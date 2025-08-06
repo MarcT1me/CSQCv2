@@ -17,7 +17,8 @@ public abstract class BaseScene(SceneNodeData nodeData)
     /// <param name="node">Узел для добавления</param>
     public static void AddNode<T>(SceneNode<T> node) where T : SceneNodeData
     {
-        Nodes[node.Id] = node as SceneNode<SceneNodeData>;
+        Nodes[node.Id] = node as SceneNode<SceneNodeData>
+                         ?? throw new ArgumentException("Node must be of type SceneNode<SceneNodeData>");
     }
 
     /// <summary>
@@ -45,7 +46,7 @@ public abstract class BaseScene(SceneNodeData nodeData)
     /// </summary>
     /// <param name="node">ребёнок</param>
     /// <typeparam name="T">тип данных ребёнка</typeparam>
-    public void AddChild<T>(SceneNode<T> node) where T: SceneNodeData
+    public void AddChild<T>(SceneNode<T> node) where T : SceneNodeData
     {
         MetaData.ChildrenIds.Add(node.Id);
         node.MetaData.SceneId = node.Id;

@@ -10,7 +10,7 @@ namespace MirageAPI::DirectX::Resource
     {
     protected:
         // native
-        ID3D12Resource* m_nativeResource = nullptr;
+        ID3D12Resource* m_nativeResource;
         // descriptions
         DX12ResourceState m_currentState;
         DX12ResourceType m_resourceType;

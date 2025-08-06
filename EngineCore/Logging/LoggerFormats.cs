@@ -17,9 +17,9 @@ public sealed class LoggerFormats
                           
                           "\e[36m{3}\e[0m" +
                           "\e[31m:\e[0m" +
-                          "\e[36m{4}\e[0m" +
-                          "\e[31m:\e[0m" +
-                          "\e[36m{5}\e[0m " +
+                          "\e[36m{4}\e[0m " +
+                          // "\e[31m:\e[0m" +
+                          // "\e[36m{5}\e[0m " +
                           
                           "\e[31m-\e[0m " +
                           
@@ -41,9 +41,9 @@ public sealed class LoggerFormats
                           
                           "\e[36m{3}\e[0m" +
                           "\e[31m:\e[0m" +
-                          "\e[36m{4}\e[0m" +
-                          "\e[31m:\e[0m" +
-                          "\e[36m{5}\e[0m " +
+                          "\e[36m{4}\e[0m " +
+                          // "\e[31m:\e[0m" +
+                          // "\e[36m{5}\e[0m " +
                           
                           "\e[31m-\e[0m " +
 
@@ -65,9 +65,9 @@ public sealed class LoggerFormats
                           
                           "\e[36m{3}\e[0m" +
                           "\e[31m:\e[0m" +
-                          "\e[36m{4}\e[0m" +
-                          "\e[31m:\e[0m" +
-                          "\e[36m{5}\e[0m " +
+                          "\e[36m{4}\e[0m " +
+                          // "\e[31m:\e[0m" +
+                          // "\e[36m{5}\e[0m " +
                           
                           "\e[31m-\e[0m " +
                           
@@ -89,9 +89,9 @@ public sealed class LoggerFormats
                           
                           "\e[36m{3}\e[0m" +
                           "\e[31m:\e[0m" +
-                          "\e[36m{4}\e[0m" +
-                          "\e[31m:\e[0m" +
-                          "\e[36m{5}\e[0m " +
+                          "\e[36m{4}\e[0m " +
+                          // "\e[31m:\e[0m" +
+                          // "\e[36m{5}\e[0m " +
                           
                           "\e[31m-\e[0m " +
 
@@ -113,9 +113,9 @@ public sealed class LoggerFormats
                           
                           "\e[36m{3}\e[0m" +
                           "\e[31m:\e[0m" +
-                          "\e[36m{4}\e[0m" +
-                          "\e[31m:\e[0m" +
-                          "\e[36m{5}\e[0m " +
+                          "\e[36m{4}\e[0m"  +
+                          // "\e[31m:\e[0m" +
+                          // "\e[36m{5}\e[0m " +
                           
                           "\e[31m-\e[0m " +
 
@@ -137,9 +137,9 @@ public sealed class LoggerFormats
                           
                           "\e[36m{3}\e[0m" +
                           "\e[31m:\e[0m" +
-                          "\e[36m{4}\e[0m" +
-                          "\e[31m:\e[0m" +
-                          "\e[36m{5}\e[0m " +
+                          "\e[36m{4}\e[0m " +
+                          // "\e[31m:\e[0m" +
+                          // "\e[36m{5}\e[0m " +
                           
                           "\e[31m-\e[0m " +
 

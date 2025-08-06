@@ -36,11 +36,32 @@ public class QEngineCore(Assembly? appLibAssembly) : EngineCore(appLibAssembly)
         DX12Device.Initialize(flags);
 
         AssetManager.RegisterAssetType(new AssetType("image", new ImageAssetLoader()));
+        AssetManager.RegisterAssetType(new AssetType("vertexShader", new VertexShaderAssetLoader()));
+        AssetManager.RegisterAssetType(new AssetType("pixelShader", new PixelShaderAssetLoader()));
     }
 
     protected override void EnableDebugFeatures()
     {
         Logger.Debug("Enable Debug Features");
+
+        foreach (
+            var assembly in (List<Assembly?>)
+            [
+                (Assembly?)QuantumTracer.GetScanned("AppLib", ScanTypes.Assembly),
+                (Assembly?)QuantumTracer.GetScanned("EngineCore", ScanTypes.Assembly),
+                (Assembly?)QuantumTracer.GetScanned("QuantumEngine", ScanTypes.Assembly)
+            ]
+        )
+        {
+            if (assembly == null) continue;
+            
+            var assemblyName = assembly.GetName().Name;
+            Logger.Info($"Embed Resources for {assemblyName}:");
+            foreach (var name in assembly.GetManifestResourceNames())
+            {
+                Logger.SimpleLog($"{assemblyName}:{name}");
+            }
+        }
     }
 
     [Obsolete("ENGINE ONLY USAGE")]

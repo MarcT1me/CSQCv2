@@ -15,46 +15,42 @@ namespace MirageAPI::DirectX::Command
 
 namespace MirageAPI::DirectX::Resource
 {
-    public ref class DX12FrameBuffer : public DX12Resource
+    public ref class DX12RenderTarget : public DX12Resource
     {
         // heap
-        DX12DescriptorHeap^ m_rtvHeap;
         UINT m_rtvDescriptorIndex = UINT_MAX;
 
     internal:
         // constructors and deconstructors
-        DX12FrameBuffer(
+        DX12RenderTarget(
+            DX12ResourceConfig config,
             ID3D12Resource* resource,
-            UINT width,
-            UINT height,
-            DX12ResourceFormat format,
             DX12DescriptorHeap^ rtvHeap
         );
 
     public:
-        DX12FrameBuffer(DX12ResourceConfig config);
+        DX12DescriptorHeap^ RTVHeap;
 
-        ~DX12FrameBuffer() { this->!DX12FrameBuffer(); }
-        !DX12FrameBuffer();
+        DX12RenderTarget(DX12ResourceConfig config);
+
+        ~DX12RenderTarget() { this->!DX12RenderTarget(); }
+        !DX12RenderTarget();
 
         // other properties
         property UINT DescriptorIndex
         {
             UINT get() { return m_rtvDescriptorIndex; }
         }
-        property DX12DescriptorHeap^ RTVHeap
+        property D3D12_CPU_DESCRIPTOR_HANDLE RTVHandleForCPU
         {
-            DX12DescriptorHeap^ get() { return m_rtvHeap; }
-            void set(DX12DescriptorHeap^ value) { m_rtvHeap = value; }
+            D3D12_CPU_DESCRIPTOR_HANDLE get() { return RTVHeap->IndexCPUHandle(m_rtvDescriptorIndex); }
         }
-        property D3D12_CPU_DESCRIPTOR_HANDLE SRVHandleForCPU
+        property D3D12_GPU_DESCRIPTOR_HANDLE RTVHandleForGPU
         {
-            D3D12_CPU_DESCRIPTOR_HANDLE get() { return m_rtvHeap->IndexCPUHandle(m_rtvDescriptorIndex); }
+            D3D12_GPU_DESCRIPTOR_HANDLE get() { return RTVHeap->IndexGPUHandle(m_rtvDescriptorIndex); }
         }
-        property D3D12_GPU_DESCRIPTOR_HANDLE SRVHandleForGPU
-        {
-            D3D12_GPU_DESCRIPTOR_HANDLE get() { return m_rtvHeap->IndexGPUHandle(m_rtvDescriptorIndex); }
-        }
+        property UINT RTVIndex { UINT get() { return m_rtvDescriptorIndex; } }
+        property bool HasRTV { bool get() { return m_rtvDescriptorIndex != UINT_MAX; } }
 
         // buffer operations
         virtual void TransitionState(

@@ -19,7 +19,7 @@ namespace MirageAPI::DirectX::Command
         // creating fence event
         m_fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
         if (!m_fenceEvent)
-            throw gcnew System::Exception("Failed to create fence event");
+            throw gcnew DXException("Failed to create fence event");
     }
 
     void DX12Fence::!DX12Fence()

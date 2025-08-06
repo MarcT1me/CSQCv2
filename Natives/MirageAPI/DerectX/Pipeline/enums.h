@@ -4,11 +4,11 @@ namespace MirageAPI::DirectX::Pipeline
 {
     public enum class DX12PrimitiveTopologyType
     {
-        UNDEFINED = 0,
-        POINT = 1,
-        LINE = 2,
-        TRIANGLE = 3,
-        PATCH = 4
+        Undefined = 0,
+        Point = 1,
+        Line = 2,
+        Triangle = 3,
+        Patch = 4
     };
 
     public enum class DX12BlendOptions
@@ -61,26 +61,26 @@ namespace MirageAPI::DirectX::Pipeline
     };
 
     [System::Flags]
-    public enum class DX12ColorWriteEnable : unsigned char
+    public enum class DX12ColorWriteEnable
     {
-        RED = 1,
-        GREEN = 2,
-        BLUE = 4,
-        ALPHA = 8,
-        ALL = RED | GREEN | BLUE | ALPHA
+        Red = 1,
+        Green = 2,
+        Blue = 4,
+        Alpha = 8,
+        All = Red | Green | Blue | Alpha
     };
 
     public enum class DX12FillMode
     {
-        WIREFRAME = 2,
-        SOLID = 3
+        Wireframe = 2,
+        Solid = 3
     };
 
     public enum class DX12CullMode
     {
-        NONE = 1,
-        FRONT = 2,
-        BACK = 3
+        None = 1,
+        Front = 2,
+        Back = 3
     };
 
     public enum class DX12Filter
@@ -125,35 +125,34 @@ namespace MirageAPI::DirectX::Pipeline
 
     public enum class DX12TextureAddressMode
     {
-        WRAP = 1,
-        MIRROR = 2,
-        CLAMP = 3,
-        BORDER = 4,
-        MIRROR_ONCE = 5
+        Wrap = 1,
+        Mirror = 2,
+        Clamp = 3,
+        Border = 4,
+        MirrorOnce = 5
     };
 
     public enum class DX12ComparisonFunc
     {
-        NEVER = 1,
-        LESS = 2,
-        EQUAL = 3,
-        LESS_EQUAL = 4,
-        GREATER = 5,
-        NOT_EQUAL = 6,
-        GREATER_EQUAL = 7,
-        ALWAYS = 8
+        Never = 1,
+        Less = 2,
+        Equal = 3,
+        LessEqual = 4,
+        Greater = 5,
+        NotEqual = 6,
+        GreaterEqual = 7,
+        Always = 8
     };
 
     public enum class DX12BorderColor
     {
-        TRANSPARENT_BLACK = 0,
-        OPAQUE_BLACK = TRANSPARENT_BLACK + 1,
-        OPAQUE_WHITE = OPAQUE_BLACK + 1
+        TransparentBlack = 0,
+        OpaqueBlack = 1,
+        OpaqueWhite = 2
     };
 
     public enum class DX12RootSignatureVersion
     {
-        V_1 = 0x1,
         V_1_0 = 0x1,
         V_1_1 = 0x2
     };

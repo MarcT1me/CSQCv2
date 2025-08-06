@@ -11,14 +11,36 @@ namespace MirageAPI::DirectX
             if (checkDevice && hr == DXGI_ERROR_DEVICE_REMOVED)
             {
                 throw gcnew HRException(
-                    hr, gcnew System::String(msg) + gcnew System::String(
-                        ": Device removed (" + DX12Device::GetDeviceRemovedReason() + ")"
-                    ));
+                    hr, CSFormat(
+                        "{0} (hr - {1}): Device Removed (Reason - {2})",
+                        gcnew System::String(msg), hr, DX12Device::GetDeviceRemovedReason()
+                    )
+                );
+            }
+            if (hr == E_INVALIDARG)
+            {
+                throw gcnew HRException(
+                    hr, CSFormat(
+                        "{0} (hr - {1}): Invalid Arguments",
+                        gcnew System::String(msg), hr
+                    )
+                );
+            }
+            if (hr == E_OUTOFMEMORY)
+            {
+                throw gcnew HRException(
+                    hr, CSFormat(
+                        "{0} (hr - {1}): Out of memory",
+                        gcnew System::String(msg), hr
+                    )
+                );
             }
             throw gcnew HRException(
-                hr, gcnew System::String(msg) + gcnew System::String(
-                    ": " + hr
-                ));
+                hr, CSFormat(
+                    "{0} (hr - {1})",
+                    gcnew System::String(msg), hr
+                )
+            );
         }
     }
 
@@ -78,7 +100,7 @@ namespace MirageAPI::DirectX
         // Unknown/default
         case DX12ResourceFormat::Unknown:
         default:
-            throw gcnew System::NotImplementedException("Unsupported texture format");
+            throw gcnew System::NotImplementedException("Unsupported resource format");
         }
     }
 }

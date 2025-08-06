@@ -1,100 +1,20 @@
 ﻿using System.Runtime.InteropServices;
-using Engine.Events.QuantumEvents;
 using OpenTK.Mathematics;
-using Engine.Graphic.Window;
-using Engine.Logging;
+// MirageAPI
 using MirageAPI.DirectX;
 using MirageAPI.DirectX.Shader;
 using MirageAPI.DirectX.Pipeline;
 using MirageAPI.DirectX.Resource;
-using System.Reflection;
-using System.Text;
-using Engine.Asset;
-using Engine.Asset.Defaults;
 using MirageAPI.DirectX.Command;
+// Engine
+using Engine.Asset;
+using Engine.Asset.Image;
+using Engine.Asset.Shader;
+using Engine.Graphic.Window;
+using Engine.Logging;
+using Engine.Events.QuantumEvents;
 
 namespace AppLib.Game;
-
-public static class EmbedResourceLoader
-{
-    public static string LoadEmbeddedText(string resourceName, Encoding encoding)
-    {
-        var assembly = Assembly.GetExecutingAssembly();
-        using var stream = assembly.GetManifestResourceStream(resourceName);
-        if (stream == null)
-            throw new FileNotFoundException($"Embedded shader resource not found: {resourceName}");
-
-        using var reader = new StreamReader(stream, encoding);
-        return reader.ReadToEnd();
-    }
-}
-
-// Cache generator
-#if !DEBUG
-public static class ShaderCacheManager
-{
-    private static string CacheDirectory => Path.Combine(
-        AssetLoader.AssetDirectory,
-        "Shaders"
-    );
-
-    public static unsafe DX12Shader GetCachedShader(
-        string shaderName,
-        DX12ShaderType type,
-        string entryPoint,
-        string target,
-        DX12ShaderCompileFlags flags0,
-        DX12ShaderCompileFlags flags1,
-        string? hlslSource = null)
-    {
-        Directory.CreateDirectory(Path.Combine(CacheDirectory, shaderName));
-
-        string cacheFileName = $"{shaderName}_{type}_{entryPoint}.cso";
-        string cachePath = Path.Combine(CacheDirectory, shaderName, cacheFileName);
-
-        if (File.Exists(cachePath))
-        {
-            return DX12Shader.LoadFromFile(cachePath, type);
-        }
-
-        DX12Shader shader;
-        if (hlslSource != null)
-        {
-            shader = DX12ShaderCompiler.CompileShaderFromSource(
-                hlslSource,
-                type,
-                entryPoint,
-                target,
-                flags0,
-                flags1,
-                null
-            );
-        }
-        else
-        {
-            string shaderPath = Path.Combine(
-                AssetLoader.AssetDirectory,
-                "Shaders",
-                $"{shaderName}.hlsl"
-            );
-
-            shader = DX12ShaderCompiler.CompileShaderFromFile(
-                shaderPath,
-                type,
-                entryPoint,
-                target,
-                flags0,
-                flags1,
-                null
-            );
-        }
-
-        // Сохраняем в кеш
-        shader.SaveToFile(cachePath);
-        return shader;
-    }
-}
-#endif
 
 [StructLayout(LayoutKind.Sequential)]
 struct Vertex
@@ -112,30 +32,49 @@ public class GameWindow : Window
     private int _vertexCount;
 
     private DX12DescriptorHeap? _descriptorHeap;
-    private AssetData? _img;
     private DX12Texture? _texture;
 
     public GameWindow(WinData winData, GlData? glData = null, string? name = null)
         : base(winData, glData, name)
     {
+        LoadShaders();
         CreatePipelineState();
         LoadImage();
         CreateGeometryBuffers();
     }
 
+    private void LoadShaders()
+    {
+        Logger.Debug("Compiling shaders...");
+
+        var vertShader = (ShaderData)AssetManager.Load(
+            new(
+                "vertexShader", "AppLib:Shaders/TextureShader.hlsl",
+                isEmbedded: true, identifier: "TextureShader-Vert"
+            )
+        ).Content;
+        _vertexShader = vertShader.GetNativeShader;
+
+        var pixShader = (ShaderData)AssetManager.Load(
+            new(
+                "pixelShader", "AppLib:Shaders/TextureShader.hlsl", 
+                isEmbedded: true, identifier: "TextureShader-Pix"
+            )
+        ).Content;
+        _pixelShader = pixShader.GetNativeShader;
+    }
+
     private void CreatePipelineState()
     {
-        LoadShaders();
-
         Logger.Debug("Creating pipeline...");
 
         // Создание конфигураций
         var config = new DX12PipelineStateConfig(
             [
-            new DX12RootParameter(
-                DX12ResourceType.Texture,
-                DX12ShaderVisibility.Pixel
-            )
+                new DX12RootParameter(
+                    DX12ResourceType.Texture,
+                    DX12ShaderVisibility.Pixel
+                )
             ],
             [
                 new DX12SamplerConfig(
@@ -163,118 +102,22 @@ public class GameWindow : Window
             _pipelineState = new DX12PipelineState(_vertexShader, _pixelShader, config);
     }
 
-    private void LoadShaders()
-    {
-        const string shaderName = "TextureShader";
-        const string vsEntry = "VS";
-        const string psEntry = "PS";
-        const string vsTarget = "vs_5_0";
-        const string psTarget = "ps_5_0";
-
-        Logger.Debug("Compiling shaders...");
-
-#if DEBUG
-        // Загружаем текстуру в дебаг-режиме (без кеширования)
-        var shaderFlags = DX12ShaderCompileFlags.Debug | DX12ShaderCompileFlags.SkipOptimization;
-
-        string hlslSource = EmbedResourceLoader.LoadEmbeddedText(
-            $"AppLib.Assets.Shaders.{shaderName}",
-            Encoding.UTF8
-        );
-
-        unsafe
-        {
-            _vertexShader = DX12ShaderCompiler.CompileShaderFromSource(
-                hlslSource,
-                DX12ShaderType.Vertex,
-                vsEntry,
-                vsTarget,
-                shaderFlags,
-                DX12ShaderCompileFlags.None,
-                null
-            );
-
-            _pixelShader = DX12ShaderCompiler.CompileShaderFromSource(
-                hlslSource,
-                DX12ShaderType.Pixel,
-                psEntry,
-                psTarget,
-                shaderFlags,
-                DX12ShaderCompileFlags.None,
-                null
-            );
-        }
-#else
-        // Загрузка шейдеров в релизе (предварительное кеширование для первого раза, потом просто использование)
-        var shaderFlags = DX12ShaderCompileFlags.OptimizationLevel3;
-
-        string hlslSource = EmbedResourceLoader.LoadEmbeddedText(
-            $"AppLib.Assets.Shaders.{shaderName}",
-            Encoding.UTF8
-        );
-
-        _vertexShader = ShaderCacheManager.GetCachedShader(
-            shaderName,
-            DX12ShaderType.Vertex,
-            vsEntry,
-            vsTarget,
-            shaderFlags,
-            DX12ShaderCompileFlags.None,
-            hlslSource
-        );
-
-        _pixelShader = ShaderCacheManager.GetCachedShader(
-            shaderName,
-            DX12ShaderType.Pixel,
-            psEntry,
-            psTarget,
-            shaderFlags,
-            DX12ShaderCompileFlags.None,
-            hlslSource
-        );
-#endif
-    }
-
     private void LoadImage()
     {
         Logger.Debug("Loading image...");
 
         // Загружаем ассет текстуры
-        _img = AssetManager.Load(new("image", "IMG.png"));
-        ImageData imageData = (ImageData)_img.Content;
+        Image img = (Image)AssetManager.Load(
+            new(
+                "image", "AppLib:IMG.png",
+                isEmbedded: true, identifier: "IMG-Image"
+                )
+        ).Content;
 
         // Создаём текстуру
-        _texture = new DX12Texture(DX12ResourceConfig.TextureConfig(
-            (uint)imageData.Size.X,
-            (uint)imageData.Size.Y,
-            DX12ResourceFormat.RGBA8_UNORM,
-            DX12ResourceFlags.None,
-            1,
-            1,
-            DX12TextureType.Texture2D,
-            DX12ViewDimension.Texture2D
-        ));
-
-        // Загружаем данные и выделяем память в куче
-        _texture.UploadData(imageData.Data);
+        _texture = img.GetNativeTexture();
         _texture.SRVHeap = CreateDescriptorHeap();
         _texture.CreateSRV();
-    }
-
-    private byte[] ConvertToAlpha(byte[] rgbData)
-    {
-        int newSize = rgbData.Length / 3 * 4;
-        byte[] rgbaData = new byte[newSize];
-
-        for (int i = 0, j = 0; i < rgbData.Length; i += 3, j += 4)
-        {
-            rgbaData[j] = rgbData[i];
-            rgbaData[j + 1] = rgbData[i + 1];
-            rgbaData[j + 2] = rgbData[i + 2];
-            rgbaData[j + 3] = 255;
-        }
-
-        return rgbaData;
     }
 
     private DX12DescriptorHeap CreateDescriptorHeap()
@@ -329,7 +172,7 @@ public class GameWindow : Window
         int vertexSize = Marshal.SizeOf<Vertex>();
         _vertexCount = vertices.Length;
 
-        _vertexBuffer = new DX12VertexBuffer((uint)_vertexCount, (uint)vertexSize);
+        _vertexBuffer = new DX12VertexBuffer((uint)_vertexCount, (uint)vertexSize, DX12ResourceFlags.None);
 
         try
         {
@@ -349,13 +192,6 @@ public class GameWindow : Window
             _vertexBuffer.Dispose();
             throw;
         }
-    }
-
-    public override void Prepare()
-    {
-        Logger.Debug("Preparing window...");
-
-        base.Prepare();
     }
 
     public override void HandleEvent(QuantumEvent e)

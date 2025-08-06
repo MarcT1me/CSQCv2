@@ -21,7 +21,7 @@ namespace MirageAPI::DirectX::Pipeline
         }
 
     internal:
-        D3D12_ROOT_PARAMETER GenerateNativeDesc(System::Collections::Generic::List<System::IntPtr>^ rangesList)
+        D3D12_ROOT_PARAMETER GenerateNativeDesc(CSList<System::IntPtr>^ rangesList)
         {
             D3D12_ROOT_PARAMETER param;
             param.ParameterType = static_cast<D3D12_ROOT_PARAMETER_TYPE>(Type);
@@ -67,13 +67,13 @@ namespace MirageAPI::DirectX::Pipeline
         Shader::DX12ShaderVisibility ShaderVisibility;
 
         DX12Filter Filter = DX12Filter::MIN_MAG_MIP_LINEAR;
-        DX12TextureAddressMode AddressU = DX12TextureAddressMode::WRAP;
-        DX12TextureAddressMode AddressV = DX12TextureAddressMode::WRAP;
-        DX12TextureAddressMode AddressW = DX12TextureAddressMode::WRAP;
+        DX12TextureAddressMode AddressU = DX12TextureAddressMode::Wrap;
+        DX12TextureAddressMode AddressV = DX12TextureAddressMode::Wrap;
+        DX12TextureAddressMode AddressW = DX12TextureAddressMode::Wrap;
         float MipLODBias = 0;
         UINT MaxAnisotropy = 16;
-        DX12ComparisonFunc ComparisonFunc = DX12ComparisonFunc::ALWAYS;
-        DX12BorderColor BorderColor = DX12BorderColor::TRANSPARENT_BLACK;
+        DX12ComparisonFunc ComparisonFunc = DX12ComparisonFunc::Always;
+        DX12BorderColor BorderColor = DX12BorderColor::TransparentBlack;
         float MinLOD = 0;
         float MaxLOD = D3D12_FLOAT32_MAX;
         UINT Size = 0u;
@@ -111,8 +111,8 @@ namespace MirageAPI::DirectX::Pipeline
 
     public ref struct DX12RasterizerConfig
     {
-        DX12FillMode FillMode = DX12FillMode::SOLID;
-        DX12CullMode CullMode = DX12CullMode::BACK;
+        DX12FillMode FillMode = DX12FillMode::Solid;
+        DX12CullMode CullMode = DX12CullMode::Back;
 
         bool FrontCounterClockwise = false;
 
@@ -171,7 +171,7 @@ namespace MirageAPI::DirectX::Pipeline
         bool LogicOpEnable;
         DX12LogicOperators LogicOp = DX12LogicOperators::NOOP;
 
-        DX12ColorWriteEnable RenderTargetWriteMask = DX12ColorWriteEnable::ALL;
+        DX12ColorWriteEnable RenderTargetWriteMask = DX12ColorWriteEnable::All;
 
         DX12BlendConfig(
             bool blendEnable,
@@ -239,20 +239,20 @@ namespace MirageAPI::DirectX::Pipeline
         // root signature
         array<DX12RootParameter^>^ RootParams;
         array<DX12SamplerConfig^>^ SamplerConfigs;
-        DX12RootSignatureVersion RootSignatureVersion = DX12RootSignatureVersion::V_1;
+        DX12RootSignatureVersion RootSignatureVersion = DX12RootSignatureVersion::V_1_0;
         // pso
         DX12RasterizerConfig^ RasterizerState;
         DX12BlendConfig^ BlendState;
         array<DX12InputElement^>^ InputLayouts;
         // dss
         bool DepthWriteEnable = false;
-        DX12ComparisonFunc DepthFunc = DX12ComparisonFunc::LESS;
+        DX12ComparisonFunc DepthFunc = DX12ComparisonFunc::Less;
         bool DepthStencilEnable = false;
         bool StencilEnable = false;
         // other
         UINT SampleMask = UINT_MAX;
         DX12ResourceFormat DSVFormat = DX12ResourceFormat::Unknown;
-        DX12PrimitiveTopologyType PrimitiveTopologyType = DX12PrimitiveTopologyType::TRIANGLE;
+        DX12PrimitiveTopologyType PrimitiveTopologyType = DX12PrimitiveTopologyType::Triangle;
 
         DX12PipelineStateConfig(
             // root signature

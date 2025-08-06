@@ -9,7 +9,7 @@ namespace MirageAPI::DirectX
     ) : m_config(config)
     {
         m_commandQueue = gcnew Command::DX12CommandQueue(DX12CommandListType::Direct);
-        m_swapChain = gcnew DX12SwapChain(hwnd, m_commandQueue, config);
+        m_swapChain = gcnew DX12SwapChain(hwnd, config, m_commandQueue);
         m_commandQueue->Fence = m_fence = gcnew Command::DX12Fence(1);
         m_commandList = gcnew Command::DX12CommandList(DX12CommandListType::Direct);
     }
@@ -48,10 +48,8 @@ namespace MirageAPI::DirectX
     void DX12Context::HandleResize()
     {
         // wait last frame
-        m_commandQueue->WaitForCompletion();
-        m_commandQueue->Signal();
-        m_fence->WaitForCompletion();
-        m_fence->IncreaseValue();
+        m_commandQueue->Wait();
+        m_fence->Wait();
 
         // update swap chain buffers
         m_swapChain->UpdateBufferSizes();
@@ -79,8 +77,6 @@ namespace MirageAPI::DirectX
         if (m_isResized) HandleResize();
 
         m_commandQueue->Signal();
-        m_fence->WaitForCompletion();
-        m_fence->IncreaseValue();
 
         // prepare command list
         m_commandList->Reset();
@@ -130,8 +126,7 @@ namespace MirageAPI::DirectX
         m_commandList->Close();
         // and execute him
         m_commandQueue->ExecuteList(m_commandList);
-        m_commandQueue->WaitForCompletion();
-        m_commandQueue->Signal();
+        m_commandQueue->Wait();
     }
 
     void DX12Context::Present()
@@ -140,7 +135,6 @@ namespace MirageAPI::DirectX
 
         m_swapChain->Present();
 
-        m_fence->WaitForCompletion();
-        m_fence->IncreaseValue();
+        m_fence->Wait();
     }
 }

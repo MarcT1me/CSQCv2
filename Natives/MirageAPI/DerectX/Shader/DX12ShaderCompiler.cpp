@@ -9,7 +9,7 @@ namespace MirageAPI::DirectX::Shader
     DX12Shader^ DX12ShaderCompiler::CompileShaderFromFile(
         const wchar_t* filename,
         DX12ShaderType shaderType,
-        const char* entryPoint,
+        const char* entry,
         const char* target,
         DX12ShaderCompileFlags compileFlags0,
         DX12ShaderCompileFlags compileFlags1,
@@ -23,7 +23,7 @@ namespace MirageAPI::DirectX::Shader
             filename,
             defines,
             D3D_COMPILE_STANDARD_FILE_INCLUDE,
-            entryPoint,
+            entry,
             target,
             static_cast<UINT>(compileFlags0),
             static_cast<UINT>(compileFlags1),
@@ -38,12 +38,12 @@ namespace MirageAPI::DirectX::Shader
                 const char* errorMsg = static_cast<const char*>(errors->GetBufferPointer());
                 System::String^ managedError = gcnew System::String(errorMsg);
                 errors->Release();
-                throw gcnew System::Exception("Failed to compile shader: " + managedError);
+                throw gcnew DXException("Failed to compile shader: " + managedError);
             }
             _com_error err(hr);
             LPCTSTR errMsg = err.ErrorMessage();
             System::String^ managedError = gcnew System::String(errMsg);
-            throw gcnew System::Exception("Failed to compile shader: " + managedError);
+            throw gcnew DXException("Failed to compile shader: " + managedError);
         }
 
         return gcnew DX12Shader(bytecode, shaderType);
@@ -52,7 +52,7 @@ namespace MirageAPI::DirectX::Shader
     DX12Shader^ DX12ShaderCompiler::CompileShaderFromSource(
         const std::string& source,
         DX12ShaderType shaderType,
-        const char* entryPoint,
+        const char* entry,
         const char* target,
         DX12ShaderCompileFlags compileFlags0,
         DX12ShaderCompileFlags compileFlags1,
@@ -68,7 +68,7 @@ namespace MirageAPI::DirectX::Shader
             nullptr,
             defines,
             D3D_COMPILE_STANDARD_FILE_INCLUDE,
-            entryPoint,
+            entry,
             target,
             static_cast<UINT>(compileFlags0),
             static_cast<UINT>(compileFlags1),
@@ -83,12 +83,12 @@ namespace MirageAPI::DirectX::Shader
                 const char* errorMsg = static_cast<const char*>(errors->GetBufferPointer());
                 System::String^ managedError = gcnew System::String(errorMsg);
                 errors->Release();
-                throw gcnew System::Exception("Failed to compile shader: " + managedError);
+                throw gcnew DXException("Failed to compile shader: " + managedError);
             }
             _com_error err(hr);
             LPCTSTR errMsg = err.ErrorMessage();
             System::String^ managedError = gcnew System::String(errMsg);
-            throw gcnew System::Exception("Failed to compile shader: " + managedError);
+            throw gcnew DXException("Failed to compile shader: " + managedError);
         }
 
         return gcnew DX12Shader(bytecode, shaderType);

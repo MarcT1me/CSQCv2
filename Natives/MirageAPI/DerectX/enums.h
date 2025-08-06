@@ -4,46 +4,46 @@ namespace MirageAPI::DirectX
 {
     public enum class DX12HeapType
     {
-        Custom = D3D12_HEAP_TYPE_CUSTOM,
-        Default = D3D12_HEAP_TYPE_DEFAULT,
-        Readback = D3D12_HEAP_TYPE_READBACK,
-        Upload = D3D12_HEAP_TYPE_UPLOAD,
+        Default = 1,
+        Upload = 2,
+        Custom = 4,
+        Readback = 3
     };
 
     public enum class DX12CommandListType
     {
-        Bundle = D3D12_COMMAND_LIST_TYPE_BUNDLE,
-        Compute = D3D12_COMMAND_LIST_TYPE_COMPUTE,
-        Copy = D3D12_COMMAND_LIST_TYPE_COPY,
-        Direct = D3D12_COMMAND_LIST_TYPE_DIRECT,
+        Direct = 0,
+        Bundle = 1,
+        Compute = 2,
+        Copy = 3,
 
-        VideoDecode = D3D12_COMMAND_LIST_TYPE_VIDEO_DECODE,
-        VideoEncode = D3D12_COMMAND_LIST_TYPE_VIDEO_ENCODE,
-        VideoProcess = D3D12_COMMAND_LIST_TYPE_VIDEO_PROCESS,
+        VideoDecode = 4,
+        VideoProcess = 5,
+        VideoEncode = 6
     };
 
     public enum class DX12DescriptorHeapType
     {
-        CBV_SRV_UAV,
-        Sampler,
-        RTV,
-        DSV
+        CBV_SRV_UAV = 0,
+        Sampler = 1,
+        RTV = 2,
+        DSV = 3
     };
 
-    public enum class DX12ResourceType
+    public enum class DX12ResourceType : UINT8
     {
-        Constants = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS,
-        
+        Texture = 0,
+        RenderTarget = 0,
+
+        Constants = 1,
+
         Buffer,
-        ConstantBuffer = D3D12_ROOT_PARAMETER_TYPE_CBV,
-        StructuredBuffer = D3D12_ROOT_PARAMETER_TYPE_SRV,
+        ConstantBuffer = 2,
+        StructuredBuffer = 3,
         ReadbackBuffer,
         UploadBuffer,
         VertexBuffer,
         IndexBuffer,
-
-        Texture = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE,
-        FrameBuffer = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE,
     };
 
     public enum class DX12ResourceFormat
@@ -96,52 +96,53 @@ namespace MirageAPI::DirectX
 
     public enum class DX12ResourceState
     {
-        Common = D3D12_RESOURCE_STATE_COMMON,
+        Common = 0,
+        VertexAndConstantBuffer = 0x1,
+        IndexBuffer = 0x2,
+        RenderTarget = 0x4,
+        UnorderedAccess = 0x8,
 
-        CopyDest = D3D12_RESOURCE_STATE_COPY_DEST,
-        CopySource = D3D12_RESOURCE_STATE_COPY_SOURCE,
+        DepthWrite = 0x10,
+        DepthRead = 0x20,
 
-        DepthRead = D3D12_RESOURCE_STATE_DEPTH_READ,
-        DepthWrite = D3D12_RESOURCE_STATE_DEPTH_WRITE,
+        NonPixelShaderResource = 0x40,
+        PixelShaderResource = 0x80,
+        AllShaderResource = NonPixelShaderResource | PixelShaderResource,
 
-        GenericRead = D3D12_RESOURCE_STATE_GENERIC_READ,
-        IndirectArgument = D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT,
+        StreamOut = 0x100,
+        IndirectArgument = 0x200,
+        CopyDest = 0x400,
+        CopySource = 0x800,
+        ResolveDest = 0x1000,
+        ResolveSource = 0x2000,
+        RaytracingStructure = 0x400000,
+        ShadingRateSource = 0x1000000,
+        GenericRead = VertexAndConstantBuffer
+        | IndexBuffer
+        | AllShaderResource
+        | IndirectArgument
+        | CopySource,
 
-        IndexBuffer = D3D12_RESOURCE_STATE_INDEX_BUFFER,
-        VertexAndConstantBuffer = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER,
+        Present = 0,
+        Predication = 0x200,
 
-        AllShaderResources = D3D12_RESOURCE_STATE_ALL_SHADER_RESOURCE,
-        PixelShaderRes = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
-        NonPixelShaderRes = D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,
+        VideoDecodeRead = 0x10000,
+        VideoDecodeWrite = 0x20000,
 
-        Predication = D3D12_RESOURCE_STATE_PREDICATION,
-        Present = D3D12_RESOURCE_STATE_PRESENT,
+        VideoProcessRead = 0x40000,
+        VideoProcessWrite = 0x80000,
 
-        RayTracingAccelerationStructure = D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE,
-        RenderTarget = D3D12_RESOURCE_STATE_RENDER_TARGET,
-
-        ResolveDest = D3D12_RESOURCE_STATE_RESOLVE_DEST,
-        ResolveSource = D3D12_RESOURCE_STATE_RESOLVE_SOURCE,
-
-        ShadingRateSource = D3D12_RESOURCE_STATE_SHADING_RATE_SOURCE,
-        StreamOut = D3D12_RESOURCE_STATE_STREAM_OUT,
-        UnorderedAccess = D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
-
-        VideoDecodeRead = D3D12_RESOURCE_STATE_VIDEO_DECODE_READ,
-        VideoDecodeWrite = D3D12_RESOURCE_STATE_VIDEO_DECODE_WRITE,
-        VideoEncodeRead = D3D12_RESOURCE_STATE_VIDEO_ENCODE_READ,
-        VideoEncodeWrite = D3D12_RESOURCE_STATE_VIDEO_ENCODE_WRITE,
-        VideoProcessRead = D3D12_RESOURCE_STATE_VIDEO_PROCESS_READ,
-        VideoProcessWrite = D3D12_RESOURCE_STATE_VIDEO_PROCESS_WRITE,
+        VideoEncodeRead = 0x200000,
+        VideoEncodeWrite = 0x800000,
     };
 
     [System::Flags]
-    public enum class DX12DeviceInitFlags : unsigned int
+    public enum class DX12DeviceInitFlags
     {
         None = 0,
         Debug = 1,
         UseAdapter = 2,
-        UseWarpAdapter = 4,
-        UseHighPerformanceAdapter = 8
+        UseWarpAdapter = UseAdapter | 4,
+        UseHighPerformanceAdapter = UseAdapter | 8
     };
 }

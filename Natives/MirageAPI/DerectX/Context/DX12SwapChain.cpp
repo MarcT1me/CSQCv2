@@ -3,14 +3,14 @@
 
 #include "../DX12DescriptorHeap.h"
 #include "../Command/DX12CommandQueue.h"
-#include "../Resource/Matrix/DX12FrameBuffer.h"
+#include "../Resource/Texture/DX12RenderTarget.h"
 
 namespace MirageAPI::DirectX
 {
     DX12SwapChain::DX12SwapChain(
         HWND hwnd,
-        Command::DX12CommandQueue^ commandQueue,
-        DX12ContextConfig^ config
+        DX12ContextConfig^ config,
+        Command::DX12CommandQueue^ commandQueue
     ) : m_config(config)
     {
         // needed in swap chain initializations
@@ -70,7 +70,7 @@ namespace MirageAPI::DirectX
         );
 
         // creating frame buffer array
-        m_frameBuffers = gcnew array<Resource::DX12FrameBuffer^>(m_config->BufferCount);
+        m_frameBuffers = gcnew array<Resource::DX12RenderTarget^>(m_config->BufferCount);
 
         // and buffers
         for (UINT i = 0; i < m_config->BufferCount; i++)
@@ -83,12 +83,14 @@ namespace MirageAPI::DirectX
             );
 
             // creating buffer himself
-            auto buffer = gcnew Resource::DX12FrameBuffer(
-                renderTarget,
-                static_cast<UINT>(m_config->ResolutionX),
-                static_cast<UINT>(m_config->ResolutionY),
-                m_config->Format,
-                m_rtvHeap
+            auto buffer = gcnew Resource::DX12RenderTarget(
+                Resource::DX12ResourceConfig::RenderTargetConfig(
+                    static_cast<UINT>(m_config->ResolutionX),
+                    static_cast<UINT>(m_config->ResolutionY),
+                    m_config->Format,
+                    Resource::DX12ResourceFlags::None
+                ),
+                renderTarget,  m_rtvHeap
             );
             // render target view for buffer
             buffer->CreateRTV();
@@ -140,7 +142,7 @@ namespace MirageAPI::DirectX
         m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
     }
 
-    Resource::DX12FrameBuffer^ DX12SwapChain::AcquireNextBackBuffer(Command::DX12CommandList^ commandList)
+    Resource::DX12RenderTarget^ DX12SwapChain::AcquireNextBackBuffer(Command::DX12CommandList^ commandList)
     {
         m_currentFrameBuffer =
             m_frameBuffers != nullptr && m_frameIndex < static_cast<UINT>(m_frameBuffers->Length)

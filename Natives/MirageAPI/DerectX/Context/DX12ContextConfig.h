@@ -4,17 +4,17 @@ namespace MirageAPI::DirectX
 {
     public enum class DX12FullscreenScaling
     {
-        Unspecified = DXGI_MODE_SCALING_UNSPECIFIED,
-        Centered = DXGI_MODE_SCALING_CENTERED,
-        Stretch = DXGI_MODE_SCALING_STRETCHED,
+        Unspecified = 0,
+        Centered = 1,
+        Stretched = 2
     };
 
     public enum class DX12FullscreenScanlineOrder
     {
-        Unspecified = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED,
-        Progressive = DXGI_MODE_SCANLINE_ORDER_PROGRESSIVE,
-        UpperFieldFirst = DXGI_MODE_SCANLINE_ORDER_UPPER_FIELD_FIRST,
-        LowerFieldFirst = DXGI_MODE_SCANLINE_ORDER_LOWER_FIELD_FIRST,
+        Unspecified = 0,
+        Progressive = 1,
+        UpperFieldFirst = 2,
+        LowerFieldFirst = 3
     };
 
     public ref struct DX12FullscreenMode
@@ -76,10 +76,10 @@ namespace MirageAPI::DirectX
 
     public enum class DX12SwapEffect
     {
-        Discard = DXGI_SWAP_EFFECT_DISCARD,
-        FlipDiscard = DXGI_SWAP_EFFECT_FLIP_DISCARD,
-        FlipSequential = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL,
-        Sequential = DXGI_SWAP_EFFECT_SEQUENTIAL,
+        Discard = 0,
+        Sequential = 1,
+        FlipSequential = 3,
+        FlipDiscard = 4
     };
 
     public ref struct DX12ContextConfig

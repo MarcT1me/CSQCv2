@@ -15,40 +15,23 @@ namespace MirageAPI::DirectX
         heapDesc.Flags = shaderVisible ? D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE : D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 
         ID3D12DescriptorHeap* heap;
-        HRESULT hr = device->CreateDescriptorHeap(
-            &heapDesc,
-            IID_PPV_ARGS(&heap)
+        CheckHResult(
+            device->CreateDescriptorHeap(
+                &heapDesc,
+                IID_PPV_ARGS(&heap)
+            ),
+            "CreateDescriptorHeap failed"
         );
-
-        if (FAILED(hr))
-        {
-            System::String^ errorMsg;
-            if (hr == E_OUTOFMEMORY)
-                errorMsg = "Out of memory while creating descriptor heap";
-            else if (hr == E_INVALIDARG)
-                errorMsg = "Invalid arguments for descriptor heap creation";
-            else
-                errorMsg = "Failed to create descriptor heap, HRESULT: " + hr;
-
-            throw gcnew System::Exception(errorMsg);
-        }
-
-        if (heap == nullptr)
-        {
-            throw gcnew System::NullReferenceException(
-                "Descriptor heap creation returned null pointer"
-            );
-        }
         m_heap = heap;
 
         m_descriptorSize = device->GetDescriptorHandleIncrementSize(
             static_cast<D3D12_DESCRIPTOR_HEAP_TYPE>(type)
         );
 
-        if (m_descriptorSize == 0)
+        CheckNull(m_descriptorSize)
         {
             SimpleRelease(m_heap);
-            throw gcnew System::Exception("Invalid descriptor size (0)");
+            throw gcnew DXException("Invalid descriptor size (0)");
         }
     }
 
@@ -72,9 +55,12 @@ namespace MirageAPI::DirectX
 
         if (m_nextFreeIndex >= m_capacity)
         {
-            throw gcnew System::InvalidOperationException(
-                "Descriptor heap overflow. " +
-                "Capacity: " + m_capacity + ", NextIndex: " + m_nextFreeIndex);
+            throw gcnew DXException(
+                CSFormat(
+                    "Descriptor heap overflow. Capacity: {0}, Index: {1}",
+                    m_capacity, m_nextFreeIndex
+                )
+            );
         }
 
         return m_nextFreeIndex++;
@@ -114,18 +100,24 @@ namespace MirageAPI::DirectX
     {
         ThrowIfNull(
             m_heap,
-            "Descriptor heap is not initialized: " +
-            "Capacity: " + m_capacity + ", DescriptorSize: " + m_descriptorSize
+            CSFormat(
+                "Descriptor heap is not initialized. Capacity: {0}, DescriptorSize: {1}",
+                m_capacity, m_descriptorSize
+            )
         );
         ThrowIfNull(
             m_descriptorSize,
-            "Invalid descriptor size: " +
-            "Capacity: " + m_capacity + ", DescriptorSize: " + m_descriptorSize
+            CSFormat(
+                "Invalid descriptor size. Capacity: {0}, DescriptorSize: {1}",
+                m_capacity, m_descriptorSize
+            )
         );
         ThrowIfNull(
             m_capacity,
-            "Invalid heap capacity: " +
-            "Capacity: " + m_capacity + ", DescriptorSize: " + m_descriptorSize
+            CSFormat(
+                "Invalid heap capacity. Capacity: {0}, DescriptorSize: {1}",
+                m_capacity, m_descriptorSize
+            )
         );
     }
 }

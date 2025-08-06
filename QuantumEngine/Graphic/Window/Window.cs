@@ -267,7 +267,8 @@ public class Window
 
         NativeWindow.Dispose();
 
-        Logger.Info($"Window '{Id}' disposed");
+        Logger.Separator();
+        Logger.Success($"Window '{Id}' disposed");
         GC.SuppressFinalize(this);
     }
 

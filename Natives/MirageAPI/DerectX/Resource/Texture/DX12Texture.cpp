@@ -1,7 +1,7 @@
 ﻿#include "pch.h"
 #include "DX12Texture.h"
 
-#include "../Array/DX12UploadBuffer.h"
+#include "../Buffer/DX12UploadBuffer.h"
 #include "../../Command/DX12CommandQueue.h"
 #include "../../Command/DX12CommandList.h"
 
@@ -226,7 +226,7 @@ namespace MirageAPI::DirectX::Resource
         // check data sizes
         if (data->Length != m_size)
         {
-            throw gcnew System::Exception(
+            throw gcnew DXException(
                 "Texture data size mismatch. Required: " + m_size + ", Actual: " + data->Length
             );
         }
@@ -293,11 +293,10 @@ namespace MirageAPI::DirectX::Resource
         fence->IncreaseValue();
 
         // checking device errors
-        HRESULT hr = device->GetDeviceRemovedReason();
-        if (FAILED(hr))
-        {
-            throw gcnew System::Exception("Device removed after texture upload: " + hr);
-        }
+        CheckHResult(
+            device->GetDeviceRemovedReason(),
+            "Device removed after texture upload"
+        );
 
         // free used resources
         delete commandList;
@@ -317,7 +316,7 @@ namespace MirageAPI::DirectX::Resource
 
     void DX12Texture::CreateSRV()
     {
-        if (m_srvDescriptorIndex != UINT_MAX) return;
+        CheckMissmatch(m_srvDescriptorIndex, UINT_MAX) return;
 
         m_srvDescriptorIndex = m_srvHeap->Allocate();
 
@@ -325,13 +324,13 @@ namespace MirageAPI::DirectX::Resource
         device->CreateShaderResourceView(
             m_nativeResource,
             &desc,
-            m_srvHeap->IndexCPUHandle(m_srvDescriptorIndex)
+            SRVHandleForCPU
         );
     }
 
     void DX12Texture::ReleaseSRV()
     {
-        if (m_srvDescriptorIndex == UINT_MAX || !m_srvHeap) return;
+        CheckMissmatch(m_srvDescriptorIndex, UINT_MAX) return;
 
         m_srvHeap->Free(m_srvDescriptorIndex);
         m_srvDescriptorIndex = UINT_MAX;

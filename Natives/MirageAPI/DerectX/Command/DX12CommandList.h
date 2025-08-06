@@ -2,10 +2,10 @@
 
 // Mirage ecosystem
 #include "enums.h"
-#include "../Resource/Array/DX12IndexBuffer.h"
-#include "../Resource/Array/DX12VertexBuffer.h"
-#include "../Resource/Array/DX12ConstantBuffer.h"
-#include "../Resource/Array/DX12StructuredBuffer.h"
+#include "../Resource/Buffer/DX12IndexBuffer.h"
+#include "../Resource/Buffer/DX12VertexBuffer.h"
+#include "../Resource/Buffer/DX12ConstantBuffer.h"
+#include "../Resource/Buffer/DX12StructuredBuffer.h"
 
 namespace MirageAPI::DirectX
 {
@@ -19,7 +19,7 @@ namespace MirageAPI::DirectX::Pipeline
 
 namespace MirageAPI::DirectX::Resource
 {
-    ref class DX12FrameBuffer;
+    ref class DX12RenderTarget;
     ref class DX12Texture;
 }
 
@@ -103,12 +103,12 @@ namespace MirageAPI::DirectX::Command
             UINT startInstance
         );
         void ClearRenderTargetView(
-            Resource::DX12FrameBuffer^ frameBuffer,
+            Resource::DX12RenderTarget^ frameBuffer,
             float r, float g, float b, float a
         );
 
         // bindings
-        void BindBuffer(Resource::DX12FrameBuffer^ frameBuffer);
+        void BindBuffer(Resource::DX12RenderTarget^ frameBuffer);
         void BindBuffer(Resource::DX12IndexBuffer^ indexBuffer);
         void BindBuffer(Resource::DX12VertexBuffer^ vertexBuffer);
 

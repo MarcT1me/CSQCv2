@@ -8,8 +8,9 @@ namespace MirageAPI::DirectX::Resource
     {
     public:
         DX12ConstantBuffer(
-            UINT size
-        ) : DX12Buffer(DX12ResourceConfig::ConstantBufferConfig(size, DX12ResourceFlags::None))
+            UINT size,
+            DX12ResourceFlags flags
+        ) : DX12Buffer(DX12ResourceConfig::ConstantBufferConfig(size, flags))
         {
         }
     };

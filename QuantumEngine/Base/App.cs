@@ -77,6 +77,7 @@ public abstract class App<TData>
 
         Logger.Separator();
         Logger.Info("App Run started");
+        Logger.Separator();
 
         bool IsActive() => ObjectStatus.HasFlag(ObjectStatusFlags.Active);
 
@@ -160,6 +161,7 @@ public abstract class App<TData>
         // QuantumEventHandler.EventHandling -= HandleEvent;
         ExitHandling -= OnExitHandling;
 
+        Logger.Separator();
         Logger.Info("App disposed");
         Logger.Separator();
 
@@ -168,12 +170,11 @@ public abstract class App<TData>
 
     protected void Quit()
     {
-        Logger.Separator();
-
         if (!MetaData.ObjectStatus.HasFlag(ObjectStatusFlags.Active)) return;
         MetaData.ObjectStatus &= ~ObjectStatusFlags.Active;
 
-        Logger.Info("App quit");
+        Logger.Separator();
+        Logger.Warning("App quit");
     }
 
     #endregion

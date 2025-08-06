@@ -8,8 +8,7 @@ namespace MirageAPI::DirectX
         ID3D12DescriptorHeap* m_heap = nullptr;
 
         // free queue
-        System::Collections::Generic::List<UINT>^ m_freeList =
-            gcnew System::Collections::Generic::List<UINT>();
+        CSList<UINT>^ m_freeList = gcnew CSList<UINT>();
 
     internal:
         // description

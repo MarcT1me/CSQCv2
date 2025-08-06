@@ -26,11 +26,10 @@ namespace MirageAPI::DirectX::Shader
         UINT dataSize = byteArray->Length;
 
         ID3DBlob* bytecode;
-        HRESULT hr = D3DCreateBlob(dataSize, &bytecode);
-        if (FAILED(hr))
-        {
-            throw gcnew System::Exception("Failed to create shader blob from byte array");
-        }
+        CheckHResult(
+            D3DCreateBlob(dataSize, &bytecode),
+            "Failed to create shader blob from byte array"
+        );
         m_bytecode = bytecode;
 
         memcpy(m_bytecode->GetBufferPointer(), pinnedData, dataSize);
@@ -63,7 +62,7 @@ namespace MirageAPI::DirectX::Shader
 
         if (_wfopen_s(&file, nativePath, L"wb") != 0)
         {
-            throw gcnew System::Exception("Failed to open file for writing");
+            throw gcnew DXException("Failed to open file for writing");
         }
 
         fwrite(m_bytecode->GetBufferPointer(), 1, m_bytecode->GetBufferSize(), file);
@@ -77,7 +76,7 @@ namespace MirageAPI::DirectX::Shader
 
         if (_wfopen_s(&file, nativePath, L"rb") != 0)
         {
-            throw gcnew System::Exception("Shader file not found");
+            throw gcnew DXException("Shader file not found");
         }
 
         fseek(file, 0, SEEK_END);

@@ -10,7 +10,7 @@ namespace MirageAPI::DirectX::Pipeline
         Shader::DX12Shader^ vertexShader,
         Shader::DX12Shader^ pixelShader,
         DX12PipelineStateConfig^ config
-    ) : m_descriptorRanges(gcnew System::Collections::Generic::List<System::IntPtr>())
+    ) : m_descriptorRanges(gcnew CSList<System::IntPtr>())
     {
         // generating root params
         if (config->RootParams)

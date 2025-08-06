@@ -1,56 +1,49 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net9.0-windows10.0.22621.0</TargetFramework>
-        <PlatformTarget>x64</PlatformTarget>
-
+        <!-- Project settings -->
+        <RootNamespace>AppLib</RootNamespace>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-
-        <RootNamespace>AppLib</RootNamespace>
         
-        <OutputPath>bin\$(Configuration)</OutputPath>
-
-        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-        <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
-
+        <!-- Build configuration -->
         <Configurations>Debug;Release</Configurations>
+        <PlatformTarget>x64</PlatformTarget>
         <Platforms>x64</Platforms>
         <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+        <TargetFramework>net9.0-windows10.0.22621.0</TargetFramework>
+        <!-- Build path configuration -->
+        <OutputPath>bin\$(Configuration)</OutputPath>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Natives\MirageAPI\MirageAPI.vcxproj"/>
+        <!-- Engine -->
         <ProjectReference Include="..\QuantumEngine\QuantumEngine.csproj"/>
+        <!-- Import MirageAPI for tests -->
+        <ProjectReference Include="..\Natives\MirageAPI\MirageAPI.vcxproj"/>
+        <!-- Other Libs -->
     </ItemGroup>
 
     <ItemGroup>
-        <Content Include="Assets\Embeded\IMG.png">
-          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </Content>
-        <None Remove="Assets\**\*.*"/>
+        <!-- Hold folders in editor -->
+        <Folder Include="Assets\"/>
+        <Folder Include="Assets\Embeded\"/>
+        <!-- Somple Assets -->
         <Content Include="Assets\**\*.*">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
-    </ItemGroup>
-
-    <ItemGroup>
-        <EmbeddedResource Include="Assets\Shaders\*.hlsl">
-            <LogicalName>AppLib.Assets.Shaders.%(Filename)</LogicalName>
+        <!-- Embeded Files -->
+        <EmbeddedResource Include="Assets\Embeded\**\*.*">
+            <LogicalName>$([System.String]::Copy('%(RecursiveDir)').Replace('\','/'))%(Filename)%(Extension)</LogicalName>
         </EmbeddedResource>
+        <!-- Remove embeded assets from simple asset context-->
+        <Content Remove="Assets\Embeded\**\*.*"/>
 
-        <Content Remove="Assets\Shaders\*.hlsl"/>
-        
-        <EmbeddedResource Include="Assets\Embeded\*.*">
-            <LogicalName>AppLib.Assets.%(Filename)</LogicalName>
-        </EmbeddedResource>
-
-        <Content Remove="Assets\Embeded\*.*"/>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Assets\Embeded\" />
+        <!-- Other Resources-->
+        <!--<Content Include="Assets\IMG.png">-->
     </ItemGroup>
 
 </Project>

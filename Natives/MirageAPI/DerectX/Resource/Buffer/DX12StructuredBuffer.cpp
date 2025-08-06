@@ -8,7 +8,7 @@ namespace MirageAPI::DirectX::Resource
     void DX12StructuredBuffer::!DX12StructuredBuffer()
     {
         Validate();
-        
+
         ReleaseSRV();
     }
 
@@ -27,7 +27,7 @@ namespace MirageAPI::DirectX::Resource
 
     void DX12StructuredBuffer::CreateSRV()
     {
-        if (m_srvIndex != UINT_MAX || m_srvHeap) return;
+        CheckMissmatch(m_srvDescriptorIndex, UINT_MAX) return;
 
         m_srvHeap = gcnew DX12DescriptorHeap(DX12DescriptorHeapType::CBV_SRV_UAV, 1, true);
 
@@ -44,9 +44,9 @@ namespace MirageAPI::DirectX::Resource
 
     void DX12StructuredBuffer::ReleaseSRV()
     {
-        if (m_srvIndex == UINT_MAX || !m_srvHeap) return;
-        
-        m_srvHeap->Free(m_srvIndex);
-        m_srvIndex = UINT_MAX;
+        CheckMissmatch(m_srvDescriptorIndex, UINT_MAX) return;
+
+        m_srvHeap->Free(m_srvDescriptorIndex);
+        m_srvDescriptorIndex = UINT_MAX;
     }
 }

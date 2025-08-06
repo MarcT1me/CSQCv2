@@ -169,6 +169,18 @@ public sealed class Logger(
     }
 
     /// <summary>
+    /// Логирует сообщение без форматирования
+    /// </summary>
+    /// <param name="message">Сообщение</param>
+    public static void SimpleLog(string message)
+    {
+        foreach (ILogger logger in Loggers.Values)
+        {
+            logger.LogWithoutFormat(message);
+        }
+    }
+
+    /// <summary>
     /// Вывод пустую строку
     /// </summary>
     public static void Separator()

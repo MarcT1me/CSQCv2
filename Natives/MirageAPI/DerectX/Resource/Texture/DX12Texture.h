@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 // Mirage ecosystem
-#include "../Array/DX12Buffer.h"
+#include "../Buffer/DX12Buffer.h"
 #include "../../DX12DescriptorHeap.h"
 
 
@@ -64,6 +64,8 @@ namespace MirageAPI::DirectX::Resource
         {
             D3D12_GPU_DESCRIPTOR_HANDLE get() { return m_srvHeap->IndexGPUHandle(m_srvDescriptorIndex); }
         }
+        property UINT SRVIndex { UINT get() { return m_srvDescriptorIndex; } }
+        property bool HasSRV { bool get() { return m_srvDescriptorIndex != UINT_MAX; } }
 
         // texture operations
         virtual void UploadData(array<System::Byte>^ data);
@@ -71,8 +73,5 @@ namespace MirageAPI::DirectX::Resource
         D3D12_SHADER_RESOURCE_VIEW_DESC CreateSRVDesc();
         void CreateSRV();
         void ReleaseSRV();
-
-        property UINT SRVIndex { UINT get() { return m_srvDescriptorIndex; } }
-        property bool HasSRV { bool get() { return m_srvDescriptorIndex != UINT_MAX; } }
     };
 }

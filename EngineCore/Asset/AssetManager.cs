@@ -55,14 +55,14 @@ public static class AssetManager
             );
 
             // resolve dependencies
-            var resolvedDependencies = DependencyResolver.Resolve(assetFile);
+            var dependencies = DependencyResolver.Resolve(assetFile).Concat(alreadyLoadedDependencies ?? []);
+            IEnumerable<AssetData> deps = dependencies as AssetData[] ?? dependencies.ToArray();
 
             // load content from file 
-            var loadedContent = assetType.AssetLoader.LoadFile(assetFile);
+            var loadedContent = assetType.AssetLoader.LoadFile(assetFile, deps);
 
             // create asset data instance
-            var finalDependencies = resolvedDependencies.Concat(alreadyLoadedDependencies ?? []);
-            var assetData = assetType.AssetLoader.CreateAsset(assetFile, finalDependencies, loadedContent);
+            var assetData = assetType.AssetLoader.CreateAsset(assetFile, deps, loadedContent);
 
             // save in asset branch
             branch[assetData.Identifier] = assetData;

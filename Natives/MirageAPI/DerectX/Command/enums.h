@@ -4,11 +4,14 @@ namespace MirageAPI::DirectX::Command
 {
     public enum class DX12PrimitiveTopology
     {
-        Undefined = D3D_PRIMITIVE_TOPOLOGY_UNDEFINED,
-        PointList = D3D_PRIMITIVE_TOPOLOGY_POINTLIST,
-        LineList = D3D_PRIMITIVE_TOPOLOGY_LINELIST,
+        Undefined = 0,
+        
+        PointList = 1,
+        
+        LineList = 2,
+        LineStrip	= 3,
 
-        TriangleList = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,
-        TriangleStrip = D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP,
+        TriangleList = 4,
+        TriangleStrip = 5,
     };
 }

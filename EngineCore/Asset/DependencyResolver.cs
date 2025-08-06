@@ -12,12 +12,12 @@ public static class DependencyResolver
         AssetFile assetFile
     )
     {
-        Logger.Info($"Resolving asset dependencies for {assetFile.Identifier}");
-
         LinkedList<AssetData> dependencies = new();
 
         if (assetFile.Dependencies.Count == 0)
             return dependencies;
+        
+        Logger.Info($"Resolving asset dependencies for {assetFile.Identifier}");
 
         var cacheKey = assetFile.Path;
 

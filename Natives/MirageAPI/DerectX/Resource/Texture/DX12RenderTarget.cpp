@@ -1,25 +1,21 @@
 ﻿#include "pch.h"
-#include "DX12FrameBuffer.h"
+#include "DX12RenderTarget.h"
 
 #include "../../Command/DX12CommandList.h"
 
 namespace MirageAPI::DirectX::Resource
 {
-    DX12FrameBuffer::DX12FrameBuffer(
+    DX12RenderTarget::DX12RenderTarget(
+        DX12ResourceConfig config,
         ID3D12Resource* resource,
-        UINT width,
-        UINT height,
-        DX12ResourceFormat format,
         DX12DescriptorHeap^ rtvHeap
-    ) : DX12Resource(
-            DX12ResourceConfig::RenderTargetConfig(width, height, format, DX12ResourceFlags::None)
-        ),
-        m_rtvHeap(rtvHeap)
+    ) : DX12Resource(config),
+        RTVHeap(rtvHeap)
     {
         m_nativeResource = resource;
     }
 
-    DX12FrameBuffer::DX12FrameBuffer(
+    DX12RenderTarget::DX12RenderTarget(
         DX12ResourceConfig config
     ) : DX12Resource(config)
     {
@@ -44,7 +40,7 @@ namespace MirageAPI::DirectX::Resource
         D3D12_CLEAR_VALUE* clearValuePtr = nullptr;
         D3D12_CLEAR_VALUE clearValue = {};
 
-        if (static_cast<int>(config.Flags & DX12ResourceFlags::AllowRenderTarget) != 0)
+        if (config.Flags.HasFlag(DX12ResourceFlags::AllowRenderTarget))
         {
             clearValue.Format = static_cast<DXGI_FORMAT>(m_resourceFormat);
             clearValue.Color[0] = 0.0f;
@@ -53,7 +49,7 @@ namespace MirageAPI::DirectX::Resource
             clearValue.Color[3] = 1.0f;
             clearValuePtr = &clearValue;
         }
-        else if (static_cast<int>(config.Flags & DX12ResourceFlags::AllowDepthStencil) != 0)
+        else if (config.Flags.HasFlag(DX12ResourceFlags::AllowDepthStencil))
         {
             clearValue.Format = static_cast<DXGI_FORMAT>(m_resourceFormat);
             clearValue.DepthStencil.Depth = 1.0f;
@@ -74,14 +70,14 @@ namespace MirageAPI::DirectX::Resource
         m_nativeResource = buffer;
     }
 
-    DX12FrameBuffer::!DX12FrameBuffer()
+    DX12RenderTarget::!DX12RenderTarget()
     {
         Validate();
 
         ReleaseRTV();
     }
 
-    void DX12FrameBuffer::TransitionState(
+    void DX12RenderTarget::TransitionState(
         Command::DX12CommandList^ commandList,
         DX12ResourceState newState
     )
@@ -99,24 +95,24 @@ namespace MirageAPI::DirectX::Resource
         m_currentState = newState;
     }
 
-    void DX12FrameBuffer::CreateRTV()
+    void DX12RenderTarget::CreateRTV()
     {
-        if (m_rtvDescriptorIndex != UINT_MAX) return;
+        CheckMissmatch(m_rtvDescriptorIndex, UINT_MAX) return;
 
-        m_rtvDescriptorIndex = m_rtvHeap->Allocate();
+        m_rtvDescriptorIndex = RTVHeap->Allocate();
 
         device->CreateRenderTargetView(
             m_nativeResource,
             nullptr,
-            SRVHandleForCPU
+            RTVHandleForCPU
         );
     }
 
-    void DX12FrameBuffer::ReleaseRTV()
+    void DX12RenderTarget::ReleaseRTV()
     {
-        if (m_rtvDescriptorIndex == UINT_MAX || !m_rtvHeap) return;
+        CheckMissmatch(m_rtvDescriptorIndex, UINT_MAX) return;
 
-        m_rtvHeap->Free(m_rtvDescriptorIndex);
+        RTVHeap->Free(m_rtvDescriptorIndex);
         m_rtvDescriptorIndex = UINT_MAX;
     }
 }

@@ -53,7 +53,7 @@ public sealed class QuantumThreadPool : ThreadRoster
                 if (Pending[id] is not { } thread) continue;
 
                 Worked[id] = thread;
-                Pending[id] = null;
+                Pending.Pop(id);
                 thread.Start();
             }
 

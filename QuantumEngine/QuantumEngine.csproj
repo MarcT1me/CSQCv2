@@ -1,50 +1,45 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net9.0-windows10.0.22621.0</TargetFramework>
-        <PlatformTarget>x64</PlatformTarget>
-
+        <!-- Project settings -->
+        <RootNamespace>Engine</RootNamespace>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
-        <RootNamespace>Engine</RootNamespace>
-
-        <OutputPath>bin\$(Configuration)</OutputPath>
-
-        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-        <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
-
+        <!-- Build configuration -->
         <Configurations>Debug;Release</Configurations>
+        <PlatformTarget>x64</PlatformTarget>
         <Platforms>x64</Platforms>
         <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+        <TargetFramework>net9.0-windows10.0.22621.0</TargetFramework>
+        <!-- Build path configuration -->
+        <OutputPath>bin\$(Configuration)</OutputPath>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     </PropertyGroup>
 
     <ItemGroup>
+        <!-- Engine -->
+        <ProjectReference Include="..\EngineCore\EngineCore.csproj"/>
+        <!-- Import MirageAPI for tests -->
+        <ProjectReference Include="..\Natives\MirageAPI\MirageAPI.vcxproj"/>
+        <!-- Libs -->
         <PackageReference Include="SpaceWizards.SharpFont" Version="1.0.2"/>
         <PackageReference Include="StbImageSharp" Version="2.30.15"/>
     </ItemGroup>
-
-    <!-- adding engine binary and assets -->
+    
     <ItemGroup>
+        <!-- Hold folders in editor -->
+        <Folder Include="EngineData\"/>
+        <!-- Embeded Files -->
+        <EmbeddedResource Include="EngineData\**\*.*">
+            <LogicalName>%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
+        </EmbeddedResource>
+        <!--Engine binary -->
         <Content Include="freetype6.dll">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <Link>freetype6.dll</Link>
-        </Content>
-    </ItemGroup>
-
-    <ItemGroup>
-        <Folder Include="EngineData\Assets\"/>
-    </ItemGroup>
-
-    <ItemGroup>
-        <ProjectReference Include="..\Natives\MirageAPI\MirageAPI.vcxproj"/>
-        <ProjectReference Include="..\EngineCore\EngineCore.csproj"/>
-    </ItemGroup>
-
-    <ItemGroup>
-        <Content Include="EngineData\**\*.*">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
     </ItemGroup>
 

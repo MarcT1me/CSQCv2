@@ -23,14 +23,12 @@ public class ThreadRoster : Roster<QuantumThread>
         {
             foreach (var id in Pending.Keys.ToList())
             {
-                Pending[id]?.Dispose();
-                Pending[id] = null;
+                Pending.Pop(id)?.Dispose();
             }
         
             foreach (var id in Worked.Keys.ToList())
             {
-                Worked[id]?.Dispose();
-                Worked[id] = null;
+                Worked.Pop(id)?.Dispose();
             }
         
             Pending.Clear();
@@ -55,7 +53,7 @@ public class ThreadRoster : Roster<QuantumThread>
             
             thread.Join();
             thread.Dispose();
-            branch[id] = null;
+            branch.Pop(id);
         }
     }
 }

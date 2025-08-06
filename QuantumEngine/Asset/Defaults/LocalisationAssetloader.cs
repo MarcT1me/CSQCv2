@@ -32,7 +32,8 @@ public sealed class LocalisationAssetloader : AssetLoader
     private static readonly FileIniDataParser IniParser = new();
 
     public override object LoadFile(
-        AssetFile assetFile
+        AssetFile assetFile,
+        IEnumerable<AssetData> dependencies
     )
     {
         var data = IniParser.ReadFile(assetFile.GetFullPath());
