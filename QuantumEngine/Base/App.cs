@@ -18,11 +18,11 @@ public abstract class App<TData>
         IEventful, IUpdatable, IRenderable // loop methods
     where TData : AppData
 {
-    public Clock Clock { get; }
-
     // ReSharper disable once StaticMemberInGenericType
     private static bool _mainloopRunning = true;
-    public static App<TData>? Instance { get; private set; }
+    public static App<TData> Instance { get; private set; } = null!;
+    
+    public Clock Clock { get; }
     public ObjectStatusFlags ObjectStatus => MetaData.ObjectStatus;
 
     #region Initialization
@@ -156,7 +156,7 @@ public abstract class App<TData>
     public virtual void Dispose()
     {
         Quit();
-        Instance = null;
+        Instance = null!;
 
         // QuantumEventHandler.EventHandling -= HandleEvent;
         ExitHandling -= OnExitHandling;

@@ -71,15 +71,15 @@ public class QEventSystem
         window.OnDrop -= HandleDropEvent;
     }
 
-    private static void HandleKeyEvent(NativeKeyEvent glfwEvent) => EnqueueEvent(ConvertEvent(glfwEvent));
+    private static void HandleKeyEvent(NativeKeyEvent nativeEvent) => EnqueueEvent(ConvertEvent(nativeEvent));
 
-    private static void HandleMouseEvent(NativeMouseEvent glfwEvent) => EnqueueEvent(ConvertEvent(glfwEvent));
+    private static void HandleMouseEvent(NativeMouseEvent nativeEvent) => EnqueueEvent(ConvertEvent(nativeEvent));
 
-    private static void HandleWindowEvent(NativeWindowEvent glfwEvent) => EnqueueEvent(ConvertEvent(glfwEvent));
+    private static void HandleWindowEvent(NativeWindowEvent nativeEvent) => EnqueueEvent(ConvertEvent(nativeEvent));
 
-    private static void HandleCharEvent(NativeCharEvent glfwEvent) => EnqueueEvent(ConvertEvent(glfwEvent));
+    private static void HandleCharEvent(NativeCharEvent nativeEvent) => EnqueueEvent(ConvertEvent(nativeEvent));
 
-    private static void HandleDropEvent(NativeDropEvent glfwEvent) => EnqueueEvent(ConvertEvent(glfwEvent));
+    private static void HandleDropEvent(NativeDropEvent nativeEvent) => EnqueueEvent(ConvertEvent(nativeEvent));
 
     public static void EnqueueEvent(QuantumEvent qEvent)
     {
@@ -102,12 +102,13 @@ public class QEventSystem
             while (EventQueue.TryDequeue(out var qEvent))
             {
                 handler.Handle(qEvent);
-                if (qEvent is WindowedQuantumEvent { Type: EventType.WindowClose } wEvent &&
-                    Registries.WindowRegistry.Size == 0)
-                    EnqueueEvent(new WindowedQuantumEvent(
-                        EventType.Quit,
-                        wEvent.WindowId
-                    ));
+                
+                if (qEvent is WindowedQuantumEvent { Type: EventType.WindowClose } wEvent
+                    && Registries.WindowRegistry.Size == 0)
+                {
+                    EnqueueEvent(new WindowedQuantumEvent( EventType.Quit, wEvent.WindowId));
+                }
+
                 UpdateInputState(qEvent);
             }
 

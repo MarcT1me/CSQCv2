@@ -75,15 +75,19 @@ namespace MirageAPI::DirectX::Resource
         array<System::Byte>^ data
     )
     {
+        // validate
         Validate();
+        CheckMissmatch(data->Length, m_size) return QuantumLog(Warning, "Data size missmatch");
 
-        if (!m_nativeResource || data->Length != m_size) return;
-
-        if (void* pData = this->Map())
+        // map and check ptr
+        void* pData = this->Map();
+        CheckNull(pData) return QuantumLog(Warning, "Error mapping data in DX12Buffer::UploadData");
+        // copy data
         {
             pin_ptr<System::Byte> pinData = &data[0];
             memcpy(pData, pinData, m_size);
-            Unmap();
         }
+        // unmap
+        Unmap();
     }
 }

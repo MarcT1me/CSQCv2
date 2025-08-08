@@ -6,7 +6,7 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        
+
         <!-- Build configuration -->
         <Configurations>Debug;Release</Configurations>
         <PlatformTarget>x64</PlatformTarget>
@@ -30,20 +30,23 @@
     <ItemGroup>
         <!-- Hold folders in editor -->
         <Folder Include="Assets\"/>
-        <Folder Include="Assets\Embeded\"/>
+        <Folder Include="Assets\Embedded\"/>
+    </ItemGroup>
+
+    <ItemGroup>
         <!-- Somple Assets -->
         <Content Include="Assets\**\*.*">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
         <!-- Embeded Files -->
-        <EmbeddedResource Include="Assets\Embeded\**\*.*">
+        <EmbeddedResource Include="Assets\Embedded\**\*.*">
             <LogicalName>$([System.String]::Copy('%(RecursiveDir)').Replace('\','/'))%(Filename)%(Extension)</LogicalName>
         </EmbeddedResource>
         <!-- Remove embeded assets from simple asset context-->
-        <Content Remove="Assets\Embeded\**\*.*"/>
+        <Content Remove="Assets\Embedded\**\*.*"/>
 
         <!-- Other Resources-->
-        <!--<Content Include="Assets\IMG.png">-->
+        <!--<Content Include="Config\GameConfig.ini">-->
     </ItemGroup>
 
 </Project>

@@ -3,5 +3,10 @@
 public class JoyEvent(EventType type, int joystickId) 
     : QuantumEvent(type)
 {
-    public int JoystickId { get; } = joystickId;
+    public readonly int JoystickId = joystickId;
+    
+    public override string ToString()
+    {
+        return $"JoyEvent<{Type}>(Joy={JoystickId})";
+    }
 }

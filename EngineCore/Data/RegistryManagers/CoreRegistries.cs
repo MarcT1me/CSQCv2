@@ -14,4 +14,6 @@ public struct CoreRegistries
 
     public static readonly IRegistryManager<Type> TypeRegistry = ScanTypeRegistryManager.Instance();
     public static readonly IRegistryManager<QuantumMethodInfo> MethodRegistry = ScanMethodRegistryManager.Instance();
+    
+    public static readonly NodeRegistryManager NodeRegistry = NodeRegistryManager.Instance();
 }

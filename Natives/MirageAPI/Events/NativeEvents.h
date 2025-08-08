@@ -7,9 +7,9 @@ namespace MirageAPI::Events
         System::IntPtr windowID;
 
         int Key;
+        bool Pressed;
+        
         int Scancode;
-
-        int Action;
         int Mods;
     };
 
@@ -24,11 +24,10 @@ namespace MirageAPI::Events
         System::IntPtr windowID;
 
         int Button;
+        bool Pressed;
 
-        double X;
-        double Y;
-
-        int Action;
+        float X;
+        float Y;
         int Mode;
     };
 
@@ -70,7 +69,7 @@ namespace MirageAPI::Events
     {
         int JoystickID;
         
-        bool Connected; // GLFW_CONNECTED или GLFW_DISCONNECTED
+        bool Connected;
     };
 
     public value struct NativeJoystickState

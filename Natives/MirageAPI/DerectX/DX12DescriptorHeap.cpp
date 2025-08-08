@@ -106,6 +106,13 @@ namespace MirageAPI::DirectX
             )
         );
         ThrowIfNull(
+            m_heap,
+            CSFormat(
+                "Descriptor heap is not initialized. Capacity: {0}, DescriptorSize: {1}",
+                m_capacity, m_descriptorSize
+            )
+        );
+        ThrowIfNull(
             m_descriptorSize,
             CSFormat(
                 "Invalid descriptor size. Capacity: {0}, DescriptorSize: {1}",

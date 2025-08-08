@@ -6,7 +6,7 @@ namespace Engine.Events.QuantumEvents;
 public class DropEvent 
     : WindowedQuantumEvent
 {
-    public string? Paths;
+    public readonly string? Paths;
 
     public DropEvent(NativeDropEvent e) : base(EventType.Drop, e.windowID)
     {
@@ -14,5 +14,10 @@ public class DropEvent
         {
             Paths = Marshal.PtrToStringAnsi((IntPtr)e.paths);
         }
+    }
+
+    public override string ToString()
+    {
+        return $"DropEvent<{Type}>(Paths={Paths}, Window: {WindowId})";
     }
 }

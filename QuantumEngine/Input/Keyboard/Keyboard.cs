@@ -11,13 +11,14 @@ public class Keyboard(IntPtr windowHandle)
 
     // static (last updated window -> PyGame and SDL format)
 
-    public static bool GetKey(int key) => Get(LastActiveWindowId).PressedKeys[key];
+    public static bool GetKey(Key key) => GetKey((int)key);
+    public static bool GetKey(int key) => LastActiveWindowId is not 0 && Get(LastActiveWindowId).PressedKeys[key];
 
     public static Keyboard Get(IntPtr windowId)
     {
         return List[windowId];
     }
-    
+
     public readonly IntPtr WindowHandle = windowHandle;
 
     public static IntPtr LastActiveWindowId { get; private set; }
@@ -38,7 +39,7 @@ public class Keyboard(IntPtr windowHandle)
 
     private void UpdateKey(KeyEvent e)
     {
-        PressedKeys[e.Key] = e.Type == EventType.KeyDown;
+        PressedKeys[(int)e.Key] = e.Type == EventType.KeyDown;
     }
 
     // registration
@@ -51,5 +52,10 @@ public class Keyboard(IntPtr windowHandle)
     internal static void UnregisterWindow(Window window)
     {
         List.Remove(window.Handle, out _);
+    }
+
+    public override string ToString()
+    {
+        return $"Keyboard<{WindowHandle}>(LastActiveWindowId: {LastActiveWindowId})";
     }
 }

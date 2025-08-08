@@ -13,6 +13,9 @@ using Engine.Asset.Shader;
 using Engine.Graphic.Window;
 using Engine.Logging;
 using Engine.Events.QuantumEvents;
+using Engine.Events.QuantumEvents.Window;
+using Engine.Input.Keyboard;
+using Engine.Objects.Camera;
 
 namespace AppLib.Game;
 
@@ -23,16 +26,32 @@ struct Vertex
     public Vector2 UV;
 }
 
+[StructLayout(LayoutKind.Sequential)]
+public struct MatrixBufferData
+{
+    public Matrix4 World;
+    public Matrix4 View;
+    public Matrix4 Projection;
+}
+
 public class GameWindow : Window
 {
+    // shader
     private DX12Shader _vertexShader = null!;
     private DX12Shader _pixelShader = null!;
     private DX12PipelineState _pipelineState = null!;
+
+    // vertex
     private DX12VertexBuffer _vertexBuffer = null!;
     private int _vertexCount;
 
-    private DX12DescriptorHeap? _descriptorHeap;
-    private DX12Texture? _texture;
+    // texture
+    private DX12DescriptorHeap _descriptorHeap = null!;
+    private DX12Texture _texture = null!;
+
+    // 3d
+    private DX12ConstantBuffer _matrixBuffer = null!;
+    public GameCamera Camera = null!;
 
     public GameWindow(WinData winData, GlData? glData = null, string? name = null)
         : base(winData, glData, name)
@@ -41,6 +60,8 @@ public class GameWindow : Window
         CreatePipelineState();
         LoadImage();
         CreateGeometryBuffers();
+        CreateMatrixBuffer();
+        CreateCamera();
     }
 
     private void LoadShaders()
@@ -49,16 +70,16 @@ public class GameWindow : Window
 
         var vertShader = (ShaderData)AssetManager.Load(
             new(
-                "vertexShader", "AppLib:Shaders/TextureShader.hlsl",
-                isEmbedded: true, identifier: "TextureShader-Vert"
+                "vertexShader", "AppLib:Shaders/3dRenderShader.hlsl",
+                isEmbedded: true, identifier: "Shader-Vert"
             )
         ).Content;
         _vertexShader = vertShader.GetNativeShader;
 
         var pixShader = (ShaderData)AssetManager.Load(
             new(
-                "pixelShader", "AppLib:Shaders/TextureShader.hlsl", 
-                isEmbedded: true, identifier: "TextureShader-Pix"
+                "pixelShader", "AppLib:Shaders/3dRenderShader.hlsl",
+                isEmbedded: true, identifier: "Shader-Pix"
             )
         ).Content;
         _pixelShader = pixShader.GetNativeShader;
@@ -74,6 +95,10 @@ public class GameWindow : Window
                 new DX12RootParameter(
                     DX12ResourceType.Texture,
                     DX12ShaderVisibility.Pixel
+                ),
+                new DX12RootParameter(
+                    DX12ResourceType.ConstantBuffer,
+                    DX12ShaderVisibility.Vertex
                 )
             ],
             [
@@ -111,7 +136,7 @@ public class GameWindow : Window
             new(
                 "image", "AppLib:IMG.png",
                 isEmbedded: true, identifier: "IMG-Image"
-                )
+            )
         ).Content;
 
         // Создаём текстуру
@@ -122,6 +147,7 @@ public class GameWindow : Window
 
     private DX12DescriptorHeap CreateDescriptorHeap()
     {
+        Logger.Debug("Creating Descriptor Heap...");
         return
             NativeWindow.DXContext.CmdList.DescriptorHeap =
                 _descriptorHeap =
@@ -194,14 +220,59 @@ public class GameWindow : Window
         }
     }
 
+    private void CreateMatrixBuffer()
+    {
+        Logger.Debug("Creating matrix buffer...");
+        _matrixBuffer = new DX12ConstantBuffer(256, DX12ResourceFlags.None);
+    }
+
+    private void CreateCamera()
+    {
+        Camera = new GameCamera(
+            new(
+                position: new Vector3(-1, -1, -1),
+                fov: 70,
+                identifier: "GameCamera"
+            )
+        );
+    }
+
     public override void HandleEvent(QuantumEvent e)
     {
         base.HandleEvent(e);
-        if (e is KeyEvent { Type: EventType.KeyDown, Key: 122 })
+        switch (e)
         {
-            Logger.Debug("ToggleFullscreen");
-            NativeWindow.ToggleFullscreen();
+            case KeyEvent { Type: EventType.KeyDown, Key: Key.F11 }:
+                Logger.Debug("ToggleFullscreen");
+                NativeWindow.ToggleFullscreen();
+                break;
+            case WinResizeEvent winResize:
+                Camera.SetAspectRatio(winResize.Size.X, winResize.Size.Y);
+                break;
         }
+    }
+
+    public override void Update()
+    {
+        base.Update();
+
+        Matrix4 world = Matrix4.Identity;
+        world.Transpose();
+
+        MatrixBufferData matrixData = new MatrixBufferData
+        {
+            World = world,
+            View = Camera.ViewMatrix,
+            Projection = Camera.ProjectionMatrix
+        };
+        var bufferSize = (int)_matrixBuffer.Size;
+        byte[] buffer = new byte[bufferSize];
+
+        IntPtr ptr = Marshal.AllocHGlobal(bufferSize);
+        Marshal.StructureToPtr(matrixData, ptr, false);
+        Marshal.Copy(ptr, buffer, 0, bufferSize);
+        Marshal.FreeHGlobal(ptr);
+        _matrixBuffer.UploadData(buffer);
     }
 
     public override void Render()
@@ -214,6 +285,7 @@ public class GameWindow : Window
         // Финальная подготовка объекта к рендеру
         commandList.SetPrimitiveTopology(DX12PrimitiveTopology.TriangleList);
         commandList.BindBuffer(_vertexBuffer);
+        commandList.BindBuffer(0, _matrixBuffer);
 
         // Рендер
         commandList.DrawInstanced((uint)_vertexCount, 1, 0, 0);
@@ -221,9 +293,9 @@ public class GameWindow : Window
 
     public override void Dispose()
     {
-        _texture?.ReleaseSRV();
-        _texture?.Dispose();
-        _descriptorHeap?.Dispose();
+        _texture.ReleaseSRV();
+        _texture.Dispose();
+        _descriptorHeap.Dispose();
 
         _vertexBuffer.Dispose();
         _pipelineState.Dispose();

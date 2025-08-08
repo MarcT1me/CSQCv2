@@ -4,4 +4,9 @@ public class WindowedQuantumEvent(EventType type, IntPtr windowId)
     : QuantumEvent(type)
 {
     public readonly IntPtr WindowId = windowId;
+
+    public override string ToString()
+    {
+        return $"WindowedQuantumEvent<{Type}>(Window={WindowId})";
+    }
 }

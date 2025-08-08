@@ -3,9 +3,9 @@
 using Events.QuantumEvents;
 using SceneNode;
 
-public class Scene(SceneNodeData nodeData) 
-    : BaseScene(nodeData),
-        IEventful, IUpdatable, IRenderable
+public class Scene<T>(T nodeData)
+    : HeadlessScene<T>(nodeData), IEventful, IRenderable
+    where T : SceneNodeData
 {
     #region Cycle methods
 
@@ -15,33 +15,6 @@ public class Scene(SceneNodeData nodeData)
         {
             if (eventfulChild.IsActive())
                 eventfulChild.HandleEvent(e);
-        }
-    }
-
-    public virtual void PreUpdate()
-    {
-        foreach (var updatableChild in IterChildren<IUpdatable>())
-        {
-            if (updatableChild.IsActive() || updatableChild.IsDynamic())
-                updatableChild.PreUpdate();
-        }
-    }
-
-    public virtual void Update()
-    {
-        foreach (var updatableChild in IterChildren<IUpdatable>())
-        {
-            if (updatableChild.IsActive() || updatableChild.IsDynamic())
-                updatableChild.Update();
-        }
-    }
-
-    public virtual void PostUpdate()
-    {
-        foreach (var updatableChild in IterChildren<IUpdatable>())
-        {
-            if (updatableChild.IsActive() || updatableChild.IsDynamic())
-                updatableChild.PostUpdate();
         }
     }
 

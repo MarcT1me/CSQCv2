@@ -33,7 +33,7 @@ public abstract class Game<TData, TWindow> : App<TData>
 
     #region override App cycle
 
-    public sealed override void PreUpdate()
+    public override void PreUpdate()
     {
         foreach (var window in Registries.WindowRegistry.Values)
         {
@@ -41,7 +41,7 @@ public abstract class Game<TData, TWindow> : App<TData>
         }
     }
 
-    public sealed override void Update()
+    public override void Update()
     {
         foreach (var window in Registries.WindowRegistry.Values)
         {
@@ -49,7 +49,7 @@ public abstract class Game<TData, TWindow> : App<TData>
         }
     }
 
-    public sealed override void PostUpdate()
+    public override void PostUpdate()
     {
         foreach (var window in Registries.WindowRegistry.Values)
         {

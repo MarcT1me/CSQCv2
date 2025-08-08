@@ -15,40 +15,40 @@ namespace MirageAPI::Events
         return safe_cast<Window::NativeWindow^>(gch.Target);
     }
 
-    void matchMouseBtnMsg(UINT msg, int* button, int* action)
+    void matchMouseBtnMsg(UINT msg, int* button, bool* pressed)
     {
         switch (msg)
         {
         case WM_LBUTTONDOWN:
             *button = 1;
-            *action = 1;
+            *pressed = true;
             break;
         case WM_LBUTTONUP:
             *button = 1;
-            *action = 0;
+            *pressed = false;
             break;
 
         case WM_MBUTTONDOWN:
             *button = 2;
-            *action = 1;
+            *pressed = true;
             break;
         case WM_MBUTTONUP:
             *button = 2;
-            *action = 0;
+            *pressed = false;
             break;
 
         case WM_RBUTTONDOWN:
             *button = 3;
-            *action = 1;
+            *pressed = true;
             break;
         case WM_RBUTTONUP:
             *button = 3;
-            *action = 0;
+            *pressed = false;
             break;
             
         default:
             *button = -1;
-            *action = -1;
+            *pressed = false;
             break;
         }
     }
@@ -62,20 +62,27 @@ namespace MirageAPI::Events
             case WM_KEYDOWN:
             case WM_KEYUP:
                 {
-                    const int scancode = lParam >> 16 & 0xFF;
-
                     // Получаем модификаторы
                     int mods = 0;
-                    if (GetKeyState(VK_SHIFT) & 0x8000) mods |= 0x0001;
-                    if (GetKeyState(VK_CONTROL) & 0x8000) mods |= 0x0002;
-                    if (GetKeyState(VK_MENU) & 0x8000) mods |= 0x0004;
-                    if (GetKeyState(VK_CAPITAL) & 0x0001) mods |= 0x0010;
+                    if (GetKeyState(VK_SHIFT) & 0x8000)
+                        mods |= 1 << 0;
+                    if (GetKeyState(VK_CONTROL) & 0x8000)
+                        mods |= 1 << 1;
+                    if (GetKeyState(VK_MENU) & 0x8000)
+                        mods |= 1 << 2;
+                    
+                    if (GetKeyState(VK_CAPITAL) & 0x0001)
+                        mods |= 1 << 3;
+                    if (GetKeyState(VK_NUMLOCK) & 0x0001)
+                        mods |= 1 << 4;
+                    if (GetKeyState(VK_SCROLL) & 0x0001)
+                        mods |= 1 << 5;
 
                     NativeEventManager::KeyCallback(
                         window,
                         static_cast<int>(wParam),
-                        scancode,
-                        msg == WM_KEYDOWN ? 1 : 0, // action: 1=press, 0=release
+                        msg == WM_KEYDOWN,
+                        static_cast<int>(lParam >> 16 & 0xFF),
                         mods
                     );
                     break;
@@ -88,19 +95,15 @@ namespace MirageAPI::Events
             case WM_MBUTTONUP:
             case WM_LBUTTONUP:
                 {
-                    int mods = 0;
-                    if (wParam & MK_CONTROL) mods |= 0x0002;
-                    if (wParam & MK_SHIFT) mods |= 0x0001;
-
                     int button;
-                    int action;
-                    matchMouseBtnMsg(msg, &button, &action);
+                    bool pressed;
+                    matchMouseBtnMsg(msg, &button, &pressed);
 
                     NativeEventManager::MouseButtonCallback(
                         window,
                         button,
-                        action,
-                        mods
+                        pressed,
+                        static_cast<int>(wParam)
                     );
                     break;
                 }

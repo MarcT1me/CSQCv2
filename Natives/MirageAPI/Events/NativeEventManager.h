@@ -11,8 +11,10 @@ namespace MirageAPI::Events
 
         static void KeyCallback(
             Window::NativeWindow^ window,
-            int key, int scancode,
-            int action, int mods
+            int key,
+            bool pressed,
+            int scancode,
+            int mods
         );
 
         // mouse
@@ -20,11 +22,12 @@ namespace MirageAPI::Events
         static void MouseButtonCallback(
             Window::NativeWindow^ window,
             int button,
-            int action, int mods
+            bool pressed,
+            int mods
         );
 
-        static void ScrollCallback(Window::NativeWindow^ window, double xOffset, double yOffset);
-        static void CursorPositionCallback(Window::NativeWindow^ window, double xPos, double yPos);
+        static void ScrollCallback(Window::NativeWindow^ window, float xOffset, float yOffset);
+        static void CursorPositionCallback(Window::NativeWindow^ window, float xPos, float yPos);
 
         // window
 

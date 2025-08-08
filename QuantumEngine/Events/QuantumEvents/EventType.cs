@@ -25,7 +25,8 @@ public enum EventType : uint
     Char,
     Drop,
     
-    JoyDevice,
+    JoyDeviceConnect,
+    JoyDeviceDisconnect,
     JoyAxisMotion,
     JoyButtonDown,
     JoyButtonUp,

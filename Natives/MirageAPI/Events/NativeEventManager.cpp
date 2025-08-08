@@ -7,17 +7,20 @@ namespace MirageAPI::Events
 
     void NativeEventManager::KeyCallback(
         Window::NativeWindow^ window,
-        const int key,
-        const int scancode,
-        const int action, const int mods
+        int key,
+        bool pressed,
+        int scancode,
+        int mods
     )
     {
         // format event
         NativeKeyEvent e;
+        e.windowID = window->Handle;
 
         e.Key = key;
+        e.Pressed = pressed;
+
         e.Scancode = scancode;
-        e.Action = action;
         e.Mods = mods;
 
         // raise event
@@ -28,26 +31,30 @@ namespace MirageAPI::Events
 
     void NativeEventManager::MouseButtonCallback(
         Window::NativeWindow^ window,
-        const int button,
-        const int action, const int mods
+        int button,
+        bool pressed,
+        int mods
     )
     {
         // format event
         NativeMouseEvent e;
+        e.windowID = window->Handle;
         e.Type = NativeMouseEventType::Button;
 
         e.Button = button;
-        e.Action = action;
+        e.Pressed = pressed;
+
         e.Mode = mods;
 
         // raise event
         window->RaiseMouseEvent(e);
     }
 
-    void NativeEventManager::ScrollCallback(Window::NativeWindow^ window, double xOffset, double yOffset)
+    void NativeEventManager::ScrollCallback(Window::NativeWindow^ window, float xOffset, float yOffset)
     {
         // format event
         NativeMouseEvent e;
+        e.windowID = window->Handle;
         e.Type = NativeMouseEventType::Scroll;
 
         e.X = xOffset;
@@ -57,10 +64,11 @@ namespace MirageAPI::Events
         window->RaiseMouseEvent(e);
     }
 
-    void NativeEventManager::CursorPositionCallback(Window::NativeWindow^ window, double xPos, double yPos)
+    void NativeEventManager::CursorPositionCallback(Window::NativeWindow^ window, float xPos, float yPos)
     {
         // format event
         NativeMouseEvent e;
+        e.windowID = window->Handle;
         e.Type = NativeMouseEventType::Move;
 
         e.X = xPos;
@@ -76,6 +84,7 @@ namespace MirageAPI::Events
     {
         // format event
         NativeWindowEvent e;
+        e.windowID = window->Handle;
         e.Type = NativeWindowEventType::Focus;
 
         e.X = focused;
@@ -88,6 +97,7 @@ namespace MirageAPI::Events
     {
         // format event
         NativeWindowEvent e;
+        e.windowID = window->Handle;
         e.Type = NativeWindowEventType::Maximize;
 
         e.X = maximize;
@@ -100,6 +110,7 @@ namespace MirageAPI::Events
     {
         // format event
         NativeWindowEvent e;
+        e.windowID = window->Handle;
         e.Type = NativeWindowEventType::Iconify;
 
         e.X = iconify;
@@ -112,6 +123,7 @@ namespace MirageAPI::Events
     {
         // format event
         NativeWindowEvent e;
+        e.windowID = window->Handle;
         e.Type = NativeWindowEventType::Resize;
 
         e.X = width;
@@ -125,6 +137,7 @@ namespace MirageAPI::Events
     {
         // format event
         NativeWindowEvent e;
+        e.windowID = window->Handle;
         e.Type = NativeWindowEventType::Move;
 
         e.X = x;
@@ -138,6 +151,7 @@ namespace MirageAPI::Events
     {
         // format event
         NativeWindowEvent e;
+        e.windowID = window->Handle;
         e.Type = NativeWindowEventType::Refresh;
 
         // raise event
@@ -148,15 +162,18 @@ namespace MirageAPI::Events
     {
         // format event
         NativeWindowEvent e;
+        e.windowID = window->Handle;
         e.Type = NativeWindowEventType::Close;
 
         // raise event
         window->RaiseWindowEvent(e);
     }
 
-    void NativeEventManager::ProcessEvents() {
+    void NativeEventManager::ProcessEvents()
+    {
         MSG msg = {nullptr};
-        while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+        while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+        {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }

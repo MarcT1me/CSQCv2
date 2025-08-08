@@ -5,10 +5,11 @@ namespace Engine.Objects.Camera;
 
 using Data;
 using Actor;
+
 // using Events.QuantumEvents;
 
 public class Camera(CameraData cameraData)
-    : Actor<CameraData>(cameraData), 
+    : Actor<CameraData>(cameraData),
         IEventful, IUpdatable, IRenderable
 {
     public float AspectRatio { get; protected set; }
@@ -17,13 +18,25 @@ public class Camera(CameraData cameraData)
 
     public bool NeedsUpdate = true;
 
-    public Vector3 Up { get; protected set; } = Transform.NewUpVector();
-    public Vector3 Right { get; protected set; } = Transform.NewRightVector();
-    public Vector3 Forward { get; protected set; } = Transform.NewForwardVector();
+    public Vector3 Up { get; protected set; } = Transform.UpVector;
+    public Vector3 Right { get; protected set; } = Transform.RightVector;
+    public Vector3 Forward { get; protected set; } = Transform.ForwardVector;
 
-    public void SetAspectRatio(float width, float height)
+    public virtual void SetAspectRatio(float width, float height)
     {
         AspectRatio = width / height;
+        NeedsUpdate = true;
+    }
+
+    public virtual void SetFov(float clipPlane)
+    {
+        MetaData.Fov = clipPlane;
+        NeedsUpdate = true;
+    }
+
+    public virtual void SetClipPlane(Vector2 clipPlane)
+    {
+        MetaData.ClipPlanes = clipPlane;
         NeedsUpdate = true;
     }
 
@@ -33,12 +46,10 @@ public class Camera(CameraData cameraData)
 
     public virtual void PreUpdate()
     {
-        // не требуется
     }
 
     public virtual void Update()
     {
-        // не требуется
     }
 
     public virtual void PostUpdate()
@@ -61,7 +72,7 @@ public class Camera(CameraData cameraData)
             Z = MathF.Sin(yaw) * MathF.Cos(pitch)
         };
 
-        Forward = Vector3.Normalize(newForward);
+        Forward = MetaData.Transform.Rotation = Vector3.Normalize(newForward);
         Right = Vector3.Normalize(Vector3.Cross(Forward, Transform.UpVector));
         Up = Vector3.Normalize(Vector3.Cross(Right, Forward));
     }
@@ -70,7 +81,7 @@ public class Camera(CameraData cameraData)
     {
         ViewMatrix = Matrix4.LookAt(
             MetaData.Transform.Position,
-            MetaData.Transform.Position + Forward,
+            Vector3.Zero,
             Up
         );
 
@@ -82,15 +93,15 @@ public class Camera(CameraData cameraData)
         );
     }
 
-    public void PreRender()
+    public virtual void PreRender()
     {
     }
 
-    public void Render()
+    public virtual void Render()
     {
     }
 
-    public void PostRender()
+    public virtual void PostRender()
     {
     }
 }

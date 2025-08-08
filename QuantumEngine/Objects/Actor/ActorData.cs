@@ -14,7 +14,7 @@ public class ActorData(
     string? identifier = null
 ) : SceneNodeData(identifier: identifier)
 {
-    public required Transform Transform { get; init; } = transform ?? new Transform();
+    public required Transform Transform = transform ?? new Transform();
 
     public int Priority = priority ?? 0;
     public Identifier? ModelId = modelId;

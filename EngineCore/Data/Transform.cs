@@ -14,11 +14,7 @@ public struct Transform(Vector3 position, Vector3 rotation, Vector3 scale)
     public Vector3 Rotation = rotation;
     public Vector3 Size = scale;
 
-    public static Vector3 UpVector { get; } = Vector3.UnitY;
-    public static Vector3 RightVector { get; } = Vector3.UnitX;
-    public static Vector3 ForwardVector { get; } = -Vector3.UnitZ;
-    
-    public static Vector3 NewUpVector() => Vector3.UnitY;
-    public static Vector3 NewRightVector() => Vector3.UnitX;
-    public static Vector3 NewForwardVector() => -Vector3.UnitZ;
+    public static Vector3 UpVector => Vector3.UnitY;
+    public static Vector3 RightVector => Vector3.UnitX;
+    public static Vector3 ForwardVector => -Vector3.UnitZ;
 }
