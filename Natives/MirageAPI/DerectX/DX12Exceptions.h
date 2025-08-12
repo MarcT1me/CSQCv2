@@ -5,7 +5,7 @@ namespace MirageAPI::DirectX
     public ref class DXException : public QuantumFailure
     {
     public:
-        DXException(System::String^ msg) : QuantumFailure(gcnew System::String(msg))
+        DXException(String^ msg) : QuantumFailure(gcnew String(msg))
         {
         }
     };
@@ -15,7 +15,7 @@ namespace MirageAPI::DirectX
         HRESULT m_hr;
 
     public:
-        HRException(HRESULT hr, System::String^ msg) : DXException(gcnew System::String(msg)), m_hr(hr)
+        HRException(HRESULT hr, String^ msg) : DXException(gcnew String(msg)), m_hr(hr)
         {
         }
 

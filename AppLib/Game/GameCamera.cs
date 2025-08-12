@@ -3,13 +3,14 @@ using Engine.Objects.Camera;
 using Engine.Events.QuantumEvents;
 using Engine.Events.QuantumEvents.Mouse;
 using Engine.Input.Keyboard;
+using Engine.Logging;
 
 namespace AppLib.Game;
 
 public class GameCamera(CameraData cameraData) : Camera(cameraData)
 {
-    public float CameraSpeed = 0.5f;
-    public float CameraSensitivity = 0.5f;
+    public float CameraSpeed = 0.05f;
+    public float CameraSensitivity = 0.005f;
 
     public override void HandleEvent(QuantumEvent e)
     {
@@ -18,9 +19,11 @@ public class GameCamera(CameraData cameraData) : Camera(cameraData)
         if (e is not MouseMoveEvent mouseMove) return;
 
         var speed = CameraSensitivity * (float)TestApp.Instance.Clock.MetaData.DeltaTime;
+        
+        Logger.Info($"event: {mouseMove}");
 
-        MetaData.Yaw += mouseMove.Pos.X * speed;
-        MetaData.Pitch += mouseMove.Pos.Y * speed;
+        MetaData.Yaw -= mouseMove.Rel.X * speed;
+        MetaData.Pitch += mouseMove.Rel.Y * speed;
         NeedsUpdate = true;
     }
 

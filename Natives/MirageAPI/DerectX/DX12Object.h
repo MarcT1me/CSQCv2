@@ -31,7 +31,7 @@ namespace MirageAPI::DirectX
         {
             if (disposed)
             {
-                throw gcnew System::InvalidOperationException("Can't operate on disposed object");
+                throw gcnew InvalidOperationException("Can't operate on disposed object");
             }
         }
     };

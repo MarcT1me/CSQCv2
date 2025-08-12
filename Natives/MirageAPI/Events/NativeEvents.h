@@ -1,10 +1,13 @@
 ﻿#pragma once
 
+using namespace System;
+using namespace OpenTK::Mathematics;
+
 namespace MirageAPI::Events
 {
-    public value struct NativeKeyEvent
+    public ref struct NativeKeyEvent
     {
-        System::IntPtr windowID;
+        IntPtr windowID;
 
         int Key;
         bool Pressed;
@@ -18,16 +21,17 @@ namespace MirageAPI::Events
         Button, Move, Scroll,
     };
 
-    public value struct NativeMouseEvent
+    public ref struct NativeMouseEvent
     {
         NativeMouseEventType Type;
-        System::IntPtr windowID;
+        IntPtr windowID;
 
         int Button;
         bool Pressed;
 
-        float X;
-        float Y;
+        Vector2i Pos;
+        Vector2i Rel;
+        
         int Mode;
     };
 
@@ -36,25 +40,25 @@ namespace MirageAPI::Events
         Focus, Maximize, Iconify, Resize, Move, Refresh, Close,
     };
 
-    public value struct NativeWindowEvent
+    public ref struct NativeWindowEvent
     {
         NativeWindowEventType Type;
-        System::IntPtr windowID;
+        IntPtr windowID;
 
         int X;
         int Y;
     };
 
-    public value struct NativeCharEvent
+    public ref struct NativeCharEvent
     {
-        System::IntPtr windowID;
+        IntPtr windowID;
 
         unsigned int codepoint;
     };
 
-    public value struct NativeDropEvent
+    public ref struct NativeDropEvent
     {
-        System::IntPtr windowID;
+        IntPtr windowID;
 
         int count;
         const char** paths;
@@ -65,14 +69,14 @@ namespace MirageAPI::Events
         Joystick, Monitor
     };
 
-    public value struct NativeJoystickEvent
+    public ref struct NativeJoystickEvent
     {
         int JoystickID;
         
         bool Connected;
     };
 
-    public value struct NativeJoystickState
+    public ref struct NativeJoystickState
     {
         int JoystickID;
         
@@ -86,10 +90,10 @@ namespace MirageAPI::Events
         const unsigned char* Hats;
     };
 
-    public value struct NativeEvent
+    public ref struct NativeEvent
     {
         NativeEventType Type;
         int event;
-        System::IntPtr data;
+        IntPtr data;
     };
 }

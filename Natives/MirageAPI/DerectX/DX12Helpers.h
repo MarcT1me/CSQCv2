@@ -13,7 +13,7 @@ namespace MirageAPI::DirectX
                 throw gcnew HRException(
                     hr, CSFormat(
                         "{0} (hr - {1}): Device Removed (Reason - {2})",
-                        gcnew System::String(msg), hr, DX12Device::GetDeviceRemovedReason()
+                        gcnew String(msg), hr, DX12Device::GetDeviceRemovedReason()
                     )
                 );
             }
@@ -22,7 +22,7 @@ namespace MirageAPI::DirectX
                 throw gcnew HRException(
                     hr, CSFormat(
                         "{0} (hr - {1}): Invalid Arguments",
-                        gcnew System::String(msg), hr
+                        gcnew String(msg), hr
                     )
                 );
             }
@@ -31,14 +31,14 @@ namespace MirageAPI::DirectX
                 throw gcnew HRException(
                     hr, CSFormat(
                         "{0} (hr - {1}): Out of memory",
-                        gcnew System::String(msg), hr
+                        gcnew String(msg), hr
                     )
                 );
             }
             throw gcnew HRException(
                 hr, CSFormat(
                     "{0} (hr - {1})",
-                    gcnew System::String(msg), hr
+                    gcnew String(msg), hr
                 )
             );
         }
@@ -100,7 +100,7 @@ namespace MirageAPI::DirectX
         // Unknown/default
         case DX12ResourceFormat::Unknown:
         default:
-            throw gcnew System::NotImplementedException("Unsupported resource format");
+            throw gcnew NotImplementedException("Unsupported resource format");
         }
     }
 }

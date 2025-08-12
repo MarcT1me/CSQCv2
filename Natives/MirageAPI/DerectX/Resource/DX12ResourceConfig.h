@@ -63,14 +63,14 @@ namespace MirageAPI::DirectX::Resource
             CheckMissmatch(format, DX12ResourceFormat::R16_UINT)
                 CheckMissmatch(format, DX12ResourceFormat::R32_UINT)
                 {
-                    throw gcnew System::ArgumentException("Invalid index buffer format");
+                    throw gcnew ArgumentException("Invalid index buffer format");
                 }
 
             DX12ResourceConfig config = BufferConfig(DX12ResourceType::IndexBuffer, count, flags);
             config.Stride = GetResourceFormatSize(format);
             config.Format = format;
 
-            config.InitialState = DX12ResourceState::IndexBuffer;
+            config.InitialState = DX12ResourceState::GenericRead;
             return config;
         }
 
@@ -81,7 +81,7 @@ namespace MirageAPI::DirectX::Resource
         {
             DX12ResourceConfig config = BufferConfig(DX12ResourceType::ConstantBuffer, size, flags);
 
-            config.InitialState = DX12ResourceState::VertexAndConstantBuffer;
+            config.InitialState = DX12ResourceState::GenericRead;
             return config;
         }
 

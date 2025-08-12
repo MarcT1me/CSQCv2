@@ -6,10 +6,10 @@ namespace Engine.Events.QuantumEvents.Mouse;
 public class MouseScrollEvent(NativeMouseEvent e)
     : MouseEvent(EventType.MouseScroll, e.windowID)
 {
-    public readonly Vector2 Scroll = new(e.X, e.Y);
+    public readonly Vector2 Rel = e.Rel;
     
     public override string ToString()
     {
-        return $"MouseEvent<{Type}>(Scroll={Scroll}, Window: {WindowId})";
+        return $"MouseEvent<{Type}>(Rel={Rel}, Window: {WindowId})";
     }
 }

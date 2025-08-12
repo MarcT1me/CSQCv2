@@ -10,8 +10,8 @@ namespace MirageAPI::Events
         LONG_PTR ptr = GetWindowLongPtr(hWnd, GWLP_USERDATA);
         if (ptr == 0) return nullptr;
 
-        System::IntPtr managed_ptr(reinterpret_cast<void*>(ptr));
-        auto gch = System::Runtime::InteropServices::GCHandle::FromIntPtr(managed_ptr);
+        IntPtr managed_ptr(reinterpret_cast<void*>(ptr));
+        auto gch = Runtime::InteropServices::GCHandle::FromIntPtr(managed_ptr);
         return safe_cast<Window::NativeWindow^>(gch.Target);
     }
 
@@ -45,7 +45,7 @@ namespace MirageAPI::Events
             *button = 3;
             *pressed = false;
             break;
-            
+
         default:
             *button = -1;
             *pressed = false;
@@ -62,15 +62,15 @@ namespace MirageAPI::Events
             case WM_KEYDOWN:
             case WM_KEYUP:
                 {
-                    // Получаем модификаторы
                     int mods = 0;
+                    
                     if (GetKeyState(VK_SHIFT) & 0x8000)
                         mods |= 1 << 0;
                     if (GetKeyState(VK_CONTROL) & 0x8000)
                         mods |= 1 << 1;
                     if (GetKeyState(VK_MENU) & 0x8000)
                         mods |= 1 << 2;
-                    
+
                     if (GetKeyState(VK_CAPITAL) & 0x0001)
                         mods |= 1 << 3;
                     if (GetKeyState(VK_NUMLOCK) & 0x0001)
@@ -110,20 +110,20 @@ namespace MirageAPI::Events
 
             case WM_MOUSEWHEEL:
                 {
-                    NativeEventManager::ScrollCallback(
-                        window,
-                        LOWORD(lParam),
-                        HIWORD(lParam)
-                    );
+                    int x = LOWORD(lParam);
+                    int y = HIWORD(lParam);
+
+                    NativeEventManager::ScrollCallback(window, x, y);
                     break;
                 }
             case WM_MOUSEMOVE:
                 {
-                    NativeEventManager::CursorPositionCallback(
-                        window,
-                        LOWORD(lParam),
-                        HIWORD(lParam)
-                    );
+                    int x = LOWORD(lParam);
+                    int y = HIWORD(lParam);
+
+                    window->UpdateMousePosition(x, y);
+
+                    NativeEventManager::CursorPositionCallback(window, x, y);
                     break;
                 }
 
@@ -146,10 +146,8 @@ namespace MirageAPI::Events
 
             case WM_DESTROY:
                 {
-                    NativeEventManager::WindowCloseCallback(
-                        window
-                    );
                     PostQuitMessage(0);
+                    NativeEventManager::WindowCloseCallback(window);
                     return 0;
                 }
             default: ;

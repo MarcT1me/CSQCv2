@@ -17,12 +17,12 @@ namespace MirageAPI::DirectX::Shader
     }
 
     DX12Shader::DX12Shader(
-        array<System::Byte>^ byteArray,
+        array<Byte>^ byteArray,
         DX12ShaderType type
     ) : m_bytecode(nullptr),
         m_type(type)
     {
-        pin_ptr<System::Byte> pinnedData = &byteArray[0];
+        pin_ptr<Byte> pinnedData = &byteArray[0];
         UINT dataSize = byteArray->Length;
 
         ID3DBlob* bytecode;
@@ -53,7 +53,7 @@ namespace MirageAPI::DirectX::Shader
         };
     }
 
-    void DX12Shader::SaveToFile(System::String^ filePath)
+    void DX12Shader::SaveToFile(String^ filePath)
     {
         if (!m_bytecode) return;
 
@@ -69,7 +69,7 @@ namespace MirageAPI::DirectX::Shader
         fclose(file);
     }
 
-    DX12Shader^ DX12Shader::LoadFromFile(System::String^ filePath, DX12ShaderType type)
+    DX12Shader^ DX12Shader::LoadFromFile(String^ filePath, DX12ShaderType type)
     {
         pin_ptr<const wchar_t> nativePath = PtrToStringChars(filePath);
         FILE* file;
@@ -83,8 +83,8 @@ namespace MirageAPI::DirectX::Shader
         long fileSize = ftell(file);
         fseek(file, 0, SEEK_SET);
 
-        array<System::Byte>^ byteArray = gcnew array<System::Byte>(fileSize);
-        pin_ptr<System::Byte> pinnedArray = &byteArray[0];
+        array<Byte>^ byteArray = gcnew array<Byte>(fileSize);
+        pin_ptr<Byte> pinnedArray = &byteArray[0];
 
         fread(pinnedArray, 1, fileSize, file);
         fclose(file);

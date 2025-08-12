@@ -18,10 +18,10 @@ namespace MirageAPI::DirectX::Shader
         );
 
         static DX12Shader^ CompileShaderFromFile(
-            System::String^ filename,
+            String^ filename,
             DX12ShaderType shaderType,
-            System::String^ entry,
-            System::String^ target,
+            String^ entry,
+            String^ target,
             DX12ShaderCompileFlags compileFlags0
         )
         {
@@ -48,10 +48,10 @@ namespace MirageAPI::DirectX::Shader
         );
 
         static DX12Shader^ CompileShaderFromSource(
-            System::String^ source,
+            String^ source,
             DX12ShaderType shaderType,
-            System::String^ entry,
-            System::String^ target,
+            String^ entry,
+            String^ target,
             DX12ShaderCompileFlags compileFlags0
         )
         {

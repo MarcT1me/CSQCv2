@@ -3,6 +3,7 @@ using Engine.Graphic.Window;
 using Engine.Objects.Scene;
 using Engine.Objects.SceneNode;
 using Engine.Events.QuantumEvents;
+using MirageAPI.Window;
 
 namespace AppLib.Game;
 
@@ -24,12 +25,17 @@ public class TestApp : GameType
 
     protected override GameWindow CreateMainWindow()
     {
-        return new GameWindow(MetaData.WinData, MetaData.GlData, MetaData.Identifier.GetNameAnyway());
+        return new GameWindow(
+            MetaData.WinData,
+            MetaData.GlData,
+            MetaData.Identifier.GetNameAnyway(),
+            monitor: NativeDisplay.GetAllMonitors().Last()
+        );
     }
 
     public TestApp()
     {
-        Scene = new(new ());
+        Scene = new(new());
         Scene.AddChild(MainWindow.Camera);
     }
 

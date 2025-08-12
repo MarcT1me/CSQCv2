@@ -13,7 +13,7 @@ namespace MirageAPI::DirectX::Pipeline
         ID3D12RootSignature* m_rootSignature;
         ID3D12PipelineState* m_pso;
 
-        CSList<System::IntPtr>^ m_descriptorRanges;
+        CSList<IntPtr>^ m_descriptorRanges;
         D3D12_ROOT_PARAMETER* m_rootParameters;
         UINT m_rootParametersLength;
 

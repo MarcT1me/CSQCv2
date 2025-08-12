@@ -17,6 +17,9 @@
 #include <dxgi1_4.h>
 #include <d3dcompiler.h>
 
+using namespace System;
+using namespace OpenTK::Mathematics;
+
 #include "Helpers.h"
 #include "Exceptions.h"
 #include "rect.h"

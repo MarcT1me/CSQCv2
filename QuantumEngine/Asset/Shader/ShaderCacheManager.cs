@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Text;
+using Engine.Configuration;
 using Engine.Logging;
 using MirageAPI.DirectX.Shader;
 
@@ -30,7 +31,7 @@ public static class ShaderCacheManager
         if (isSuccess) return shaderData;
 
         shaderData.Source = AssetLoader.ReadTextAsset(assetFile, encoding);
-        
+
         return CompileAndSave(shaderData, flags);
     }
 
@@ -51,13 +52,12 @@ public static class ShaderCacheManager
     {
         var cachePath = GetCachePath(shaderData);
 
-        if (!File.Exists(cachePath)) return (false, shaderData);
-        
+        if (!File.Exists(cachePath) || BaseConfig.DebugMode) return (false, shaderData);
+
         Logger.Success($"Shader ({shaderData.Identifier}) cache file found!");
-        
+
         shaderData.NativeShader = DX12Shader.LoadFromFile(cachePath, shaderData.Type);
         return (true, shaderData);
-
     }
 
     public static string GetCachePath(ShaderData shaderData)
@@ -78,14 +78,16 @@ public static class ShaderCacheManager
             shaderData.Target,
             flags
         );
-        
-        Logger.Info($"Compile Shader ({shaderData.Identifier})");
+
+        Logger.Success($"Shader ({shaderData.Identifier}) Compiled!");
 
         Directory.CreateDirectory(Path.Combine(CacheDirectory, shaderData.MasterShaderName));
-        shader.SaveToFile(GetCachePath(shaderData));
-        
-        Logger.Success($"Cache for Shader ({shaderData.Identifier}) saved!");
-        
+        if (!BaseConfig.DebugMode)
+        {
+            shader.SaveToFile(GetCachePath(shaderData));
+            Logger.Success($"Cache for Shader ({shaderData.Identifier}) saved!");
+        }
+
         return shaderData;
     }
 }

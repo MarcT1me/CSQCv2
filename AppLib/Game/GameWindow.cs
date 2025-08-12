@@ -15,7 +15,7 @@ using Engine.Logging;
 using Engine.Events.QuantumEvents;
 using Engine.Events.QuantumEvents.Window;
 using Engine.Input.Keyboard;
-using Engine.Objects.Camera;
+using MirageAPI.Window;
 
 namespace AppLib.Game;
 
@@ -53,8 +53,14 @@ public class GameWindow : Window
     private DX12ConstantBuffer _matrixBuffer = null!;
     public GameCamera Camera = null!;
 
-    public GameWindow(WinData winData, GlData? glData = null, string? name = null)
-        : base(winData, glData, name)
+    public GameWindow(
+        WinData winData,
+        GlData? glData = null,
+        string? name = null,
+        Window? parent = null,
+        NativeMonitorInfo? monitor = null
+    )
+        : base(winData, glData, name, parent, monitor)
     {
         LoadShaders();
         CreatePipelineState();
@@ -62,6 +68,14 @@ public class GameWindow : Window
         CreateGeometryBuffers();
         CreateMatrixBuffer();
         CreateCamera();
+    }
+
+    public override void Prepare()
+    {
+        base.Prepare();
+        
+        NativeWindow.SetMouseVisibility(true);
+        NativeWindow.SetMouseCapture(true);
     }
 
     private void LoadShaders()
@@ -230,8 +244,9 @@ public class GameWindow : Window
     {
         Camera = new GameCamera(
             new(
-                position: new Vector3(-1, -1, -1),
+                position: new Vector3(0, 0, 2),
                 fov: 70,
+                clipPlanes: new Vector2(0.001f, 100.0f),
                 identifier: "GameCamera"
             )
         );
@@ -257,7 +272,6 @@ public class GameWindow : Window
         base.Update();
 
         Matrix4 world = Matrix4.Identity;
-        world.Transpose();
 
         MatrixBufferData matrixData = new MatrixBufferData
         {
@@ -285,7 +299,7 @@ public class GameWindow : Window
         // Финальная подготовка объекта к рендеру
         commandList.SetPrimitiveTopology(DX12PrimitiveTopology.TriangleList);
         commandList.BindBuffer(_vertexBuffer);
-        commandList.BindBuffer(0, _matrixBuffer);
+        commandList.BindBuffer(1, _matrixBuffer);
 
         // Рендер
         commandList.DrawInstanced((uint)_vertexCount, 1, 0, 0);

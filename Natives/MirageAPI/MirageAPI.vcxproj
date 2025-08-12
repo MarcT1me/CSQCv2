@@ -142,6 +142,8 @@
         <ClInclude Include="DerectX\Shader\DX12ShaderCompiler.h"/>
         <ClInclude Include="DerectX\Command\DX12CommandList.h"/>
         <ClInclude Include="Window\enums.h"/>
+        <ClInclude Include="Window\NativeDisplayInfo.h" />
+        <ClInclude Include="Window\NativeDisplay.h" />
         <ClInclude Include="Window\NativeWindow.h"/>
         <ClInclude Include="Events\NativeEventManager.h"/>
         <ClInclude Include="Events\NativeEventProc.h"/>
@@ -174,6 +176,7 @@
         </ClCompile>
         <ClCompile Include="Window/NativeWindow.cpp"/>
         <ClCompile Include="Events/NativeEventManager.cpp"/>
+        <ClCompile Include="Window\NativeDisplay.cpp" />
     </ItemGroup>
     <!--  Other-->
     <ItemGroup>

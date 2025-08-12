@@ -14,14 +14,14 @@ namespace MirageAPI::Events
     )
     {
         // format event
-        NativeKeyEvent e;
-        e.windowID = window->Handle;
+        NativeKeyEvent^ e = gcnew NativeKeyEvent();
+        e->windowID = window->Handle;
 
-        e.Key = key;
-        e.Pressed = pressed;
+        e->Key = key;
+        e->Pressed = pressed;
 
-        e.Scancode = scancode;
-        e.Mods = mods;
+        e->Scancode = scancode;
+        e->Mods = mods;
 
         // raise event
         window->RaiseKeyEvent(e);
@@ -37,42 +37,41 @@ namespace MirageAPI::Events
     )
     {
         // format event
-        NativeMouseEvent e;
-        e.windowID = window->Handle;
-        e.Type = NativeMouseEventType::Button;
+        NativeMouseEvent^ e = gcnew NativeMouseEvent();
+        e->windowID = window->Handle;
+        e->Type = NativeMouseEventType::Button;
 
-        e.Button = button;
-        e.Pressed = pressed;
+        e->Button = button;
+        e->Pressed = pressed;
 
-        e.Mode = mods;
-
-        // raise event
-        window->RaiseMouseEvent(e);
-    }
-
-    void NativeEventManager::ScrollCallback(Window::NativeWindow^ window, float xOffset, float yOffset)
-    {
-        // format event
-        NativeMouseEvent e;
-        e.windowID = window->Handle;
-        e.Type = NativeMouseEventType::Scroll;
-
-        e.X = xOffset;
-        e.Y = yOffset;
+        e->Mode = mods;
 
         // raise event
         window->RaiseMouseEvent(e);
     }
 
-    void NativeEventManager::CursorPositionCallback(Window::NativeWindow^ window, float xPos, float yPos)
+    void NativeEventManager::ScrollCallback(Window::NativeWindow^ window, int xOffset, int yOffset)
     {
         // format event
-        NativeMouseEvent e;
-        e.windowID = window->Handle;
-        e.Type = NativeMouseEventType::Move;
+        NativeMouseEvent^ e = gcnew NativeMouseEvent();
+        e->windowID = window->Handle;
+        e->Type = NativeMouseEventType::Scroll;
 
-        e.X = xPos;
-        e.Y = yPos;
+        e->Rel = Vector2i(xOffset, yOffset);
+
+        // raise event
+        window->RaiseMouseEvent(e);
+    }
+
+    void NativeEventManager::CursorPositionCallback(Window::NativeWindow^ window, int xPos, int yPos)
+    {
+        // format event
+        NativeMouseEvent^ e = gcnew NativeMouseEvent();
+        e->windowID = window->Handle;
+        e->Type = NativeMouseEventType::Move;
+
+        e->Pos = Vector2i(xPos, yPos);
+        e->Rel = *window->MouseDelta;
 
         // raise event
         window->RaiseMouseEvent(e);
@@ -83,11 +82,11 @@ namespace MirageAPI::Events
     void NativeEventManager::WindowFocusedCallback(Window::NativeWindow^ window, int focused)
     {
         // format event
-        NativeWindowEvent e;
-        e.windowID = window->Handle;
-        e.Type = NativeWindowEventType::Focus;
+        NativeWindowEvent^ e = gcnew NativeWindowEvent();
+        e->windowID = window->Handle;
+        e->Type = NativeWindowEventType::Focus;
 
-        e.X = focused;
+        e->X = focused;
 
         // raise event
         window->RaiseWindowEvent(e);
@@ -96,11 +95,11 @@ namespace MirageAPI::Events
     void NativeEventManager::WindowMaximizeCallback(Window::NativeWindow^ window, int maximize)
     {
         // format event
-        NativeWindowEvent e;
-        e.windowID = window->Handle;
-        e.Type = NativeWindowEventType::Maximize;
+        NativeWindowEvent^ e = gcnew NativeWindowEvent();
+        e->windowID = window->Handle;
+        e->Type = NativeWindowEventType::Maximize;
 
-        e.X = maximize;
+        e->X = maximize;
 
         // raise event
         window->RaiseWindowEvent(e);
@@ -109,11 +108,11 @@ namespace MirageAPI::Events
     void NativeEventManager::WindowIconifyCallback(Window::NativeWindow^ window, int iconify)
     {
         // format event
-        NativeWindowEvent e;
-        e.windowID = window->Handle;
-        e.Type = NativeWindowEventType::Iconify;
+        NativeWindowEvent^ e = gcnew NativeWindowEvent();
+        e->windowID = window->Handle;
+        e->Type = NativeWindowEventType::Iconify;
 
-        e.X = iconify;
+        e->X = iconify;
 
         // raise event
         window->RaiseWindowEvent(e);
@@ -122,12 +121,12 @@ namespace MirageAPI::Events
     void NativeEventManager::WindowResizeCallback(Window::NativeWindow^ window, const int width, const int height)
     {
         // format event
-        NativeWindowEvent e;
-        e.windowID = window->Handle;
-        e.Type = NativeWindowEventType::Resize;
+        NativeWindowEvent^ e = gcnew NativeWindowEvent();
+        e->windowID = window->Handle;
+        e->Type = NativeWindowEventType::Resize;
 
-        e.X = width;
-        e.Y = height;
+        e->X = width;
+        e->Y = height;
 
         // raise event
         window->RaiseWindowEvent(e);
@@ -136,12 +135,12 @@ namespace MirageAPI::Events
     void NativeEventManager::WindowMoveCallback(Window::NativeWindow^ window, int x, int y)
     {
         // format event
-        NativeWindowEvent e;
-        e.windowID = window->Handle;
-        e.Type = NativeWindowEventType::Move;
+        NativeWindowEvent^ e = gcnew NativeWindowEvent();
+        e->windowID = window->Handle;
+        e->Type = NativeWindowEventType::Move;
 
-        e.X = x;
-        e.Y = y;
+        e->X = x;
+        e->Y = y;
 
         // raise event
         window->RaiseWindowEvent(e);
@@ -150,9 +149,9 @@ namespace MirageAPI::Events
     void NativeEventManager::WindowRefreshCallback(Window::NativeWindow^ window)
     {
         // format event
-        NativeWindowEvent e;
-        e.windowID = window->Handle;
-        e.Type = NativeWindowEventType::Refresh;
+        NativeWindowEvent^ e = gcnew NativeWindowEvent();
+        e->windowID = window->Handle;
+        e->Type = NativeWindowEventType::Refresh;
 
         // raise event
         window->RaiseWindowEvent(e);
@@ -161,9 +160,9 @@ namespace MirageAPI::Events
     void NativeEventManager::WindowCloseCallback(Window::NativeWindow^ window)
     {
         // format event
-        NativeWindowEvent e;
-        e.windowID = window->Handle;
-        e.Type = NativeWindowEventType::Close;
+        NativeWindowEvent^ e = gcnew NativeWindowEvent();
+        e->windowID = window->Handle;
+        e->Type = NativeWindowEventType::Close;
 
         // raise event
         window->RaiseWindowEvent(e);

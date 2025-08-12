@@ -36,13 +36,13 @@ namespace MirageAPI::DirectX::Shader
             if (errors)
             {
                 const char* errorMsg = static_cast<const char*>(errors->GetBufferPointer());
-                System::String^ managedError = gcnew System::String(errorMsg);
+                String^ managedError = gcnew String(errorMsg);
                 errors->Release();
                 throw gcnew DXException("Failed to compile shader: " + managedError);
             }
             _com_error err(hr);
             LPCTSTR errMsg = err.ErrorMessage();
-            System::String^ managedError = gcnew System::String(errMsg);
+            String^ managedError = gcnew String(errMsg);
             throw gcnew DXException("Failed to compile shader: " + managedError);
         }
 
@@ -81,13 +81,13 @@ namespace MirageAPI::DirectX::Shader
             if (errors)
             {
                 const char* errorMsg = static_cast<const char*>(errors->GetBufferPointer());
-                System::String^ managedError = gcnew System::String(errorMsg);
+                String^ managedError = gcnew String(errorMsg);
                 errors->Release();
                 throw gcnew DXException("Failed to compile shader: " + managedError);
             }
             _com_error err(hr);
             LPCTSTR errMsg = err.ErrorMessage();
-            System::String^ managedError = gcnew System::String(errMsg);
+            String^ managedError = gcnew String(errMsg);
             throw gcnew DXException("Failed to compile shader: " + managedError);
         }
 

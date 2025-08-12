@@ -6,27 +6,27 @@
 namespace MirageAPI::Window
 {
     // event rises
-    void NativeWindow::RaiseKeyEvent(Events::NativeKeyEvent event)
+    void NativeWindow::RaiseKeyEvent(Events::NativeKeyEvent^ event)
     {
         OnKey(event);
     }
 
-    void NativeWindow::RaiseMouseEvent(Events::NativeMouseEvent event)
+    void NativeWindow::RaiseMouseEvent(Events::NativeMouseEvent^ event)
     {
         OnMouse(event);
     }
 
-    void NativeWindow::RaiseWindowEvent(Events::NativeWindowEvent event)
+    void NativeWindow::RaiseWindowEvent(Events::NativeWindowEvent^ event)
     {
         OnWindow(event);
     }
 
-    void NativeWindow::RaiseCharEvent(Events::NativeCharEvent event)
+    void NativeWindow::RaiseCharEvent(Events::NativeCharEvent^ event)
     {
         OnChar(event);
     }
 
-    void NativeWindow::RaiseDropEvent(Events::NativeDropEvent event)
+    void NativeWindow::RaiseDropEvent(Events::NativeDropEvent^ event)
     {
         OnDrop(event);
     }
@@ -49,7 +49,7 @@ namespace MirageAPI::Window
 
     NativeWindow::NativeWindow(
         SimpleRect^ rect,
-        System::String^ title,
+        String^ title,
         float opacity,
         bool isFullscreen,
         NativeWindow^ parent,
@@ -57,25 +57,25 @@ namespace MirageAPI::Window
         DirectX::DX12ContextConfig^ dxContextConfig
     )
     {
-        SavedRect = DoubleRect::FromSimple(rect);
-        SavedStyle = (parent ? WS_CHILDWINDOW : static_cast<unsigned long>(wType)) | WS_EX_LAYERED;
+        savedRect = DoubleRect::FromSimple(rect);
+        savedStyle = (parent ? WS_CHILDWINDOW : static_cast<unsigned long>(wType)) | WS_EX_LAYERED;
 
         hwnd = CreateWindowEx(
             0, L"QWindow",
             msclr::interop::marshal_as<std::wstring>(title).c_str(),
-            SavedStyle,
-            SavedRect->X, SavedRect->Y,
-            SavedRect->Width, SavedRect->Height,
+            savedStyle,
+            savedRect->X, savedRect->Y,
+            savedRect->Width, savedRect->Height,
             parent ? parent->hwnd : nullptr,
             nullptr, hInstance, nullptr
         );
-        SetOpacity(opacity);
-        if (isFullscreen)
-            ToggleFullscreen();
+        Opacity = opacity;
+        SetFullscreen(isFullscreen);
+        savedMousePosition = MousePosition;
 
         {
-            gch = System::Runtime::InteropServices::GCHandle::Alloc(this);
-            void* native_ptr = System::Runtime::InteropServices::GCHandle::ToIntPtr(gch).ToPointer();
+            gch = Runtime::InteropServices::GCHandle::Alloc(this);
+            void* native_ptr = Runtime::InteropServices::GCHandle::ToIntPtr(gch).ToPointer();
             SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(native_ptr));
         }
         dxContext = gcnew DirectX::DX12Context(hwnd, dxContextConfig);
@@ -129,44 +129,113 @@ namespace MirageAPI::Window
 
     void NativeWindow::ToggleFullscreen()
     {
-        if (!IsFullscreen)
+        SetFullscreen(!isFullscreen);
+    }
+
+    void NativeWindow::SetFullscreen(bool isFull)
+    {
+        if (isFull && !isFullscreen)
         {
-            SavedRect = CurrentWindowRect;
-            DoubleRect^ screenRect = CurrentMonitorRect;
+            savedRect = CurrentWindowRect;
+            NativeMonitorInfo^ screenRect = CurrentMonitor;
 
             SetWindowLongPtr(
                 hwnd, GWL_STYLE,
-                SavedStyle & ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU)
+                savedStyle & ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU)
             );
 
             SetWindowPos(
                 hwnd,
                 HWND_TOP,
-                screenRect->X, screenRect->Y,
-                screenRect->Width, screenRect->Height,
+                screenRect->Position.X, screenRect->Position.Y,
+                screenRect->Size.X, screenRect->Size.Y,
                 SWP_FRAMECHANGED | SWP_SHOWWINDOW
             );
 
-            IsFullscreen = true;
+            isFullscreen = true;
         }
-        else
+        else if (!isFullscreen && isFull)
         {
             SetWindowLongPtr(
                 hwnd, GWL_STYLE,
-                SavedStyle
+                savedStyle
             );
 
             SetWindowPos(
                 hwnd,
                 nullptr,
-                SavedRect->X,
-                SavedRect->Y,
-                SavedRect->Width,
-                SavedRect->Height,
+                savedRect->X,
+                savedRect->Y,
+                savedRect->Width,
+                savedRect->Height,
                 SWP_FRAMECHANGED | SWP_SHOWWINDOW | SWP_NOZORDER
             );
 
-            IsFullscreen = false;
+            isFullscreen = false;
+        }
+    }
+
+    void NativeWindow::ToggleMouseVisibility()
+    {
+        SetMouseVisibility(!isMouseVisible);
+    }
+
+    void NativeWindow::SetMouseVisibility(bool isVisible)
+    {
+        ShowCursor(isVisible ? TRUE : FALSE);
+        isMouseVisible = isVisible;
+    }
+
+    void NativeWindow::ToggleMouseCapture()
+    {
+        SetMouseCapture(!mouseCaptureWindow);
+    }
+
+    void NativeWindow::SetMouseCapture(bool isCapture)
+    {
+        if (mouseCaptureWindow != this)
+        {
+            QuantumLog(Warning, "Mouse has already been captured in another window\nTrying to release capture mouse");
+            mouseCaptureWindow->SetMouseCapture(false);
+        }
+
+        if (isCapture && !mouseCaptureWindow)
+        {
+            SetCapture(hwnd);
+
+            lastMousePosition = savedMousePosition = MousePosition;
+
+            mouseCaptureWindow = this;
+        }
+        else if (!isCapture && mouseCaptureWindow)
+        {
+            ReleaseCapture();
+
+            mouseCaptureWindow = nullptr;
+        }
+    }
+
+    void NativeWindow::UpdateMousePosition(int x, int y)
+    {
+        lastMousePosition = savedMousePosition;
+        savedMousePosition = gcnew Vector2i(x, y);
+
+        mouseDelta = gcnew Vector2i(
+            savedMousePosition->X - lastMousePosition->X,
+            savedMousePosition->Y - lastMousePosition->Y
+        );
+
+        if (mouseCaptureWindow == this)
+        {
+            DoubleRect^ rect = CurrentWindowRect;
+
+            int centerX = rect->Width / 2;
+            int centerY = rect->Height / 2;
+
+            MousePosition = gcnew Vector2i(centerX, centerY);
+
+            lastMousePosition = Vector2i(centerX, centerY);
+            savedMousePosition = lastMousePosition;
         }
     }
 
@@ -188,7 +257,7 @@ namespace MirageAPI::Window
         FlashWindowEx(&flashInfo);
     }
 
-    void NativeWindow::SetTitle(System::String^ title)
+    void NativeWindow::SetTitle(String^ title)
     {
         SetWindowText(hwnd, msclr::interop::marshal_as<std::wstring>(title).c_str());
     }
@@ -206,13 +275,6 @@ namespace MirageAPI::Window
     void NativeWindow::SetPositionAndSize(int x, int y, int width, int height)
     {
         SetWindowPos(hwnd, nullptr, x, y, width, height, SWP_NOZORDER);
-    }
-
-    void NativeWindow::SetOpacity(float opacity)
-    {
-        opacity = std::min(std::max(opacity, 0.0f), 1.0f);
-        BYTE alpha = static_cast<BYTE>(opacity * 255);
-        SetLayeredWindowAttributes(hwnd, 0, alpha, LWA_ALPHA);
     }
 
     void NativeWindow::Update()
@@ -238,26 +300,6 @@ namespace MirageAPI::Window
         return rect;
     }
 
-    DoubleRect^ NativeWindow::CurrentMonitorRect::get()
-    {
-        MONITORINFO monitorInfo;
-        monitorInfo.cbSize = sizeof(MONITORINFO);
-        GetMonitorInfo(CurrentMonitor, &monitorInfo);
-        RECT screenRect = monitorInfo.rcMonitor;
-
-        DoubleRect^ rect = gcnew DoubleRect();
-        rect->Left = screenRect.left;
-        rect->Right = screenRect.right;
-        rect->Top = screenRect.top;
-        rect->Bottom = screenRect.bottom;
-
-        rect->X = screenRect.left;
-        rect->Y = screenRect.top;
-        rect->Width = screenRect.right - screenRect.left;
-        rect->Height = screenRect.bottom - screenRect.top;
-        return rect;
-    }
-
     float NativeWindow::Opacity::get()
     {
         BYTE alpha = 0;
@@ -267,6 +309,28 @@ namespace MirageAPI::Window
             return static_cast<float>(alpha) / 255.0f;
         }
         return 1.0f;
+    }
+
+    void NativeWindow::Opacity::set(float value)
+    {
+        value = std::min(std::max(value, 0.0f), 1.0f);
+        BYTE alpha = static_cast<BYTE>(value * 255);
+        SetLayeredWindowAttributes(hwnd, 0, alpha, LWA_ALPHA);
+    }
+
+    Vector2i^ NativeWindow::MousePosition::get()
+    {
+        POINT point;
+        GetCursorPos(&point);
+        ScreenToClient(hwnd, &point);
+        return gcnew Vector2i(point.x, point.y);
+    }
+
+    void NativeWindow::MousePosition::set(Vector2i^ value)
+    {
+        POINT center = {static_cast<LONG>(value->X), static_cast<LONG>(value->Y)};
+        ClientToScreen(hwnd, &center);
+        SetCursorPos(center.x, center.y);
     }
 
     bool NativeWindow::IsMinimized::get()
@@ -282,6 +346,20 @@ namespace MirageAPI::Window
     void NativeWindow::SetVSync(UINT interval)
     {
         dxContext->VSync = interval;
+    }
+
+    void NativeWindow::MoveWindowToMonitor(NativeMonitorInfo^ monitorInfo)
+    {
+        DoubleRect^ rect = CurrentWindowRect;
+        NativeMonitorInfo^ curMonitor = CurrentMonitor;
+
+        int xRel = rect->Left - curMonitor->Position.X;
+        int yRel = rect->Top - curMonitor->Position.Y;
+
+        int x = monitorInfo->Position.X + xRel;
+        int y = monitorInfo->Position.Y + yRel;
+
+        SetPosition(x, y);
     }
 
     void NativeWindow::BeginFrame()

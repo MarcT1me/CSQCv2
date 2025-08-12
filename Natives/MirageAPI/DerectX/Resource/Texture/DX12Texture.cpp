@@ -214,12 +214,12 @@ namespace MirageAPI::DirectX::Resource
         return Result;
     }
 
-    void DX12Texture::UploadData(array<System::Byte>^ data)
+    void DX12Texture::UploadData(array<Byte>^ data)
     {
         // validate texture himself and data
         Validate();
         if (!data || data->Length == 0)
-            throw gcnew System::ArgumentException("Invalid texture data");
+            throw gcnew ArgumentException("Invalid texture data");
 
         const UINT uploadBufferSize = GetRequiredIntermediateSize(m_nativeResource, 0, 1);
 
@@ -248,7 +248,7 @@ namespace MirageAPI::DirectX::Resource
             );
 
             void* pUploadData = malloc(copySize);
-            pin_ptr<System::Byte> pinnedData = &data[0];
+            pin_ptr<Byte> pinnedData = &data[0];
             memcpy(pUploadData, pinnedData, copySize);
 
             D3D12_SUBRESOURCE_DATA textureSubresourceData;

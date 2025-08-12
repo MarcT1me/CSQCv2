@@ -11,7 +11,7 @@ namespace MirageAPI::DirectX::Shader
 
     public:
         DX12Shader(ID3DBlob* bytecode, DX12ShaderType type);
-        DX12Shader(array<System::Byte>^ byteArray, DX12ShaderType type);
+        DX12Shader(array<Byte>^ byteArray, DX12ShaderType type);
 
         ~DX12Shader() { this->!DX12Shader(); }
         !DX12Shader();
@@ -29,7 +29,7 @@ namespace MirageAPI::DirectX::Shader
             D3D12_SHADER_BYTECODE get();
         }
 
-        void SaveToFile(System::String^ filePath);
-        static DX12Shader^ LoadFromFile(System::String^ filePath, DX12ShaderType type);
+        void SaveToFile(String^ filePath);
+        static DX12Shader^ LoadFromFile(String^ filePath, DX12ShaderType type);
     };
 }

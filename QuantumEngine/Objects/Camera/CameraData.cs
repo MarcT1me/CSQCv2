@@ -32,6 +32,7 @@ public class CameraData : ActorData
     public CameraData(
         CameraType cameraType = CameraType.Perspective,
         Vector3? position = null,
+        Vector3? rotation = null,
         Vector2? clipPlanes = null,
         float fov = 60,
         // MetaData
@@ -39,7 +40,8 @@ public class CameraData : ActorData
     ) : base(identifier: identifier)
     {
         CameraType = cameraType;
-        Transform.Position = position ?? Vector3.One;
+        Transform.Position = position ?? Vector3.Zero;
+        Transform.Rotation = rotation ?? new Vector3(1, 0, 0);
         ClipPlanes = clipPlanes ?? new Vector2(0.001f, 100.0f);
         Fov = fov;
     }

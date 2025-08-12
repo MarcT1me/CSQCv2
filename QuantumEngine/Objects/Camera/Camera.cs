@@ -81,7 +81,7 @@ public class Camera(CameraData cameraData)
     {
         ViewMatrix = Matrix4.LookAt(
             MetaData.Transform.Position,
-            Vector3.Zero,
+            MetaData.Transform.Position + Forward,
             Up
         );
 

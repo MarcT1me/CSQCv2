@@ -1,5 +1,8 @@
 ﻿#pragma once
 
+using namespace System;
+using namespace OpenTK::Mathematics;
+
 #include "../Window/NativeWindow.h"
 
 namespace MirageAPI::Events
@@ -26,8 +29,8 @@ namespace MirageAPI::Events
             int mods
         );
 
-        static void ScrollCallback(Window::NativeWindow^ window, float xOffset, float yOffset);
-        static void CursorPositionCallback(Window::NativeWindow^ window, float xPos, float yPos);
+        static void ScrollCallback(Window::NativeWindow^ window, int xOffset, int yOffset);
+        static void CursorPositionCallback(Window::NativeWindow^ window, int xPos, int yPos);
 
         // window
 

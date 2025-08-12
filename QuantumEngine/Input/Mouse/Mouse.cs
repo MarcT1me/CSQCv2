@@ -17,7 +17,6 @@ public class Mouse(IntPtr windowHandle)
     public static bool GetButton(byte button) => Get(LastActiveWindowId).IsButtonDown(button);
 
     public static Vector2 GetPos() => Get(LastActiveWindowId).Pos;
-    public static Vector2 GetRell() => Get(LastActiveWindowId).ScrollPos;
 
     public static Mouse Get(IntPtr windowId)
     {
@@ -46,7 +45,6 @@ public class Mouse(IntPtr windowHandle)
 
     // vec sroll and pos
 
-    public Vector2 ScrollPos { get; private set; } = Vector2i.Zero;
     public Vector2 Pos { get; private set; } = Vector2i.Zero;
 
     // updating
@@ -68,9 +66,6 @@ public class Mouse(IntPtr windowHandle)
                 break;
             case MouseButtonEvent { Type: EventType.MouseButtonUp } mbu:
                 SetButton(mbu.Button, false);
-                break;
-            case MouseScrollEvent { Type: EventType.MouseScroll } ms:
-                ScrollPos = ms.Scroll;
                 break;
             case MouseMoveEvent { Type: EventType.MouseMove } mm:
                 Pos = mm.Pos;

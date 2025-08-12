@@ -40,7 +40,7 @@ namespace MirageAPI::DirectX::Resource
         );
 
         virtual void UploadData(
-            array<System::Byte>^ data
+            array<Byte>^ data
         );
     };
 }

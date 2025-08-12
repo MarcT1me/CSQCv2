@@ -21,7 +21,7 @@ namespace MirageAPI::DirectX::Pipeline
         }
 
     internal:
-        D3D12_ROOT_PARAMETER GenerateNativeDesc(CSList<System::IntPtr>^ rangesList)
+        D3D12_ROOT_PARAMETER GenerateNativeDesc(CSList<IntPtr>^ rangesList)
         {
             D3D12_ROOT_PARAMETER param;
             param.ParameterType = static_cast<D3D12_ROOT_PARAMETER_TYPE>(Type);
@@ -50,7 +50,7 @@ namespace MirageAPI::DirectX::Pipeline
                 param.DescriptorTable.NumDescriptorRanges = 1;
                 param.DescriptorTable.pDescriptorRanges = range;
 
-                rangesList->Add(System::IntPtr(range));
+                rangesList->Add(IntPtr(range));
             }
             else
             {
@@ -215,7 +215,7 @@ namespace MirageAPI::DirectX::Pipeline
 
     public ref struct DX12InputElement
     {
-        System::String^ Name;
+        String^ Name;
         DX12ResourceFormat Format;
         UINT Offset;
         uint32_t Index = 0;
@@ -224,7 +224,7 @@ namespace MirageAPI::DirectX::Pipeline
         bool IsInstanceData = false;
 
         DX12InputElement(
-            System::String^ name,
+            String^ name,
             DX12ResourceFormat format,
             UINT offset
         ) : Name(name),

@@ -68,7 +68,7 @@ namespace MirageAPI::DirectX::Resource
         property bool HasSRV { bool get() { return m_srvDescriptorIndex != UINT_MAX; } }
 
         // texture operations
-        virtual void UploadData(array<System::Byte>^ data);
+        virtual void UploadData(array<Byte>^ data);
 
         D3D12_SHADER_RESOURCE_VIEW_DESC CreateSRVDesc();
         void CreateSRV();

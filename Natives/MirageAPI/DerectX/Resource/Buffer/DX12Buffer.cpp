@@ -72,7 +72,7 @@ namespace MirageAPI::DirectX::Resource
     }
 
     void DX12Buffer::UploadData(
-        array<System::Byte>^ data
+        array<Byte>^ data
     )
     {
         // validate
@@ -84,7 +84,7 @@ namespace MirageAPI::DirectX::Resource
         CheckNull(pData) return QuantumLog(Warning, "Error mapping data in DX12Buffer::UploadData");
         // copy data
         {
-            pin_ptr<System::Byte> pinData = &data[0];
+            pin_ptr<Byte> pinData = &data[0];
             memcpy(pData, pinData, m_size);
         }
         // unmap

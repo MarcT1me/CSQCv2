@@ -12,15 +12,15 @@ struct VertexOutput
 
 cbuffer TransformCB : register(b0)
 {
-    float4x4 world;
-    float4x4 view;
-    float4x4 projection;
+    row_major float4x4 world;
+    row_major float4x4 view;
+    row_major float4x4 projection;
 }
 
 VertexOutput VS(VertexInput input)
 {
     VertexOutput output;
-    float4x4 wvp = mul(mul(world, view), projection);
+    float4x4 wvp = mul(world, mul(view, projection));
     output.position = mul(float4(input.position, 1.0), wvp);
     output.uv = input.uv;
     return output;

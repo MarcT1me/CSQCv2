@@ -10,7 +10,7 @@ namespace MirageAPI::DirectX::Pipeline
         Shader::DX12Shader^ vertexShader,
         Shader::DX12Shader^ pixelShader,
         DX12PipelineStateConfig^ config
-    ) : m_descriptorRanges(gcnew CSList<System::IntPtr>())
+    ) : m_descriptorRanges(gcnew CSList<IntPtr>())
     {
         // generating root params
         if (config->RootParams)
@@ -50,7 +50,7 @@ namespace MirageAPI::DirectX::Pipeline
             if (errorBlob)
             {
                 LPCSTR errMsg = static_cast<LPCSTR>(errorBlob->GetBufferPointer());
-                System::String^ message = gcnew System::String(errMsg);
+                String^ message = gcnew String(errMsg);
                 errorBlob->Release();
                 throw gcnew DXException("Root signature error: " + message);
             }
@@ -99,7 +99,7 @@ namespace MirageAPI::DirectX::Pipeline
         for (UINT i = 0; i < m_inputLayoutsLength; i++)
         {
             DX12InputElement^ inputLayout = config->InputLayouts[i];
-            System::String^ str = inputLayout->Name;
+            String^ str = inputLayout->Name;
             m_semanticNames[i] = msclr::interop::marshal_as<std::string>(str);
             m_inputLayoutsArr[i] =
             {

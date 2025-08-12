@@ -31,7 +31,8 @@ public class Window
         WinData winData,
         GlData? glData = null,
         string? name = null,
-        Window? parent = null
+        Window? parent = null,
+        NativeMonitorInfo? monitor = null
     ) : base(new WindowData(winData, glData ?? new GlData(), name))
     {
         Logger.Info(
@@ -115,17 +116,23 @@ public class Window
         NativeWindow.Establish();
     }
 
-    protected void TogleFullscreen()
+    protected void ToggleFullscreen()
     {
-        MetaData.WinData.Fullscreen = !MetaData.WinData.Fullscreen;
         NativeWindow.ToggleFullscreen();
+        MetaData.WinData.Fullscreen = !MetaData.WinData.Fullscreen;
+    }
+
+    protected void SetFullscreen(bool isFullscreen)
+    {
+        NativeWindow.SetFullscreen(isFullscreen);
+        MetaData.WinData.Fullscreen = isFullscreen;
     }
 
     protected void SetOpacity(float? opacity = null)
     {
         if (opacity.HasValue)
             UpdateOpacity(opacity.Value);
-        NativeWindow.SetOpacity(MetaData.WinData.Opacity);
+        NativeWindow.Opacity = MetaData.WinData.Opacity;
     }
 
     protected void UpdateOpacity(float opacity)
