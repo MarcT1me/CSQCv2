@@ -1,4 +1,6 @@
-﻿namespace Engine.Objects.Scene;
+﻿using Engine.Time;
+
+namespace Engine.Objects.Scene;
 
 using SceneNode;
 
@@ -13,30 +15,30 @@ public class HeadlessScene<T>
     
     #region Cycle methods
 
-    public virtual void PreUpdate()
+    public virtual void PreUpdate(ClockMeta clockMeta)
     {
         foreach (var updatableChild in IterChildren<IUpdatable>())
         {
-            if (updatableChild.IsActive() || updatableChild.IsDynamic())
-                updatableChild.PreUpdate();
+            if (updatableChild.IsDynamic)
+                updatableChild.PreUpdate(clockMeta);
         }
     }
 
-    public virtual void Update()
+    public virtual void Update(ClockMeta clockMeta)
     {
         foreach (var updatableChild in IterChildren<IUpdatable>())
         {
-            if (updatableChild.IsActive() || updatableChild.IsDynamic())
-                updatableChild.Update();
+            if (updatableChild.IsDynamic)
+                updatableChild.Update(clockMeta);
         }
     }
 
-    public virtual void PostUpdate()
+    public virtual void PostUpdate(ClockMeta clockMeta)
     {
         foreach (var updatableChild in IterChildren<IUpdatable>())
         {
-            if (updatableChild.IsActive() || updatableChild.IsDynamic())
-                updatableChild.PostUpdate();
+            if (updatableChild.IsDynamic)
+                updatableChild.PostUpdate(clockMeta);
         }
     }
 

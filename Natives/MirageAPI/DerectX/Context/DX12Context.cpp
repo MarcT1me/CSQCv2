@@ -38,10 +38,9 @@ namespace MirageAPI::DirectX
         m_winRect = winRect;
     }
 
-    void DX12Context::SetResolution(int width, int height)
+    void DX12Context::SetResolution(Vector2i^ resolution)
     {
-        m_config->ResolutionX = width;
-        m_config->ResolutionY = height;
+        m_config->Resolution = *resolution;
         m_isResized = true;
     }
 
@@ -56,18 +55,15 @@ namespace MirageAPI::DirectX
         m_isResized = false;
     }
 
-    void DX12Context::SetViewport(float x, float y, float width, float height)
+    void DX12Context::SetViewport(SimpleRect^ viewportRect)
     {
-        m_config->Viewport->X = x;
-        m_config->Viewport->Y = y;
-        m_config->Viewport->Width = width;
-        m_config->Viewport->Height = height;
+        m_config->Viewport = viewportRect;
     }
 
-    void DX12Context::SetViewportDepth(float x, float y)
+    void DX12Context::SetClipPlanes(Vector2^ depth)
     {
-        m_config->Near = x;
-        m_config->Far = y;
+        m_config->Near = depth->X;
+        m_config->Far = depth->Y;
     }
 
     void DX12Context::BeginFrame()
@@ -85,8 +81,8 @@ namespace MirageAPI::DirectX
 
         // first (default) commands
         m_commandList->SetViewport(
-            m_config->Viewport->X,
-            m_config->Viewport->Y,
+            static_cast<float>(m_config->Viewport->X),
+            static_cast<float>(m_config->Viewport->Y),
             m_config->Viewport->Width == -1
                 ? static_cast<float>(m_winRect->Width)
                 : m_config->Viewport->Width,
@@ -108,11 +104,11 @@ namespace MirageAPI::DirectX
         );
     }
 
-    void DX12Context::Clear(float r, float g, float b, float a)
+    void DX12Context::Clear(Color4 color)
     {
         if (IncorrectSize) return;
 
-        m_commandList->ClearRenderTargetView(m_swapChain->CurrentFrameBuffer, r, g, b, a);
+        m_commandList->ClearRenderTargetView(m_swapChain->CurrentFrameBuffer, color.R, color.G, color.B, color.A);
     }
 
     void DX12Context::EndFrame()

@@ -50,27 +50,23 @@ namespace MirageAPI::DirectX
             UINT get() { return m_config->VSyncInterval; }
             void set(UINT value) { m_config->VSyncInterval = value; }
         }
-        property int ResolutionX
+        property Vector2i Resolution
         {
-            int get() { return m_config->ResolutionX; }
-        }
-        property int ResolutionY
-        {
-            int get() { return m_config->ResolutionY; }
+            Vector2i get() { return m_config->Resolution; }
         }
         // other
         property bool IncorrectSize
         {
-            bool get() { return ResolutionX <= 0 || ResolutionY <= 0; }
+            bool get() { return m_config->Resolution.X <= 0 || m_config->Resolution.Y <= 0; }
         }
 
         // context methods
-        void SetResolution(int width, int height);
+        void SetResolution(Vector2i^ resolution);
         void SetWinRect(DoubleRect^ winRect);
-        void SetViewport(float x, float y, float width, float height);
-        void SetViewportDepth(float x, float y);
+        void SetViewport(SimpleRect^ viewportRect);
+        void SetClipPlanes(Vector2^ depth);
         void BeginFrame();
-        void Clear(float r, float g, float b, float a);
+        void Clear(Color4 color);
         void EndFrame();
         void Present();
     };

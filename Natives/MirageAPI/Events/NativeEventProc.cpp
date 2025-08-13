@@ -110,10 +110,7 @@ namespace MirageAPI::Events
 
             case WM_MOUSEWHEEL:
                 {
-                    int x = LOWORD(lParam);
-                    int y = HIWORD(lParam);
-
-                    NativeEventManager::ScrollCallback(window, x, y);
+                    NativeEventManager::ScrollCallback(window, static_cast<int>(wParam));
                     break;
                 }
             case WM_MOUSEMOVE:
@@ -124,6 +121,13 @@ namespace MirageAPI::Events
                     window->UpdateMousePosition(x, y);
 
                     NativeEventManager::CursorPositionCallback(window, x, y);
+                    break;
+                }
+            case WM_MOUSELEAVE:
+                {
+                    window->CursorLeaveHandle();
+                    
+                    NativeEventManager::CursorLeaveCallback(window);
                     break;
                 }
 

@@ -1,8 +1,8 @@
 ﻿using Engine.Base;
-using Engine.Graphic.Window;
 using Engine.Objects.Scene;
 using Engine.Objects.SceneNode;
 using Engine.Events.QuantumEvents;
+using Engine.Time;
 using MirageAPI.Window;
 
 namespace AppLib.Game;
@@ -19,7 +19,8 @@ public class TestApp : GameType
         return new TestAppData
         {
             Tps = 0,
-            WinData = new WinData(new(1600, 900))
+            WinData = new((1600, 900)),
+            GlData = new() { ClipPlanes = (0.001f, 4000f) }
         };
     }
 
@@ -28,8 +29,7 @@ public class TestApp : GameType
         return new GameWindow(
             MetaData.WinData,
             MetaData.GlData,
-            MetaData.Identifier.GetNameAnyway(),
-            monitor: NativeDisplay.GetAllMonitors().Last()
+            MetaData.Identifier.GetNameAnyway()
         );
     }
 
@@ -45,21 +45,21 @@ public class TestApp : GameType
         Scene.HandleEvent(e);
     }
 
-    public override void PreUpdate()
+    public override void PreUpdate(ClockMeta clockMeta)
     {
-        base.PreUpdate();
-        Scene.PreUpdate();
+        base.PreUpdate(clockMeta);
+        Scene.PreUpdate(clockMeta);
     }
 
-    public override void Update()
+    public override void Update(ClockMeta clockMeta)
     {
-        base.Update();
-        Scene.Update();
+        base.Update(clockMeta);
+        Scene.Update(clockMeta);
     }
 
-    public override void PostUpdate()
+    public override void PostUpdate(ClockMeta clockMeta)
     {
-        base.PostUpdate();
-        Scene.PostUpdate();
+        base.PostUpdate(clockMeta);
+        Scene.PostUpdate(clockMeta);
     }
 }

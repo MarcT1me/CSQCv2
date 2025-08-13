@@ -90,15 +90,15 @@ public abstract class App<TData>
 
             // Update
 
-            PreUpdate();
+            PreUpdate(Clock.MetaData);
             QuantumThread.WaitAll();
             if (!IsActive()) break;
 
-            Update();
+            Update(Clock.MetaData);
             QuantumThread.WaitAll();
             if (!IsActive()) break;
 
-            PostUpdate();
+            PostUpdate(Clock.MetaData);
             QuantumThread.WaitAll();
             if (!IsActive()) break;
             // Render
@@ -132,11 +132,11 @@ public abstract class App<TData>
         }
     }
 
-    public abstract void PreUpdate();
+    public abstract void PreUpdate(ClockMeta clockMeta);
 
-    public abstract void Update();
+    public abstract void Update(ClockMeta clockMeta);
 
-    public abstract void PostUpdate();
+    public abstract void PostUpdate(ClockMeta clockMeta);
 
     public abstract void PreRender();
 

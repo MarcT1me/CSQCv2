@@ -29,8 +29,10 @@ namespace MirageAPI::Events
             int mods
         );
 
-        static void ScrollCallback(Window::NativeWindow^ window, int xOffset, int yOffset);
+        static void ScrollCallback(Window::NativeWindow^ window, int params);
         static void CursorPositionCallback(Window::NativeWindow^ window, int xPos, int yPos);
+        static void CursorLeaveCallback(Window::NativeWindow^ window);
+        static void CursorEnterCallback(Window::NativeWindow^ window);
 
         // window
 

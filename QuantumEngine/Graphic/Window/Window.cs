@@ -1,4 +1,5 @@
 ﻿using Engine.Events.QuantumEvents.Window;
+using Engine.Time;
 using MirageAPI;
 using MirageAPI.DirectX;
 using OpenTK.Mathematics;
@@ -23,7 +24,8 @@ public class Window
 
     public Window? ActiveWindow { get; protected set; }
 
-    public Window? ParentWindow { get; init; }
+    public Window? ParentWindow { get; }
+    public NativeDisplayInfo? Display { get; protected set; }
     public IntPtr Handle => NativeWindow.Handle;
     public ObjectStatusFlags ObjectStatus => MetaData.Status;
 
@@ -32,7 +34,7 @@ public class Window
         GlData? glData = null,
         string? name = null,
         Window? parent = null,
-        NativeMonitorInfo? monitor = null
+        NativeDisplayInfo? display = null
     ) : base(new WindowData(winData, glData ?? new GlData(), name))
     {
         Logger.Info(
@@ -42,9 +44,11 @@ public class Window
             $"Opacity: {winData.Opacity}"
         );
 
+        ParentWindow = parent;
+        Display = display;
+
         // ReSharper disable once VirtualMemberCallInConstructor
         NativeWindow = PrepareInstance();
-        ParentWindow = parent;
 
         QEventSystem.RegisterWindow(NativeWindow);
         QEventSystem.EventHandling += HandleEvent;
@@ -69,6 +73,7 @@ public class Window
             MetaData.WinData.Opacity,
             MetaData.WinData.Fullscreen,
             ParentWindow?.NativeWindow,
+            Display,
             WindowType.Overlapped,
             CreateDefaultWindowContextConfig()
         );
@@ -79,17 +84,11 @@ public class Window
     {
         var windowContextConfig = new DX12ContextConfig
         {
-            Viewport = new SimpleRect
-            {
-                X = MetaData.GlData.Viewport.X,
-                Y = MetaData.GlData.Viewport.Y,
-                Width = MetaData.GlData.Viewport.Z,
-                Height = MetaData.GlData.Viewport.W
-            },
-            ResolutionX = MetaData.WinData.Resolution.X,
-            ResolutionY = MetaData.WinData.Resolution.Y,
-            Near = MetaData.GlData.ViewportDepth.X,
-            Far = MetaData.GlData.ViewportDepth.Y,
+            Viewport = MetaData.GlData.Viewport,
+            Near = MetaData.GlData.ClipPlanes.X,
+            Far = MetaData.GlData.ClipPlanes.Y,
+
+            Resolution = MetaData.WinData.Resolution,
 
             BufferCount = MetaData.GlData.MaxFramesInFlight,
             Format = MetaData.GlData.Format,
@@ -119,19 +118,18 @@ public class Window
     protected void ToggleFullscreen()
     {
         NativeWindow.ToggleFullscreen();
-        MetaData.WinData.Fullscreen = !MetaData.WinData.Fullscreen;
+        MetaData.WinData.Fullscreen = NativeWindow.IsFullscreen;
     }
 
     protected void SetFullscreen(bool isFullscreen)
     {
         NativeWindow.SetFullscreen(isFullscreen);
-        MetaData.WinData.Fullscreen = isFullscreen;
+        MetaData.WinData.Fullscreen = NativeWindow.IsFullscreen;
     }
 
-    protected void SetOpacity(float? opacity = null)
+    protected void SetOpacity(float opacity)
     {
-        if (opacity.HasValue)
-            UpdateOpacity(opacity.Value);
+        UpdateOpacity(opacity);
         NativeWindow.Opacity = MetaData.WinData.Opacity;
     }
 
@@ -146,11 +144,10 @@ public class Window
         SetPosition(position);
     }
 
-    protected void SetSize(Vector2i? size = null)
+    protected void SetSize(Vector2i size)
     {
-        if (size.HasValue)
-            UpdateSize(size.Value);
-        NativeWindow.SetSize(MetaData.WinData.Size.X, MetaData.WinData.Size.Y);
+        UpdateSize(size);
+        NativeWindow.SetSize(MetaData.WinData.Size);
     }
 
     protected void UpdateSize(Vector2i size)
@@ -158,11 +155,10 @@ public class Window
         MetaData.WinData.Size = size;
     }
 
-    protected void SetPosition(Vector2i? position = null)
+    protected void SetPosition(Vector2i position)
     {
-        if (position.HasValue)
-            UpdatePosition(position.Value);
-        NativeWindow.SetPosition(MetaData.WinData.Position.X, MetaData.WinData.Position.Y);
+        UpdatePosition(position);
+        NativeWindow.SetPosition(MetaData.WinData.Position);
     }
 
     protected void UpdatePosition(Vector2i position)
@@ -170,10 +166,9 @@ public class Window
         MetaData.WinData.Position = position;
     }
 
-    protected void SetVsync(uint? interval = 1)
+    protected void SetVsync(uint interval)
     {
-        if (interval.HasValue)
-            UpdateVsync(interval.Value);
+        UpdateVsync(interval);
         NativeWindow.SetVSync(MetaData.WinData.VSyncInterval);
     }
 
@@ -184,29 +179,19 @@ public class Window
 
     protected void UpdateViewport()
     {
-        NativeWindow.DXContext.SetViewport(
-            MetaData.GlData.Viewport.X,
-            MetaData.GlData.Viewport.Y,
-            MetaData.GlData.Viewport.Z,
-            MetaData.GlData.Viewport.W
-        );
+        NativeWindow.DXContext.SetViewport(MetaData.GlData.Viewport);
     }
 
     protected void UpdateViewportDepth()
     {
-        NativeWindow.DXContext.SetViewportDepth(
-            MetaData.GlData.ViewportDepth.X,
-            MetaData.GlData.ViewportDepth.Y
-        );
+        NativeWindow.DXContext.SetClipPlanes(MetaData.GlData.ClipPlanes);
     }
 
-    protected void BeginFrame() => NativeWindow.BeginFrame();
-
-    protected void Clear(Vector4 clearColor) =>
-        NativeWindow.Clear(clearColor.X, clearColor.Y, clearColor.Z, clearColor.W);
-
-    protected void EndFrame() => NativeWindow.EndFrame();
-    protected void Present() => NativeWindow.Present();
+    protected void MoveOnDisplay(NativeDisplayInfo display)
+    {
+        Display = display;
+        NativeWindow.MoveOnDisplay(display);
+    }
 
     protected void Show() => NativeWindow.Show();
     protected void Hide() => NativeWindow.Hide();
@@ -229,20 +214,20 @@ public class Window
                 break;
             case WinResizeEvent winResize:
                 UpdateSize(winResize.Size);
-                NativeWindow.DXContext.SetResolution(MetaData.WinData.Resolution.X, MetaData.WinData.Resolution.Y);
+                NativeWindow.DXContext.SetResolution(MetaData.WinData.Resolution);
                 break;
         }
     }
 
-    public virtual void PreUpdate()
+    public virtual void PreUpdate(ClockMeta clockMeta)
     {
     }
 
-    public virtual void Update()
+    public virtual void Update(ClockMeta clockMeta)
     {
     }
 
-    public virtual void PostUpdate()
+    public virtual void PostUpdate(ClockMeta clockMeta)
     {
     }
 
@@ -251,16 +236,23 @@ public class Window
         BeginFrame();
     }
 
+    protected void BeginFrame() => NativeWindow.BeginFrame();
+
     public virtual void Render()
     {
         Clear(MetaData.GlData.ClearColor);
     }
 
+    protected void Clear(Color4 clearColor) => NativeWindow.Clear(clearColor);
+
     public virtual void PostRender()
     {
         EndFrame();
-        Present();
     }
+
+    protected void EndFrame() => NativeWindow.EndFrame();
+
+    public void Present() => NativeWindow.Present();
 
     public virtual void Dispose()
     {

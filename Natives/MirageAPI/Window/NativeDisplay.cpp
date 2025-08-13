@@ -14,7 +14,7 @@ namespace MirageAPI::Window
         info.cbSize = sizeof(MONITORINFOEX);
         GetMonitorInfo(hMonitor, &info);
 
-        NativeMonitorInfo^ mi = gcnew NativeMonitorInfo();
+        NativeDisplayInfo^ mi = gcnew NativeDisplayInfo();
         mi->Handle = IntPtr(hMonitor);
         mi->Position = Vector2i(
             info.rcMonitor.left,
@@ -31,12 +31,12 @@ namespace MirageAPI::Window
         return TRUE;
     }
 
-    CSList<NativeMonitorInfo^>^ NativeDisplay::GetAllMonitors()
+    CSList<NativeDisplayInfo^>^ NativeDisplay::GetAllMonitors()
     {
         return Monitors->Count == 0 ? UpdateMonitors() : Monitors;
     }
 
-    CSList<NativeMonitorInfo^>^ NativeDisplay::UpdateMonitors()
+    CSList<NativeDisplayInfo^>^ NativeDisplay::UpdateMonitors()
     {
         Monitors->Clear();
         EnumDisplayMonitors(
@@ -47,7 +47,7 @@ namespace MirageAPI::Window
         return Monitors;
     }
 
-    NativeMonitorInfo^ NativeDisplay::GetPrimaryMonitor()
+    NativeDisplayInfo^ NativeDisplay::GetPrimaryMonitor()
     {
         if (Monitors->Capacity == 0) UpdateMonitors();
         for each (auto monitor in Monitors)
@@ -58,7 +58,7 @@ namespace MirageAPI::Window
         return Monitors[0];
     }
 
-    NativeMonitorInfo^ NativeDisplay::GetMonitorFromHandle(IntPtr hMonitor)
+    NativeDisplayInfo^ NativeDisplay::GetMonitorFromHandle(IntPtr hMonitor)
     {
         if (Monitors->Capacity == 0) UpdateMonitors();
         for each (auto monitor in Monitors)

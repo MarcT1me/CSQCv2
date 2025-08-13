@@ -2,7 +2,7 @@
 
 namespace MirageAPI::Window
 {
-    public ref struct NativeMonitorInfo
+    public ref struct NativeDisplayInfo
     {
         IntPtr Handle;
         String^ Name;

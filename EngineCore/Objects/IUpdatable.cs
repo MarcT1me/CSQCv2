@@ -1,21 +1,21 @@
-﻿namespace Engine.Objects;
+﻿using Engine.Time;
+
+namespace Engine.Objects;
 
 public interface IUpdatable : IHasActorStatus
 {
-    public bool IsDynamic() => ObjectStatus.HasFlag(ObjectStatusFlags.Dynamic);
-    
     /// <summary>
     /// Подгатовка перед обновлениями
     /// </summary>
-    void PreUpdate();
+    void PreUpdate(ClockMeta clockMeta);
     
     /// <summary>
     /// Обновления
     /// </summary>
-    void Update();
+    void Update(ClockMeta clockMeta);
     
     /// <summary>
     /// Завершение обновления
     /// </summary>
-    void PostUpdate();
+    void PostUpdate(ClockMeta clockMeta);
 }

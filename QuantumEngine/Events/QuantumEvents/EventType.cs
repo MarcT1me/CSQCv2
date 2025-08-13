@@ -10,6 +10,8 @@ public enum EventType : uint
     MouseButtonDown,
     MouseButtonUp,
     MouseMove,
+    MouseEnter,
+    MouseLeave,
     MouseScroll,
     
     WindowFocusGained,

@@ -7,12 +7,12 @@ namespace MirageAPI::Window
     public ref class NativeDisplay abstract
     {
     public:
-        static CSList<NativeMonitorInfo^>^ Monitors = gcnew CSList<NativeMonitorInfo^>();
+        static CSList<NativeDisplayInfo^>^ Monitors = gcnew CSList<NativeDisplayInfo^>();
 
-        static CSList<NativeMonitorInfo^>^ GetAllMonitors();
+        static CSList<NativeDisplayInfo^>^ GetAllMonitors();
 
-        static CSList<NativeMonitorInfo^>^ UpdateMonitors();
-        static NativeMonitorInfo^ GetPrimaryMonitor();
-        static NativeMonitorInfo^ GetMonitorFromHandle(IntPtr hMonitor);
+        static CSList<NativeDisplayInfo^>^ UpdateMonitors();
+        static NativeDisplayInfo^ GetPrimaryMonitor();
+        static NativeDisplayInfo^ GetMonitorFromHandle(IntPtr hMonitor);
     };
 }

@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Globalization;
 using Engine.Failures;
 
 namespace Engine.Logging;
@@ -36,7 +37,7 @@ public sealed class Logger(
         Console.Out.Flush();
     }
 
-    public static void InitLogger()
+    internal static void InitLogger()
     {
         AddLogger(new Logger());
         Success("Default Logger added");
@@ -87,6 +88,14 @@ public sealed class Logger(
     {
         Debug($"Logging finished. File {MetaData.File?.Info.Name}");
         MetaData.IsActive = false;
+    }
+
+    /// <summary>
+    /// Just Console Beep 
+    /// </summary>
+    public static void Beep()
+    {
+        Console.Beep();
     }
 
     /// <summary>
@@ -227,7 +236,9 @@ public sealed class Logger(
         var formattedMessage = string.Format(
             format.ColorizedFormat ?? format.Format,
             nowTime,
-            nowTime.Millisecond * 10 + float.Round(nowTime.Nanosecond / 100f, 0),
+            (
+                nowTime.Millisecond * 10 + float.Round(nowTime.Nanosecond / 100f, 0)
+            ).ToString(CultureInfo.InvariantCulture).PadLeft(4, '0'),
             level,
             typeName,
             methodName,
@@ -263,7 +274,9 @@ public sealed class Logger(
         var formattedMessage = string.Format(
             format.Format,
             nowTime,
-            nowTime.Millisecond * 10 + float.Round(nowTime.Nanosecond / 100f, 0),
+            (
+                nowTime.Millisecond * 10 + float.Round(nowTime.Nanosecond / 100f, 0)
+            ).ToString(CultureInfo.InvariantCulture).PadLeft(4, '0'),
             level,
             typeName,
             methodName,

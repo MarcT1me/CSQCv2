@@ -85,8 +85,8 @@ namespace MirageAPI::DirectX
             // creating buffer himself
             auto buffer = gcnew Resource::DX12RenderTarget(
                 Resource::DX12ResourceConfig::RenderTargetConfig(
-                    static_cast<UINT>(m_config->ResolutionX),
-                    static_cast<UINT>(m_config->ResolutionY),
+                    static_cast<UINT>(m_config->Resolution.X),
+                    static_cast<UINT>(m_config->Resolution.Y),
                     m_config->Format,
                     Resource::DX12ResourceFlags::None
                 ),
@@ -124,8 +124,8 @@ namespace MirageAPI::DirectX
         CheckHResult(
             m_swapChain->ResizeBuffers(
                 m_config->BufferCount,
-                static_cast<UINT>(m_config->ResolutionX),
-                static_cast<UINT>(m_config->ResolutionY),
+                static_cast<UINT>(m_config->Resolution.X),
+                static_cast<UINT>(m_config->Resolution.Y),
                 desc.BufferDesc.Format,
                 desc.Flags
             ),

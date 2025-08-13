@@ -12,7 +12,7 @@ namespace MirageAPI::Window
     {
         bool isFullscreen;
         static NativeWindow^ mouseCaptureWindow;
-        static bool isMouseVisible;
+        bool isMouseVisible = true;
         DWORD savedStyle;
         DoubleRect^ savedRect;
         Vector2i^ savedMousePosition;
@@ -33,7 +33,8 @@ namespace MirageAPI::Window
         void RaiseWindowEvent(Events::NativeWindowEvent^ event);
         void RaiseCharEvent(Events::NativeCharEvent^ event);
         void RaiseDropEvent(Events::NativeDropEvent^ event);
-
+        
+        void CursorLeaveHandle();
         void UpdateMousePosition(int x, int y);
 
     public:
@@ -62,6 +63,7 @@ namespace MirageAPI::Window
             float opacity,
             bool isFullscreen,
             NativeWindow^ parent,
+            NativeDisplayInfo^ display,
             WindowType wType,
             DirectX::DX12ContextConfig^ dxContextConfig
         );
@@ -78,9 +80,9 @@ namespace MirageAPI::Window
             IntPtr get() { return IntPtr(MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST)); }
         }
 
-        property NativeMonitorInfo^ CurrentMonitor
+        property NativeDisplayInfo^ CurrentMonitor
         {
-            NativeMonitorInfo^ get() { return NativeDisplay::GetMonitorFromHandle(MonitorHandle); }
+            NativeDisplayInfo^ get() { return NativeDisplay::GetMonitorFromHandle(MonitorHandle); }
         }
         property DirectX::DX12Context^ DXContext
         {
@@ -105,7 +107,7 @@ namespace MirageAPI::Window
         property bool IsMaximized { bool get(); }
         property bool IsFullscreen { bool get() { return isFullscreen; } }
 
-        static property bool IsMouseVisible { bool get() { return isMouseVisible; } }
+        property bool IsMouseVisible { bool get() { return isMouseVisible; } }
         property NativeWindow^ CaptureWindow { NativeWindow^ get() { return mouseCaptureWindow; } }
 
         // window actions
@@ -121,8 +123,8 @@ namespace MirageAPI::Window
         void ToggleFullscreen();
         void SetFullscreen(bool isFullscreen);
 
-        static void ToggleMouseVisibility();
-        static void SetMouseVisibility(bool isVisible);
+        void ToggleMouseVisibility();
+        void SetMouseVisibility(bool isVisible);
 
         void ToggleMouseCapture();
         void SetMouseCapture(bool isCapture);
@@ -131,17 +133,17 @@ namespace MirageAPI::Window
         void FlashWindow();
 
         void SetTitle(String^ title);
-        void SetPositionAndSize(int x, int y, int width, int height);
-        void SetPosition(int x, int y);
-        void SetSize(int width, int height);
+        void SetPositionAndSize(Vector2i^ pos, Vector2i^ size);
+        void SetPosition(Vector2i^ pos);
+        void SetSize(Vector2i^ size);
         void SetVSync(UINT interval);
 
-        void MoveWindowToMonitor(NativeMonitorInfo^ monitorInfo);
+        void MoveOnDisplay(NativeDisplayInfo^ monitorInfo);
 
         void Update();
 
         void BeginFrame();
-        void Clear(float r, float g, float b, float a);
+        void Clear(Color4 color);
         void EndFrame();
         void Present();
     };

@@ -1,107 +1,68 @@
-﻿using Engine.Events.QuantumEvents;
+﻿using Engine.Events.QuantumEvents.Window;
+using Engine.Time;
 using OpenTK.Mathematics;
 
 namespace Engine.Objects.Camera;
 
-using Data;
 using Actor;
+using Events.QuantumEvents;
+using Graphic.Window;
 
-// using Events.QuantumEvents;
-
-public class Camera(CameraData cameraData)
-    : Actor<CameraData>(cameraData),
-        IEventful, IUpdatable, IRenderable
+public class Camera<TData>(TData cameraData)
+    : Actor<TData>(cameraData), IEventful, IUpdatable, IWindowRenderable
+    where TData : CameraData
 {
-    public float AspectRatio { get; protected set; }
     public Matrix4 ViewMatrix { get; protected set; }
     public Matrix4 ProjectionMatrix { get; protected set; }
 
-    public bool NeedsUpdate = true;
-
-    public Vector3 Up { get; protected set; } = Transform.UpVector;
-    public Vector3 Right { get; protected set; } = Transform.RightVector;
-    public Vector3 Forward { get; protected set; } = Transform.ForwardVector;
-
-    public virtual void SetAspectRatio(float width, float height)
-    {
-        AspectRatio = width / height;
-        NeedsUpdate = true;
-    }
-
-    public virtual void SetFov(float clipPlane)
-    {
-        MetaData.Fov = clipPlane;
-        NeedsUpdate = true;
-    }
-
-    public virtual void SetClipPlane(Vector2 clipPlane)
-    {
-        MetaData.ClipPlanes = clipPlane;
-        NeedsUpdate = true;
-    }
-
     public virtual void HandleEvent(QuantumEvent e)
     {
+        if (e is WinResizeEvent) MetaData.NeedsUpdate = true;
     }
 
-    public virtual void PreUpdate()
+    public virtual void PreUpdate(ClockMeta clockMeta)
     {
     }
 
-    public virtual void Update()
+    public virtual void Update(ClockMeta clockMeta)
     {
     }
 
-    public virtual void PostUpdate()
+    public virtual void PostUpdate(ClockMeta clockMeta)
     {
-        if (!NeedsUpdate) return;
-        MetaData.Pitch = MathHelper.Clamp(MetaData.Pitch, -89.9f, 89.9f);
-        UpdateCameraVectors();
-        UpdateCameraMatrix();
     }
 
-    public virtual void UpdateCameraVectors()
+    public virtual void PreRender(WindowData winMeta)
     {
-        float yaw = MathHelper.DegreesToRadians(MetaData.Yaw);
-        float pitch = MathHelper.DegreesToRadians(MetaData.Pitch);
+        // check necessity
+        if (!MetaData.NeedsUpdate) return;
 
-        Vector3 newForward = new Vector3
-        {
-            X = MathF.Cos(yaw) * MathF.Cos(pitch),
-            Y = MathF.Sin(pitch),
-            Z = MathF.Sin(yaw) * MathF.Cos(pitch)
-        };
+        UpdateCameraMatrix(winMeta);
 
-        Forward = MetaData.Transform.Rotation = Vector3.Normalize(newForward);
-        Right = Vector3.Normalize(Vector3.Cross(Forward, Transform.UpVector));
-        Up = Vector3.Normalize(Vector3.Cross(Right, Forward));
+        MetaData.NeedsUpdate = false;
     }
 
-    public virtual void UpdateCameraMatrix()
+    public virtual void UpdateCameraMatrix(WindowData winMeta)
     {
         ViewMatrix = Matrix4.LookAt(
-            MetaData.Transform.Position,
-            MetaData.Transform.Position + Forward,
-            Up
+            Transform.Position,
+            Transform.Position + Transform.Forward,
+            Transform.Up
         );
 
         ProjectionMatrix = Matrix4.CreatePerspectiveFieldOfView(
-            MathHelper.DegreesToRadians(MetaData.Fov),
-            AspectRatio,
-            MetaData.ClipPlanes.X,
-            MetaData.ClipPlanes.Y
+            MathHelper.DegreesToRadians(MetaData.FieldOfView),
+            winMeta.AspectRatio,
+            winMeta.ClipPlanes.X,
+            winMeta.ClipPlanes.Y
         );
     }
 
-    public virtual void PreRender()
+    public virtual void Render(WindowData winMeta)
     {
     }
 
-    public virtual void Render()
-    {
-    }
-
-    public virtual void PostRender()
+    public virtual void PostRender(WindowData winMeta)
     {
     }
 }

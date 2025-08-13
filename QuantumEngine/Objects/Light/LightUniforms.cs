@@ -1,7 +1,9 @@
-﻿using OpenTK.Mathematics;
+﻿using System.Runtime.InteropServices;
+using OpenTK.Mathematics;
 
 namespace Engine.Objects.Light;
 
+[StructLayout(LayoutKind.Sequential)]
 public struct LightUniforms
 {
     public LightType Type;

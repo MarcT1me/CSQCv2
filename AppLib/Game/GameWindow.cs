@@ -1,21 +1,21 @@
 ﻿using System.Runtime.InteropServices;
-using OpenTK.Mathematics;
-// MirageAPI
-using MirageAPI.DirectX;
-using MirageAPI.DirectX.Shader;
-using MirageAPI.DirectX.Pipeline;
-using MirageAPI.DirectX.Resource;
-using MirageAPI.DirectX.Command;
-// Engine
 using Engine.Asset;
 using Engine.Asset.Image;
 using Engine.Asset.Shader;
-using Engine.Graphic.Window;
-using Engine.Logging;
 using Engine.Events.QuantumEvents;
-using Engine.Events.QuantumEvents.Window;
+using Engine.Events.QuantumEvents.Mouse;
+using Engine.Graphic.Window;
 using Engine.Input.Keyboard;
-using MirageAPI.Window;
+using Engine.Logging;
+using Engine.Time;
+using MirageAPI.DirectX;
+using MirageAPI.DirectX.Command;
+using MirageAPI.DirectX.Pipeline;
+using MirageAPI.DirectX.Resource;
+using MirageAPI.DirectX.Shader;
+using OpenTK.Mathematics;
+// MirageAPI
+// Engine
 
 namespace AppLib.Game;
 
@@ -57,10 +57,9 @@ public class GameWindow : Window
         WinData winData,
         GlData? glData = null,
         string? name = null,
-        Window? parent = null,
-        NativeMonitorInfo? monitor = null
+        Window? parent = null
     )
-        : base(winData, glData, name, parent, monitor)
+        : base(winData, glData, name, parent)
     {
         LoadShaders();
         CreatePipelineState();
@@ -68,14 +67,6 @@ public class GameWindow : Window
         CreateGeometryBuffers();
         CreateMatrixBuffer();
         CreateCamera();
-    }
-
-    public override void Prepare()
-    {
-        base.Prepare();
-        
-        NativeWindow.SetMouseVisibility(true);
-        NativeWindow.SetMouseCapture(true);
     }
 
     private void LoadShaders()
@@ -172,50 +163,55 @@ public class GameWindow : Window
     {
         Logger.Debug("Creating geometry buffer...");
 
-        // Создаем вершинны
+        float unitX = _texture.Width / 200f;
+        float unitY = _texture.Height / 200f;
+
         Vertex[] vertices =
         [
             new()
             {
-                Position = new Vector3(-1.0f, 1.0f, 0.0f),
+                Position = new Vector3(-unitX, 0.0f, unitY),
                 UV = new Vector2(0, 0)
             },
             new()
             {
-                Position = new Vector3(1.0f, 1.0f, 0.0f),
+                Position = new Vector3(unitX, 0.0f, unitY),
                 UV = new Vector2(1, 0)
             },
             new()
             {
-                Position = new Vector3(-1.0f, -1.0f, 0.0f),
+                Position = new Vector3(-unitX, 0.0f, -unitY),
                 UV = new Vector2(0, 1)
             },
 
             new()
             {
-                Position = new Vector3(1.0f, 1.0f, 0.0f),
+                Position = new Vector3(unitX, 0.0f, unitY),
                 UV = new Vector2(1, 0)
             },
             new()
             {
-                Position = new Vector3(1.0f, -1.0f, 0.0f),
+                Position = new Vector3(unitX, 0.0f, -unitY),
                 UV = new Vector2(1, 1)
             },
             new()
             {
-                Position = new Vector3(-1.0f, -1.0f, 0.0f),
+                Position = new Vector3(-unitX, 0.0f, -unitY),
                 UV = new Vector2(0, 1)
             }
         ];
 
-        // Создаем вершинный буфер
-        int vertexSize = Marshal.SizeOf<Vertex>();
-        _vertexCount = vertices.Length;
-
-        _vertexBuffer = new DX12VertexBuffer((uint)_vertexCount, (uint)vertexSize, DX12ResourceFlags.None);
-
         try
         {
+            int vertexSize = Marshal.SizeOf<Vertex>();
+            _vertexCount = vertices.Length;
+
+            _vertexBuffer = new DX12VertexBuffer(
+                (uint)_vertexCount,
+                (uint)vertexSize,
+                DX12ResourceFlags.None
+            );
+
             unsafe
             {
                 fixed (Vertex* verticesPtr = vertices)
@@ -244,9 +240,8 @@ public class GameWindow : Window
     {
         Camera = new GameCamera(
             new(
-                position: new Vector3(0, 0, 2),
-                fov: 70,
-                clipPlanes: new Vector2(0.001f, 100.0f),
+                position: (0, -10, 0),
+                rotation: (0, 0, 90),
                 identifier: "GameCamera"
             )
         );
@@ -255,21 +250,33 @@ public class GameWindow : Window
     public override void HandleEvent(QuantumEvent e)
     {
         base.HandleEvent(e);
+
+        if (e is MouseEvent { Type: EventType.MouseMove }) return;
+
+        Logger.Info($"handle event: {e}");
+
         switch (e)
         {
-            case KeyEvent { Type: EventType.KeyDown, Key: Key.F11 }:
-                Logger.Debug("ToggleFullscreen");
-                NativeWindow.ToggleFullscreen();
+            case KeyEvent { Type: EventType.KeyDown, Key: Key.F11 } keyEvent:
+            {
+                Logger.Debug("Toggle Fullscreen");
+                ToggleFullscreen();
+
+                if (keyEvent.Mods.HasFlag(KeyMod.Shift))
+                {
+                    Logger.Debug("set Mouse Capture and visibility");
+                    NativeWindow.SetMouseCapture(MetaData.WinData.Fullscreen);
+                    NativeWindow.SetMouseVisibility(!MetaData.WinData.Fullscreen);
+                }
+
                 break;
-            case WinResizeEvent winResize:
-                Camera.SetAspectRatio(winResize.Size.X, winResize.Size.Y);
-                break;
+            }
         }
     }
 
-    public override void Update()
+    public override void Update(ClockMeta clockMeta)
     {
-        base.Update();
+        base.Update(clockMeta);
 
         Matrix4 world = Matrix4.Identity;
 
@@ -289,9 +296,17 @@ public class GameWindow : Window
         _matrixBuffer.UploadData(buffer);
     }
 
+    public override void PreRender()
+    {
+        base.PreRender();
+        TestApp.Instance.Scene.PreRender(MetaData);
+    }
+
     public override void Render()
     {
         base.Render();
+
+        TestApp.Instance.Scene.Render(MetaData);
 
         // Подготовка трубы и стыковка с CommandList
         var commandList = NativeWindow.DXContext.CmdList;
@@ -303,6 +318,13 @@ public class GameWindow : Window
 
         // Рендер
         commandList.DrawInstanced((uint)_vertexCount, 1, 0, 0);
+    }
+
+    public override void PostRender()
+    {
+        TestApp.Instance.Scene.PostRender(MetaData);
+
+        base.PostRender();
     }
 
     public override void Dispose()

@@ -5,7 +5,6 @@ namespace Engine.Objects.Light;
 
 using Actor;
 
-[method: SetsRequiredMembers]
 public class LightData(
     Color4 color,
     float intensity,
@@ -21,7 +20,6 @@ public class LightData(
     public bool CastShadows { get; set; } = true;
 }
 
-[method: SetsRequiredMembers]
 public class DirectionalLightData(
     Color4 color,
     float intensity,
@@ -32,7 +30,6 @@ public class DirectionalLightData(
     public new readonly LightType LightType = LightType.Directional;
 }
 
-[method: SetsRequiredMembers]
 public class PointLightData(
     Color4 color,
     float intensity,
@@ -47,7 +44,6 @@ public class PointLightData(
     public float MaxDistance { get; set; } = 100f;
 }
 
-[method: SetsRequiredMembers]
 public class SpotLightData(
     Color4 color,
     float intensity,

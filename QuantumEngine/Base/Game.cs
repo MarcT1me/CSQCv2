@@ -1,5 +1,7 @@
 ﻿// ReSharper disable VirtualMemberCallInConstructor
 
+using Engine.Time;
+
 namespace Engine.Base;
 
 using Graphic.Window;
@@ -14,7 +16,7 @@ public abstract class Game<TData, TWindow> : App<TData>
     where TData : AppData
     where TWindow : Window
 {
-    protected TWindow MainWindow { get; }
+    public TWindow MainWindow { get; }
 
     protected Game()
     {
@@ -33,27 +35,27 @@ public abstract class Game<TData, TWindow> : App<TData>
 
     #region override App cycle
 
-    public override void PreUpdate()
+    public override void PreUpdate(ClockMeta clockMeta)
     {
         foreach (var window in Registries.WindowRegistry.Values)
         {
-            window.PreUpdate();
+            window.PreUpdate(clockMeta);
         }
     }
 
-    public override void Update()
+    public override void Update(ClockMeta clockMeta)
     {
         foreach (var window in Registries.WindowRegistry.Values)
         {
-            window.Update();
+            window.Update(clockMeta);
         }
     }
 
-    public override void PostUpdate()
+    public override void PostUpdate(ClockMeta clockMeta)
     {
         foreach (var window in Registries.WindowRegistry.Values)
         {
-            window.PostUpdate();
+            window.PostUpdate(clockMeta);
         }
     }
 
@@ -78,6 +80,7 @@ public abstract class Game<TData, TWindow> : App<TData>
         foreach (var window in Registries.WindowRegistry.Values)
         {
             window.PostRender();
+            window.Present();
         }
     }
 

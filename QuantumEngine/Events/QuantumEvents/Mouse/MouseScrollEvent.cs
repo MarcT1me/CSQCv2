@@ -1,15 +1,14 @@
-﻿using OpenTK.Mathematics;
-using MirageAPI.Events;
+﻿using MirageAPI.Events;
 
 namespace Engine.Events.QuantumEvents.Mouse;
 
 public class MouseScrollEvent(NativeMouseEvent e)
     : MouseEvent(EventType.MouseScroll, e.windowID)
 {
-    public readonly Vector2 Rel = e.Rel;
+    public readonly int Scroll = e.Button;
     
     public override string ToString()
     {
-        return $"MouseEvent<{Type}>(Rel={Rel}, Window: {WindowId})";
+        return $"MouseEvent<{Type}>(Scroll={Scroll}, Window: {WindowId})";
     }
 }

@@ -87,8 +87,7 @@ namespace MirageAPI::DirectX
         SimpleRect^ Viewport;
         float Near;
         float Far;
-        int ResolutionX;
-        int ResolutionY;
+        Vector2i Resolution;
 
         UINT BufferCount;
         DX12ResourceFormat Format;
@@ -107,8 +106,8 @@ namespace MirageAPI::DirectX
             DXGI_SWAP_CHAIN_DESC1 desc = {};
 
             desc.BufferCount = BufferCount;
-            desc.Width = static_cast<UINT>(ResolutionX);
-            desc.Height = static_cast<UINT>(ResolutionY);
+            desc.Width = static_cast<UINT>(Resolution.X);
+            desc.Height = static_cast<UINT>(Resolution.Y);
             desc.Format = NativeFormat;
             desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
             desc.SampleDesc = {SampleCount, SwapQuality};

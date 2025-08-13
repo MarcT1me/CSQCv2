@@ -1,77 +1,67 @@
-﻿using Engine.Data;
-using Engine.Objects.Camera;
-using Engine.Events.QuantumEvents;
+﻿using Engine.Events.QuantumEvents;
 using Engine.Events.QuantumEvents.Mouse;
+using Engine.Objects.Camera;
 using Engine.Input.Keyboard;
-using Engine.Logging;
+using Engine.Time;
 
 namespace AppLib.Game;
 
-public class GameCamera(CameraData cameraData) : Camera(cameraData)
+public class GameCamera(CameraData cameraData) : Camera<CameraData>(cameraData)
 {
-    public float CameraSpeed = 0.05f;
-    public float CameraSensitivity = 0.005f;
+    public float CameraSpeed = 0.025f;
+    public float CameraSensitivity = 0.000125f;
 
     public override void HandleEvent(QuantumEvent e)
     {
         base.HandleEvent(e);
-
-        if (e is not MouseMoveEvent mouseMove) return;
-
-        var speed = CameraSensitivity * (float)TestApp.Instance.Clock.MetaData.DeltaTime;
         
-        Logger.Info($"event: {mouseMove}");
-
-        MetaData.Yaw -= mouseMove.Rel.X * speed;
-        MetaData.Pitch += mouseMove.Rel.Y * speed;
-        NeedsUpdate = true;
+        if (e is not MouseMoveEvent mouseMove || !TestApp.Instance.MainWindow.MetaData.WinData.Fullscreen) return;
+        
+        var rotationSpeed = CameraSensitivity * (float)TestApp.Instance.Clock.MetaData.DeltaTime;
+        
+        // yaw-pitch
+        Transform.Rotate(Transform.Right, rotationSpeed * mouseMove.Rel.Y);
+        Transform.Rotate(-Transform.Up, rotationSpeed * mouseMove.Rel.X);
     }
 
-    public override void Update()
+    public override void Update(ClockMeta clockMeta)
     {
-        base.Update();
+        base.Update(clockMeta);
 
-        var speed = CameraSpeed * (float)TestApp.Instance.Clock.MetaData.DeltaTime;
-        var updated = false;
+        var moveSpeed = CameraSpeed * (float)clockMeta.DeltaTime;
 
+        // x-y
         if (Keyboard.GetKey(Key.W))
-        {
-            MetaData.Transform.Position += Forward * speed;
-            updated = true;
-        }
-
+            Transform.Translate(Transform.Forward * moveSpeed);
         if (Keyboard.GetKey(Key.S))
-        {
-            MetaData.Transform.Position -= Forward * speed;
-            updated = true;
-        }
-
-        if (Keyboard.GetKey(Key.A))
-        {
-            MetaData.Transform.Position -= Right * speed;
-            updated = true;
-        }
-
+            Transform.Translate(-Transform.Forward * moveSpeed);
         if (Keyboard.GetKey(Key.D))
-        {
-            MetaData.Transform.Position += Right * speed;
-            updated = true;
-        }
+            Transform.Translate(-Transform.Right * moveSpeed);
+        if (Keyboard.GetKey(Key.A))
+            Transform.Translate(Transform.Right * moveSpeed);
 
-        if (Keyboard.GetKey(Key.Space))
-        {
-            MetaData.Transform.Position += Transform.UpVector * speed;
-            updated = true;
-        }
+        // z
+        if (Keyboard.GetKey(Key.R))
+            Transform.Translate(Transform.Up * moveSpeed);
+        if (Keyboard.GetKey(Key.F))
+            Transform.Translate(-Transform.Up * moveSpeed);
 
-        if (Keyboard.GetKey(Key.Shift))
-        {
-            MetaData.Transform.Position -= Transform.UpVector * speed;
-            updated = true;
-        }
+        var rotationSpeed = moveSpeed / 20;
 
-        if (!updated) return;
+        // roll
+        if (Keyboard.GetKey(Key.E))
+            Transform.Rotate(Transform.Forward, rotationSpeed);
+        if (Keyboard.GetKey(Key.Q))
+            Transform.Rotate(Transform.Forward, -rotationSpeed);
 
-        NeedsUpdate = true;
+        // yaw-pitch
+        if (Keyboard.GetKey(Key.Up))
+            Transform.Rotate(Transform.Right, -rotationSpeed);
+        if (Keyboard.GetKey(Key.Down))
+            Transform.Rotate(Transform.Right, rotationSpeed);
+        if (Keyboard.GetKey(Key.Right))
+            Transform.Rotate(Transform.Up, -rotationSpeed);
+        if (Keyboard.GetKey(Key.Left))
+            Transform.Rotate(Transform.Up, rotationSpeed);
     }
 }

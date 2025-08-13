@@ -50,14 +50,14 @@ namespace MirageAPI::Events
         window->RaiseMouseEvent(e);
     }
 
-    void NativeEventManager::ScrollCallback(Window::NativeWindow^ window, int xOffset, int yOffset)
+    void NativeEventManager::ScrollCallback(Window::NativeWindow^ window, int params)
     {
         // format event
         NativeMouseEvent^ e = gcnew NativeMouseEvent();
         e->windowID = window->Handle;
         e->Type = NativeMouseEventType::Scroll;
 
-        e->Rel = Vector2i(xOffset, yOffset);
+        e->Button = params;
 
         // raise event
         window->RaiseMouseEvent(e);
@@ -72,6 +72,28 @@ namespace MirageAPI::Events
 
         e->Pos = Vector2i(xPos, yPos);
         e->Rel = *window->MouseDelta;
+
+        // raise event
+        window->RaiseMouseEvent(e);
+    }
+
+    void NativeEventManager::CursorLeaveCallback(Window::NativeWindow^ window)
+    {
+        // format event
+        NativeMouseEvent^ e = gcnew NativeMouseEvent();
+        e->windowID = window->Handle;
+        e->Type = NativeMouseEventType::Leave;
+
+        // raise event
+        window->RaiseMouseEvent(e);
+    }
+    
+    void NativeEventManager::CursorEnterCallback(Window::NativeWindow^ window)
+    {
+        // format event
+        NativeMouseEvent^ e = gcnew NativeMouseEvent();
+        e->windowID = window->Handle;
+        e->Type = NativeMouseEventType::Enter;
 
         // raise event
         window->RaiseMouseEvent(e);

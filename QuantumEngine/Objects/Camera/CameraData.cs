@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using Engine.Data.Collections;
+﻿using Engine.Data.Collections;
 using OpenTK.Mathematics;
 
 namespace Engine.Objects.Camera;
@@ -10,39 +9,40 @@ using Actor;
 public class CameraData : ActorData
 {
     public readonly CameraType CameraType;
+    private float _fov;
 
-    public Vector2 ClipPlanes
+    public float FieldOfView
     {
-        get => Transform.Size.Xy;
-        set => Transform.Size.Xy = value;
-    }
-
-    public float Fov
-    {
-        get => Transform.Size.Z;
-        set => Transform.Size.Z = value;
+        get => _fov;
+        set
+        {
+            _fov = value;
+            NeedsUpdate = true;
+        }
     }
 
     public readonly ConcurrentSet<Identifier> PostProcess = new();
 
-    public float Yaw = 0;
-    public float Pitch = 0;
-
-    [method: SetsRequiredMembers]
     public CameraData(
         CameraType cameraType = CameraType.Perspective,
         Vector3? position = null,
         Vector3? rotation = null,
-        Vector2? clipPlanes = null,
-        float fov = 60,
+        float fov = 70,
         // MetaData
         string? identifier = null
     ) : base(identifier: identifier)
     {
         CameraType = cameraType;
-        Transform.Position = position ?? Vector3.Zero;
-        Transform.Rotation = rotation ?? new Vector3(1, 0, 0);
-        ClipPlanes = clipPlanes ?? new Vector2(0.001f, 100.0f);
-        Fov = fov;
+        _fov = fov;
+        var rotationVector = rotation ?? Vector3.Zero;
+        Transform = new Transform(
+            position ?? Vector3.Zero,
+            Quaternion.FromEulerAngles(
+                MathHelper.DegreesToRadians(rotationVector.X),
+                MathHelper.DegreesToRadians(rotationVector.Y),
+                MathHelper.DegreesToRadians(rotationVector.Z)
+                ),
+            Vector3.One
+        );
     }
 }

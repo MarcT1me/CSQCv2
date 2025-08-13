@@ -4,6 +4,6 @@ public class MouseEvent(EventType type, IntPtr windowId) : WindowedQuantumEvent(
 {
     public override string ToString()
     {
-        return $"MouseEvent<{Type}>()";
+        return $"MouseEvent<{Type}>(Window: {WindowId})";
     }
 }

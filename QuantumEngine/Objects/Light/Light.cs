@@ -1,26 +1,26 @@
-﻿namespace Engine.Objects.Light;
+﻿using Engine.Graphic.Window;
+
+namespace Engine.Objects.Light;
 
 using Actor;
 
-public class Light<T>(T nodeData)
-    : Actor<T>(nodeData), IRenderable
-    where T : LightData
+public class Light<TData>(TData nodeData)
+    : Actor<TData>(nodeData), IWindowRenderable
+    where TData : LightData
 {
     private LightUniforms _uniforms;
-    public bool NeedsUpdate = true;
 
-    public void PreRender()
+    public void PreRender(WindowData winMeta)
     {
-        if (NeedsUpdate)
-        {
-            // 1. Обновляем данные света
-            UpdateLightData();
+        if (!MetaData.NeedsUpdate) return;
+        
+        // 1. Обновляем данные света
+        UpdateLightData();
 
-            // 2. Загружаем данные в буфер
-            // LightBufferManager.UploadLightData(this, ref _uniforms);
+        // 2. Загружаем данные в буфер
+        // LightBufferManager.UploadLightData(this, ref _uniforms);
 
-            NeedsUpdate = false;
-        }
+        MetaData.NeedsUpdate = false;
     }
 
     /// <summary>
@@ -33,7 +33,7 @@ public class Light<T>(T nodeData)
             Type = MetaData.LightType,
 
             Position = MetaData.Transform.Position,
-            Rotation = MetaData.Transform.Rotation,
+            Rotation = MetaData.Transform.EulerAngles,
             Size = MetaData.Transform.Size,
 
             Color = MetaData.Color.ToArgb(),
@@ -54,13 +54,11 @@ public class Light<T>(T nodeData)
         _uniforms.FalloffExponent = spot.FalloffExponent;
     }
 
-    public void Render()
+    public void Render(WindowData winMeta)
     {
-        // не требуется
     }
 
-    public void PostRender()
+    public void PostRender(WindowData winMeta)
     {
-        // не требуется
     }
 }

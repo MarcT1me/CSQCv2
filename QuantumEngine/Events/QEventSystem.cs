@@ -102,11 +102,11 @@ public class QEventSystem
             while (EventQueue.TryDequeue(out var qEvent))
             {
                 handler.Handle(qEvent);
-                
+
                 if (qEvent is WindowedQuantumEvent { Type: EventType.WindowClose } wEvent
                     && Registries.WindowRegistry.Size == 0)
                 {
-                    EnqueueEvent(new WindowedQuantumEvent( EventType.Quit, wEvent.WindowId));
+                    EnqueueEvent(new WindowedQuantumEvent(EventType.Quit, wEvent.WindowId));
                 }
 
                 UpdateInputState(qEvent);
@@ -139,43 +139,34 @@ public class QEventSystem
         NativeMouseEventType.Button => new MouseButtonEvent(e),
         NativeMouseEventType.Move => new MouseMoveEvent(e),
         NativeMouseEventType.Scroll => new MouseScrollEvent(e),
+        NativeMouseEventType.Enter => new MouseEvent(EventType.MouseEnter, e.windowID),
+        NativeMouseEventType.Leave => new MouseEvent(EventType.MouseLeave, e.windowID),
         _ => new QuantumEvent(EventType.Unknown)
     };
 
-    private static QuantumEvent ConvertEvent(NativeWindowEvent e)
+    private static QuantumEvent ConvertEvent(NativeWindowEvent e) => e.Type switch
     {
-        switch (e.Type)
-        {
-            case NativeWindowEventType.Close:
-                return new WindowedQuantumEvent(
-                    EventType.WindowClose,
-                    e.windowID
-                );
-            case NativeWindowEventType.Focus:
-                return new WindowedQuantumEvent(
-                    e.X == 1 ? EventType.WindowFocusGained : EventType.WindowFocusLost,
-                    e.windowID
-                );
-            case NativeWindowEventType.Maximize:
-                return new WindowedQuantumEvent(
-                    e.X == 1 ? EventType.WindowMaximize : EventType.WindowMinimize,
-                    e.windowID
-                );
-            case NativeWindowEventType.Refresh:
-                return new WindowedQuantumEvent(
-                    EventType.WindowRestore,
-                    e.windowID
-                );
-            case NativeWindowEventType.Resize:
-                return new QuantumEvents.Window.WinResizeEvent(e);
-            case NativeWindowEventType.Move:
-                return new QuantumEvents.Window.WinMoveEvent(e);
-            case NativeWindowEventType.Iconify:
-                return new QuantumEvents.Window.WinIconifyEvent(e);
-            default:
-                return new QuantumEvent(EventType.Unknown);
-        }
-    }
+        NativeWindowEventType.Close => new WindowedQuantumEvent(
+            EventType.WindowClose,
+            e.windowID
+        ),
+        NativeWindowEventType.Focus => new WindowedQuantumEvent(
+            e.X == 1 ? EventType.WindowFocusGained : EventType.WindowFocusLost,
+            e.windowID
+        ),
+        NativeWindowEventType.Maximize => new WindowedQuantumEvent(
+            e.X == 1 ? EventType.WindowMaximize : EventType.WindowMinimize,
+            e.windowID
+        ),
+        NativeWindowEventType.Refresh => new WindowedQuantumEvent(
+            EventType.WindowRestore,
+            e.windowID
+        ),
+        NativeWindowEventType.Resize => new QuantumEvents.Window.WinResizeEvent(e),
+        NativeWindowEventType.Move => new QuantumEvents.Window.WinMoveEvent(e),
+        NativeWindowEventType.Iconify => new QuantumEvents.Window.WinIconifyEvent(e),
+        _ => new QuantumEvent(EventType.Unknown)
+    };
 
     private static QuantumEvent ConvertEvent(NativeCharEvent e) => new CharEvent(e);
 

@@ -18,7 +18,7 @@ namespace MirageAPI::Events
 
     public enum class NativeMouseEventType
     {
-        Button, Move, Scroll,
+        Button, Move, Scroll, Leave, Enter
     };
 
     public ref struct NativeMouseEvent
