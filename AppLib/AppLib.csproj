@@ -29,7 +29,6 @@
 
     <ItemGroup>
         <!-- Hold folders in editor -->
-        <Folder Include="Assets\"/>
         <Folder Include="Assets\Embedded\"/>
     </ItemGroup>
 

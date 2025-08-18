@@ -19,7 +19,7 @@ public sealed class WinData(
         (int)(ResolutionScaling * Size.Y)
     );
 
-    public Vector2i Position { get; internal set; } = position ?? new Vector2i(Window.UseDefault);
+    public Vector2i Position { get; internal set; } = position ?? new Vector2i(MirageAPI.Window.USE_DEFAULT_POSITION);
     public float Opacity { get; internal set; } = opacity;
     public uint VSyncInterval { get; internal set; } = vsyncInterval;
     public bool Fullscreen { get; internal set; } = isFullscreen;

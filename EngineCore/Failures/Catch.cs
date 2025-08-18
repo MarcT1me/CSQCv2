@@ -1,4 +1,5 @@
-﻿using Engine.Logging;
+﻿using System.Reflection;
+using Engine.Logging;
 
 namespace Engine.Failures;
 
@@ -58,7 +59,7 @@ public sealed class Catch : MetaObject<CatchMeta>, IContextManager
             return defaultValue;
         }
     }
-    
+
     /// <summary>
     /// Метод для безопасного запуска опасной функции
     /// </summary>
@@ -87,6 +88,8 @@ public sealed class Catch : MetaObject<CatchMeta>, IContextManager
     /// <exception cref="FailureException">Если обрабатываемая ошибка отмечена как критичная</exception>
     public void OnException(Exception ex)
     {
+        if (ex is TargetInvocationException && ex.InnerException != null) ex = ex.InnerException;
+
         Console.Beep();
         Logger.Warning(
             $"Catch with id '{Id}' got '{MetaData.FailureLevel}' level error:\n" +
@@ -102,7 +105,7 @@ public sealed class Catch : MetaObject<CatchMeta>, IContextManager
         MetaData.Failures[new Identifier()] = failure;
 
         if (MetaData.FailureLevel is not (FailureLevel.First or FailureLevel.Second)) return;
-        
+
         if (MetaData.Handler != null)
         {
             MetaData.Handler.OnFailure(failure);

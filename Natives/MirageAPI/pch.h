@@ -24,11 +24,11 @@ using namespace OpenTK::Mathematics;
 #include "Exceptions.h"
 #include "rect.h"
 
-// Window
-#include "Window/enums.h"
-
-// Events
-#include "Events/NativeEvents.h"
+// Window and window tools
+#include "WinTools/enums.h"
+#include "WinTools/Events/Events.h"
+#include "WinTools/Cursor/enums.h"
+#include "WinTools/Menu/enums.h"
 
 // DX12
 #include "DerectX/enums.h"

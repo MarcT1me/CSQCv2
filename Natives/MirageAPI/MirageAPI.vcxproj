@@ -119,15 +119,15 @@
         <ClInclude Include="DerectX\Pipeline\DX12PipelineState.h"/>
         <ClInclude Include="DerectX\Pipeline\DX12PipelineStateConfig.h"/>
         <ClInclude Include="DerectX\Pipeline\enums.h"/>
-        <ClInclude Include="DerectX\Resource\Buffer\DX12Buffer.h" />
-        <ClInclude Include="DerectX\Resource\Buffer\DX12ConstantBuffer.h" />
-        <ClInclude Include="DerectX\Resource\Buffer\DX12IndexBuffer.h" />
-        <ClInclude Include="DerectX\Resource\Buffer\DX12StructuredBuffer.h" />
-        <ClInclude Include="DerectX\Resource\Buffer\DX12UploadBuffer.h" />
-        <ClInclude Include="DerectX\Resource\Buffer\DX12VertexBuffer.h" />
+        <ClInclude Include="DerectX\Resource\Buffer\DX12Buffer.h"/>
+        <ClInclude Include="DerectX\Resource\Buffer\DX12ConstantBuffer.h"/>
+        <ClInclude Include="DerectX\Resource\Buffer\DX12IndexBuffer.h"/>
+        <ClInclude Include="DerectX\Resource\Buffer\DX12StructuredBuffer.h"/>
+        <ClInclude Include="DerectX\Resource\Buffer\DX12UploadBuffer.h"/>
+        <ClInclude Include="DerectX\Resource\Buffer\DX12VertexBuffer.h"/>
         <ClInclude Include="DerectX\Resource\enums.h"/>
-        <ClInclude Include="DerectX\Resource\Texture\DX12RenderTarget.h" />
-        <ClInclude Include="DerectX\Resource\Texture\DX12Texture.h" />
+        <ClInclude Include="DerectX\Resource\Texture\DX12RenderTarget.h"/>
+        <ClInclude Include="DerectX\Resource\Texture\DX12Texture.h"/>
         <ClInclude Include="DerectX\Shader\enums.h"/>
         <ClInclude Include="Exceptions.h"/>
         <ClInclude Include="Helpers.h"/>
@@ -141,13 +141,21 @@
         <ClInclude Include="DerectX\Shader\DX12Shader.h"/>
         <ClInclude Include="DerectX\Shader\DX12ShaderCompiler.h"/>
         <ClInclude Include="DerectX\Command\DX12CommandList.h"/>
-        <ClInclude Include="Window\enums.h"/>
-        <ClInclude Include="Window\NativeDisplayInfo.h" />
-        <ClInclude Include="Window\NativeDisplay.h" />
-        <ClInclude Include="Window\NativeWindow.h"/>
-        <ClInclude Include="Events\NativeEventManager.h"/>
-        <ClInclude Include="Events\NativeEventProc.h"/>
-        <ClInclude Include="Events\NativeEvents.h"/>
+        <ClInclude Include="WinTools\enums.h"/>
+        <ClInclude Include="WinTools\Icon\IconInfo.h"/>
+        <ClInclude Include="WinTools\Menu\enums.h"/>
+        <ClInclude Include="WinTools\Menu\MenuItem.h"/>
+        <ClInclude Include="WinTools\Menu\Menu.h"/>
+        <ClInclude Include="WinTools\Menu\SystemWindowMenu.h" />
+        <ClInclude Include="WinTools\Menu\TrayIconMenu.h" />
+        <ClInclude Include="WinTools\Window.h"/>
+        <ClInclude Include="WinTools\Display\DisplayManager.h"/>
+        <ClInclude Include="WinTools\Display\DisplayInfo.h"/>
+        <ClInclude Include="WinTools\Cursor\enums.h"/>
+        <ClInclude Include="WinTools\Cursor\CursorInfo.h"/>
+        <ClInclude Include="WinTools\Events\Events.h"/>
+        <ClInclude Include="WinTools\Events\EventManager.h"/>
+        <ClInclude Include="WinTools\Events\EventProc.h"/>
     </ItemGroup>
     <!--  Source-->
     <ItemGroup>
@@ -160,23 +168,27 @@
         <ClCompile Include="DerectX\DX12Device.cpp"/>
         <ClCompile Include="DerectX\DX12DescriptorHeap.cpp"/>
         <ClCompile Include="DerectX\Pipeline\DX12PipelineState.cpp"/>
-        <ClCompile Include="DerectX\Resource\Buffer\DX12Buffer.cpp" />
-        <ClCompile Include="DerectX\Resource\Buffer\DX12IndexBuffer.cpp" />
-        <ClCompile Include="DerectX\Resource\Buffer\DX12StructuredBuffer.cpp" />
-        <ClCompile Include="DerectX\Resource\Buffer\DX12VertexBuffer.cpp" />
+        <ClCompile Include="DerectX\Resource\Buffer\DX12Buffer.cpp"/>
+        <ClCompile Include="DerectX\Resource\Buffer\DX12IndexBuffer.cpp"/>
+        <ClCompile Include="DerectX\Resource\Buffer\DX12StructuredBuffer.cpp"/>
+        <ClCompile Include="DerectX\Resource\Buffer\DX12VertexBuffer.cpp"/>
         <ClCompile Include="DerectX\Resource\DX12Resource.cpp"/>
-        <ClCompile Include="DerectX\Resource\Texture\DX12RenderTarget.cpp" />
-        <ClCompile Include="DerectX\Resource\Texture\DX12Texture.cpp" />
+        <ClCompile Include="DerectX\Resource\Texture\DX12RenderTarget.cpp"/>
+        <ClCompile Include="DerectX\Resource\Texture\DX12Texture.cpp"/>
         <ClCompile Include="DerectX\Shader\DX12Shader.cpp"/>
         <ClCompile Include="DerectX\Shader\DX12ShaderCompiler.cpp"/>
-        <ClCompile Include="Events\NativeEventProc.cpp"/>
+        <ClCompile Include="WinTools\Icon\IconInfo.cpp"/>
+        <ClCompile Include="WinTools\Menu\SystemWindowMenu.cpp" />
+        <ClCompile Include="WinTools\Menu\TrayIconMenu.cpp" />
+        <ClCompile Include="WinTools\Window.cpp"/>
+        <ClCompile Include="WinTools\Events\EventProc.cpp"/>
+        <ClCompile Include="WinTools\Events\EventManager.cpp"/>
+        <ClCompile Include="WinTools\Display\DisplayManager.cpp"/>
+        <ClCompile Include="WinTools\Cursor\CursorInfo.cpp"/>
         <ClCompile Include="pch.cpp">
             <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
             <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
         </ClCompile>
-        <ClCompile Include="Window/NativeWindow.cpp"/>
-        <ClCompile Include="Events/NativeEventManager.cpp"/>
-        <ClCompile Include="Window\NativeDisplay.cpp" />
     </ItemGroup>
     <!--  Other-->
     <ItemGroup>

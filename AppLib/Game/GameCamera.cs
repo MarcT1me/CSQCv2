@@ -14,11 +14,11 @@ public class GameCamera(CameraData cameraData) : Camera<CameraData>(cameraData)
     public override void HandleEvent(QuantumEvent e)
     {
         base.HandleEvent(e);
-        
+
         if (e is not MouseMoveEvent mouseMove || !TestApp.Instance.MainWindow.MetaData.WinData.Fullscreen) return;
-        
+
         var rotationSpeed = CameraSensitivity * (float)TestApp.Instance.Clock.MetaData.DeltaTime;
-        
+
         // yaw-pitch
         Transform.Rotate(Transform.Right, rotationSpeed * mouseMove.Rel.Y);
         Transform.Rotate(-Transform.Up, rotationSpeed * mouseMove.Rel.X);

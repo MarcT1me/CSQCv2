@@ -1,12 +1,12 @@
 ﻿#include "pch.h"
-#include "NativeEventManager.h"
+#include "EventManager.h"
 
 namespace MirageAPI::Events
 {
     // key
 
-    void NativeEventManager::KeyCallback(
-        Window::NativeWindow^ window,
+    void EventManager::KeyCallback(
+        Window^ window,
         int key,
         bool pressed,
         int scancode,
@@ -29,8 +29,8 @@ namespace MirageAPI::Events
 
     // mouse
 
-    void NativeEventManager::MouseButtonCallback(
-        Window::NativeWindow^ window,
+    void EventManager::MouseButtonCallback(
+        Window^ window,
         int button,
         bool pressed,
         int mods
@@ -50,7 +50,7 @@ namespace MirageAPI::Events
         window->RaiseMouseEvent(e);
     }
 
-    void NativeEventManager::ScrollCallback(Window::NativeWindow^ window, int params)
+    void EventManager::ScrollCallback(Window^ window, int params)
     {
         // format event
         NativeMouseEvent^ e = gcnew NativeMouseEvent();
@@ -63,7 +63,7 @@ namespace MirageAPI::Events
         window->RaiseMouseEvent(e);
     }
 
-    void NativeEventManager::CursorPositionCallback(Window::NativeWindow^ window, int xPos, int yPos)
+    void EventManager::CursorPositionCallback(Window^ window, int xPos, int yPos)
     {
         // format event
         NativeMouseEvent^ e = gcnew NativeMouseEvent();
@@ -77,7 +77,7 @@ namespace MirageAPI::Events
         window->RaiseMouseEvent(e);
     }
 
-    void NativeEventManager::CursorLeaveCallback(Window::NativeWindow^ window)
+    void EventManager::CursorLeaveCallback(Window^ window)
     {
         // format event
         NativeMouseEvent^ e = gcnew NativeMouseEvent();
@@ -87,8 +87,8 @@ namespace MirageAPI::Events
         // raise event
         window->RaiseMouseEvent(e);
     }
-    
-    void NativeEventManager::CursorEnterCallback(Window::NativeWindow^ window)
+
+    void EventManager::CursorEnterCallback(Window^ window)
     {
         // format event
         NativeMouseEvent^ e = gcnew NativeMouseEvent();
@@ -101,7 +101,7 @@ namespace MirageAPI::Events
 
     // window
 
-    void NativeEventManager::WindowFocusedCallback(Window::NativeWindow^ window, int focused)
+    void EventManager::WindowFocusedCallback(Window^ window, int focused)
     {
         // format event
         NativeWindowEvent^ e = gcnew NativeWindowEvent();
@@ -114,7 +114,7 @@ namespace MirageAPI::Events
         window->RaiseWindowEvent(e);
     }
 
-    void NativeEventManager::WindowMaximizeCallback(Window::NativeWindow^ window, int maximize)
+    void EventManager::WindowMaximizeCallback(Window^ window, int maximize)
     {
         // format event
         NativeWindowEvent^ e = gcnew NativeWindowEvent();
@@ -127,7 +127,7 @@ namespace MirageAPI::Events
         window->RaiseWindowEvent(e);
     }
 
-    void NativeEventManager::WindowIconifyCallback(Window::NativeWindow^ window, int iconify)
+    void EventManager::WindowIconifyCallback(Window^ window, int iconify)
     {
         // format event
         NativeWindowEvent^ e = gcnew NativeWindowEvent();
@@ -140,7 +140,7 @@ namespace MirageAPI::Events
         window->RaiseWindowEvent(e);
     }
 
-    void NativeEventManager::WindowResizeCallback(Window::NativeWindow^ window, const int width, const int height)
+    void EventManager::WindowResizeCallback(Window^ window, const int width, const int height)
     {
         // format event
         NativeWindowEvent^ e = gcnew NativeWindowEvent();
@@ -154,7 +154,7 @@ namespace MirageAPI::Events
         window->RaiseWindowEvent(e);
     }
 
-    void NativeEventManager::WindowMoveCallback(Window::NativeWindow^ window, int x, int y)
+    void EventManager::WindowMoveCallback(Window^ window, int x, int y)
     {
         // format event
         NativeWindowEvent^ e = gcnew NativeWindowEvent();
@@ -168,7 +168,7 @@ namespace MirageAPI::Events
         window->RaiseWindowEvent(e);
     }
 
-    void NativeEventManager::WindowRefreshCallback(Window::NativeWindow^ window)
+    void EventManager::WindowRefreshCallback(Window^ window)
     {
         // format event
         NativeWindowEvent^ e = gcnew NativeWindowEvent();
@@ -179,7 +179,7 @@ namespace MirageAPI::Events
         window->RaiseWindowEvent(e);
     }
 
-    void NativeEventManager::WindowCloseCallback(Window::NativeWindow^ window)
+    void EventManager::WindowCloseCallback(Window^ window)
     {
         // format event
         NativeWindowEvent^ e = gcnew NativeWindowEvent();
@@ -190,7 +190,7 @@ namespace MirageAPI::Events
         window->RaiseWindowEvent(e);
     }
 
-    void NativeEventManager::ProcessEvents()
+    void EventManager::ProcessEvents()
     {
         MSG msg = {nullptr};
         while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
@@ -198,5 +198,55 @@ namespace MirageAPI::Events
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
+    }
+
+    void EventManager::PostEvent(
+        UINT eventType,
+        WPARAM wParam, LPARAM lParam
+    )
+    {
+        for (int i = 0; i < Window::winList->Count; i++)
+        {
+            PostEvent(
+                Window::winList[i]->hwnd,
+                eventType, wParam, lParam
+            );
+        }
+    }
+
+    void EventManager::PostEvent(
+        Window^ window, UINT eventType,
+        WPARAM wParam, LPARAM lParam
+    )
+    {
+        PostEvent(
+            window->hwnd,
+            eventType, wParam, lParam
+        );
+    }
+
+    void EventManager::PostEvent(
+        HWND hwnd, UINT eventType,
+        WPARAM wParam, LPARAM lParam
+    )
+    {
+        if (IsWindowVisible(hwnd))
+        {
+            PostMessage(
+                hwnd,
+                eventType, wParam, lParam | HTCLIENT
+            );
+        }
+    }
+
+    void EventManager::SendEvent(
+        Window^ window, UINT eventType,
+        WPARAM wParam, LPARAM lParam
+    )
+    {
+        SendMessage(
+            window->hwnd,
+            eventType, wParam, lParam | HTCLIENT
+        );
     }
 }

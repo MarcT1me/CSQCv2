@@ -77,11 +77,11 @@ namespace MirageAPI::DirectX::Resource
     {
         // validate
         Validate();
-        CheckMissmatch(data->Length, m_size) return QuantumLog(Warning, "Data size missmatch");
+        CheckMissmatch(data->Length, m_size) return QLog(Warning, "Data size missmatch");
 
         // map and check ptr
         void* pData = this->Map();
-        CheckNull(pData) return QuantumLog(Warning, "Error mapping data in DX12Buffer::UploadData");
+        CheckNull(pData) return QLog(Warning, "Error mapping data in DX12Buffer::UploadData");
         // copy data
         {
             pin_ptr<Byte> pinData = &data[0];

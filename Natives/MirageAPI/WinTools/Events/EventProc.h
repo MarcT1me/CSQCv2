@@ -1,12 +1,12 @@
 ﻿#pragma once
 
-#include "../Window/NativeWindow.h"
+#include "../Window.h"
 
 namespace MirageAPI::Events
 {
-    public ref class NativeEventProc
+    public ref class EventProc
     {
-        static Window::NativeWindow^ GetNativeWindow(HWND hWnd);
+        static Window^ GetNativeWindow(HWND hWnd);
 
     internal:
         static LRESULT QuantumWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);

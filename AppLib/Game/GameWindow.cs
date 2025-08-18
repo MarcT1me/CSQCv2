@@ -8,12 +8,15 @@ using Engine.Graphic.Window;
 using Engine.Input.Keyboard;
 using Engine.Logging;
 using Engine.Time;
+using MirageAPI;
 using MirageAPI.DirectX;
 using MirageAPI.DirectX.Command;
 using MirageAPI.DirectX.Pipeline;
 using MirageAPI.DirectX.Resource;
 using MirageAPI.DirectX.Shader;
 using OpenTK.Mathematics;
+using Window = Engine.Graphic.Window.Window;
+
 // MirageAPI
 // Engine
 
@@ -55,11 +58,17 @@ public class GameWindow : Window
 
     public GameWindow(
         WinData winData,
-        GlData? glData = null,
-        string? name = null,
-        Window? parent = null
+        GlData glData,
+        string name,
+        DisplayInfo? display = null,
+        IconInfo? icon = null,
+        CursorInfo? cursor = null
+    ) : base(
+        winData, glData, name,
+        icon: icon,
+        display: display,
+        cursor: cursor
     )
-        : base(winData, glData, name, parent)
     {
         LoadShaders();
         CreatePipelineState();
@@ -247,6 +256,29 @@ public class GameWindow : Window
         );
     }
 
+    protected override void Establish()
+    {
+        NativeWindow.IconMenu = new TrayIconMenu(NativeWindow, "ХУЙ меню", 1, null);
+        NativeWindow.IconMenu.AddItem(
+            new MenuItem(MenuItemType.String, 1, "ХУЙ"
+            )
+        );
+        NativeWindow.IconMenu.AddItem(
+            new MenuItem(MenuItemType.String, 2, "Вертай нахуй"
+            )
+        );
+        NativeWindow.IconMenu.Callback += id =>
+        {
+            Logger.Info($"SysMenu: {id}");
+            if (id == 2)
+            {
+                NativeWindow.ShowFromTray();
+            }
+        };
+
+        base.Establish();
+    }
+
     public override void HandleEvent(QuantumEvent e)
     {
         base.HandleEvent(e);
@@ -269,6 +301,17 @@ public class GameWindow : Window
                     NativeWindow.SetMouseVisibility(!MetaData.WinData.Fullscreen);
                 }
 
+                break;
+            }
+            case KeyEvent { Type: EventType.KeyDown, Key: Key.F }:
+            {
+                NativeWindow.Flash(3, 1);
+                Logger.Beep();
+                break;
+            }
+            case KeyEvent { Type: EventType.KeyDown, Key: Key.F1 }:
+            {
+                NativeWindow.HideToTray();
                 break;
             }
         }

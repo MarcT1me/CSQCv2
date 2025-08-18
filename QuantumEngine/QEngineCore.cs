@@ -29,9 +29,8 @@ public class QEngineCore(Assembly? appLibAssembly) : EngineCore(appLibAssembly)
     {
         Logger.Info("Initialize MirageAPI::DirectX12");
 
-        DX12DeviceInitFlags flags = DX12DeviceInitFlags.None;
+        DX12DeviceInitFlags flags = DX12DeviceInitFlags.UseHighPerformanceAdapter;
         flags |= BaseConfig.DebugMode ? DX12DeviceInitFlags.Debug : DX12DeviceInitFlags.None;
-        flags |= DX12DeviceInitFlags.UseAdapter | DX12DeviceInitFlags.UseHighPerformanceAdapter;
 
         DX12Device.Initialize(flags);
 
@@ -54,7 +53,7 @@ public class QEngineCore(Assembly? appLibAssembly) : EngineCore(appLibAssembly)
         )
         {
             if (assembly == null) continue;
-            
+
             var assemblyName = assembly.GetName().Name;
             Logger.Info($"Embed Resources for {assemblyName}:");
             foreach (var name in assembly.GetManifestResourceNames())

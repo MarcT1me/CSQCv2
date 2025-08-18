@@ -3,8 +3,8 @@ using Engine.Time;
 using MirageAPI;
 using MirageAPI.DirectX;
 using OpenTK.Mathematics;
+
 // engine sub-systems
-using MirageAPI.Window;
 
 namespace Engine.Graphic.Window;
 
@@ -16,17 +16,14 @@ using Logging;
 using Data.RegistryManagers;
 
 public class Window
-    : MetaObject<WindowData>, IPreparableInstance<NativeWindow>, IPreparable,
+    : MetaObject<WindowData>, IPreparableInstance, IPreparable,
         IEventful, IUpdatable, IRenderable
 {
-    protected readonly NativeWindow NativeWindow;
-    public const int UseDefault = unchecked((int)0x80000000);
+    protected readonly MirageAPI.Window NativeWindow;
+    public IntPtr Handle => NativeWindow.Handle;
 
     public Window? ActiveWindow { get; protected set; }
-
     public Window? ParentWindow { get; }
-    public NativeDisplayInfo? Display { get; protected set; }
-    public IntPtr Handle => NativeWindow.Handle;
     public ObjectStatusFlags ObjectStatus => MetaData.Status;
 
     public Window(
@@ -34,34 +31,21 @@ public class Window
         GlData? glData = null,
         string? name = null,
         Window? parent = null,
-        NativeDisplayInfo? display = null
+        DisplayInfo? display = null,
+        IconInfo? icon = null,
+        CursorInfo? cursor = null
     ) : base(new WindowData(winData, glData ?? new GlData(), name))
     {
         Logger.Info(
             $"Creating window '{MetaData.Identifier}'\n" +
             $"Position: {winData.Position}\n" +
-            $"Size: {winData.Size}\n" +
-            $"Opacity: {winData.Opacity}"
+            $"Size: {winData.Size}\n"
         );
 
         ParentWindow = parent;
-        Display = display;
 
-        // ReSharper disable once VirtualMemberCallInConstructor
-        NativeWindow = PrepareInstance();
-
-        QEventSystem.RegisterWindow(NativeWindow);
-        QEventSystem.EventHandling += HandleEvent;
-
-        Input.Mouse.Mouse.RegisterWindow(this);
-        Input.Keyboard.Keyboard.RegisterWindow(this);
-
-        Registries.WindowRegistry.Register(this);
-    }
-
-    public virtual NativeWindow PrepareInstance()
-    {
-        var win = new NativeWindow(
+        NativeWindow = new MirageAPI.Window(
+            WindowType.Overlapped,
             new SimpleRect
             {
                 X = MetaData.WinData.Position.X,
@@ -72,12 +56,23 @@ public class Window
             MetaData.Identifier.GetNameAnyway(),
             MetaData.WinData.Opacity,
             MetaData.WinData.Fullscreen,
-            ParentWindow?.NativeWindow,
-            Display,
-            WindowType.Overlapped,
+            parent?.NativeWindow, display, icon, cursor,
             CreateDefaultWindowContextConfig()
         );
-        return win;
+
+        // ReSharper disable once VirtualMemberCallInConstructor
+        PrepareInstance();
+
+        Registries.WindowRegistry.Register(this);
+    }
+
+    public virtual void PrepareInstance()
+    {
+        QEventSystem.RegisterWindow(NativeWindow);
+        QEventSystem.EventHandling += HandleEvent;
+
+        Input.Mouse.Mouse.RegisterWindow(this);
+        Input.Keyboard.Keyboard.RegisterWindow(this);
     }
 
     protected DX12ContextConfig CreateDefaultWindowContextConfig()
@@ -97,9 +92,7 @@ public class Window
             SwapQuality = MetaData.GlData.SwapQuality,
 
             SwapEffect = MetaData.GlData.SwapEffect,
-            VSyncInterval = MetaData.WinData.VSyncInterval,
-
-            FullscreenConfig = DX12FullscreenMode.Windowed(0)
+            VSyncInterval = MetaData.WinData.VSyncInterval
         };
 
         return windowContextConfig;
@@ -169,7 +162,7 @@ public class Window
     protected void SetVsync(uint interval)
     {
         UpdateVsync(interval);
-        NativeWindow.SetVSync(MetaData.WinData.VSyncInterval);
+        NativeWindow.VSync = MetaData.WinData.VSyncInterval;
     }
 
     protected void UpdateVsync(uint interval)
@@ -187,10 +180,9 @@ public class Window
         NativeWindow.DXContext.SetClipPlanes(MetaData.GlData.ClipPlanes);
     }
 
-    protected void MoveOnDisplay(NativeDisplayInfo display)
+    protected void MoveOnDisplay(DisplayInfo display)
     {
-        Display = display;
-        NativeWindow.MoveOnDisplay(display);
+        NativeWindow.Display = display;
     }
 
     protected void Show() => NativeWindow.Show();

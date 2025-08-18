@@ -1,18 +1,18 @@
 ﻿#include "pch.h"
-#include "NativeEventProc.h"
+#include "EventProc.h"
 
-#include "NativeEventManager.h"
+#include "EventManager.h"
 
 namespace MirageAPI::Events
 {
-    Window::NativeWindow^ NativeEventProc::GetNativeWindow(HWND hWnd)
+    Window^ EventProc::GetNativeWindow(HWND hWnd)
     {
         LONG_PTR ptr = GetWindowLongPtr(hWnd, GWLP_USERDATA);
         if (ptr == 0) return nullptr;
 
         IntPtr managed_ptr(reinterpret_cast<void*>(ptr));
         auto gch = Runtime::InteropServices::GCHandle::FromIntPtr(managed_ptr);
-        return safe_cast<Window::NativeWindow^>(gch.Target);
+        return safe_cast<Window^>(gch.Target);
     }
 
     void matchMouseBtnMsg(UINT msg, int* button, bool* pressed)
@@ -53,9 +53,11 @@ namespace MirageAPI::Events
         }
     }
 
-    LRESULT NativeEventProc::QuantumWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+    LRESULT EventProc::QuantumWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     {
-        if (Window::NativeWindow^ window = GetNativeWindow(hwnd))
+        QLogger::SimpleLog(CSFormat("native event proc - msg: {0}", msg));
+
+        if (Window^ window = GetNativeWindow(hwnd))
         {
             switch (msg)
             {
@@ -63,7 +65,7 @@ namespace MirageAPI::Events
             case WM_KEYUP:
                 {
                     int mods = 0;
-                    
+
                     if (GetKeyState(VK_SHIFT) & 0x8000)
                         mods |= 1 << 0;
                     if (GetKeyState(VK_CONTROL) & 0x8000)
@@ -78,7 +80,7 @@ namespace MirageAPI::Events
                     if (GetKeyState(VK_SCROLL) & 0x0001)
                         mods |= 1 << 5;
 
-                    NativeEventManager::KeyCallback(
+                    EventManager::KeyCallback(
                         window,
                         static_cast<int>(wParam),
                         msg == WM_KEYDOWN,
@@ -99,7 +101,7 @@ namespace MirageAPI::Events
                     bool pressed;
                     matchMouseBtnMsg(msg, &button, &pressed);
 
-                    NativeEventManager::MouseButtonCallback(
+                    EventManager::MouseButtonCallback(
                         window,
                         button,
                         pressed,
@@ -110,7 +112,7 @@ namespace MirageAPI::Events
 
             case WM_MOUSEWHEEL:
                 {
-                    NativeEventManager::ScrollCallback(window, static_cast<int>(wParam));
+                    EventManager::ScrollCallback(window, static_cast<int>(wParam));
                     break;
                 }
             case WM_MOUSEMOVE:
@@ -120,14 +122,14 @@ namespace MirageAPI::Events
 
                     window->UpdateMousePosition(x, y);
 
-                    NativeEventManager::CursorPositionCallback(window, x, y);
+                    EventManager::CursorPositionCallback(window, x, y);
                     break;
                 }
             case WM_MOUSELEAVE:
                 {
                     window->CursorLeaveHandle();
-                    
-                    NativeEventManager::CursorLeaveCallback(window);
+
+                    EventManager::CursorLeaveCallback(window);
                     break;
                 }
 
@@ -136,7 +138,7 @@ namespace MirageAPI::Events
                     int width = LOWORD(lParam);
                     int height = HIWORD(lParam);
 
-                    NativeEventManager::WindowResizeCallback(window, width, height);
+                    EventManager::WindowResizeCallback(window, width, height);
                     break;
                 }
             case WM_MOVE:
@@ -144,15 +146,58 @@ namespace MirageAPI::Events
                     int x = LOWORD(lParam);
                     int y = HIWORD(lParam);
 
-                    NativeEventManager::WindowMoveCallback(window, x, y);
+                    EventManager::WindowMoveCallback(window, x, y);
                     break;
                 }
 
+            case WM_SETCURSOR:
+                {
+                    if (LOWORD(lParam) == HTCLIENT && window->Cursor != nullptr)
+                    {
+                        SetCursor(window->Cursor->NativeCursor);
+                        return TRUE;
+                    }
+                    break;
+                }
+
+            case TRAY_MENU_EVENT_TYPE:
+                {
+                    if (lParam == WM_RBUTTONUP)
+                    {
+                        POINT pt;
+                        GetCursorPos(&pt);
+                        window->IconMenu->Show(gcnew Vector2i(pt.x, pt.y));
+                    }
+                    else if (lParam == WM_LBUTTONDOWN)
+                    {
+                        window->BringToFront();
+                    }
+                    break;
+                }
+            case WM_COMMAND:
+                {
+                    int commandId = LOWORD(wParam);
+                    window->IconMenu->RaiseCallback(commandId);
+                    break;
+                }
+            case WM_SYSCOMMAND:
+                {
+                    int commandId = wParam & 0xFFF0;
+                    if (commandId >= 0xF000) break;
+
+                    window->SysMenu->RaiseCallback(commandId);
+                    break;
+                }
+
+            case WM_CLOSE:
+                {
+                    window->Destroy();
+                    EventManager::WindowCloseCallback(window);
+                }
             case WM_DESTROY:
                 {
                     PostQuitMessage(0);
-                    NativeEventManager::WindowCloseCallback(window);
-                    return 0;
+                    return FALSE;
                 }
             default: ;
             }

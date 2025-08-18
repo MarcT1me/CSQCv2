@@ -1,8 +1,8 @@
 #pragma once
 
-namespace MirageAPI::Window
+namespace MirageAPI
 {
-    public ref struct NativeDisplayInfo
+    public ref struct DisplayInfo
     {
         IntPtr Handle;
         String^ Name;

@@ -11,7 +11,7 @@ namespace MirageAPI::Events
 
         int Key;
         bool Pressed;
-        
+
         int Scancode;
         int Mods;
     };
@@ -31,7 +31,7 @@ namespace MirageAPI::Events
 
         Vector2i Pos;
         Vector2i Rel;
-        
+
         int Mode;
     };
 
@@ -72,28 +72,26 @@ namespace MirageAPI::Events
     public ref struct NativeJoystickEvent
     {
         int JoystickID;
-        
+
         bool Connected;
     };
 
     public ref struct NativeJoystickState
     {
         int JoystickID;
-        
+
         int AxesCount;
         const float* Axes;
-        
+
         int ButtonCount;
         const unsigned char* Buttons;
-        
+
         int HatCount;
         const unsigned char* Hats;
     };
 
-    public ref struct NativeEvent
+    public ref class Event
     {
-        NativeEventType Type;
-        int event;
-        IntPtr data;
+        int eventType;
     };
 }

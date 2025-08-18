@@ -1,9 +1,11 @@
-﻿using Engine.Base;
+﻿using Engine.Asset;
+using Engine.Asset.Image;
+using Engine.Base;
 using Engine.Objects.Scene;
 using Engine.Objects.SceneNode;
 using Engine.Events.QuantumEvents;
 using Engine.Time;
-using MirageAPI.Window;
+using MirageAPI;
 
 namespace AppLib.Game;
 
@@ -16,20 +18,18 @@ public class TestApp : GameType
 
     public override TestAppData PrepareInstance()
     {
-        return new TestAppData
-        {
-            Tps = 0,
-            WinData = new((1600, 900)),
-            GlData = new() { ClipPlanes = (0.001f, 4000f) }
-        };
+        return new TestAppData();
     }
 
     protected override GameWindow CreateMainWindow()
     {
+        var winName = MetaData.Identifier.GetNameAnyway();
+
         return new GameWindow(
             MetaData.WinData,
             MetaData.GlData,
-            MetaData.Identifier.GetNameAnyway()
+            winName,
+            icon: new IconInfo(AssetLoader.AssetDirectory + "/Logo.ico")
         );
     }
 

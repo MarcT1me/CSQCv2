@@ -1,6 +1,5 @@
 ﻿using System.Collections.Concurrent;
 // engine sub-systems
-using MirageAPI.Window;
 using MirageAPI.Events;
 
 namespace Engine.Events;
@@ -53,7 +52,7 @@ public class QEventSystem
         }
     }
 
-    public static void RegisterWindow(NativeWindow window)
+    public static void RegisterWindow(MirageAPI.Window window)
     {
         window.OnKey += HandleKeyEvent;
         window.OnMouse += HandleMouseEvent;
@@ -62,7 +61,7 @@ public class QEventSystem
         window.OnDrop += HandleDropEvent;
     }
 
-    public static void UnregisterWindow(NativeWindow window)
+    public static void UnregisterWindow(MirageAPI.Window window)
     {
         window.OnKey -= HandleKeyEvent;
         window.OnMouse -= HandleMouseEvent;
@@ -96,7 +95,7 @@ public class QEventSystem
             var handler = new EventBatchHandler();
 
             // Опрашиваем все окна
-            NativeEventManager.ProcessEvents();
+            EventManager.ProcessEvents();
 
             // Обрабатываем накопленные события
             while (EventQueue.TryDequeue(out var qEvent))

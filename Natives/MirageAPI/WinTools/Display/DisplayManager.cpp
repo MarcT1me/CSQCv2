@@ -1,7 +1,7 @@
 #include "pch.h"
-#include "NativeDisplay.h"
+#include "DisplayManager.h"
 
-namespace MirageAPI::Window
+namespace MirageAPI
 {
     BOOL CALLBACK MonitorEnumProc(
         HMONITOR hMonitor,
@@ -14,7 +14,7 @@ namespace MirageAPI::Window
         info.cbSize = sizeof(MONITORINFOEX);
         GetMonitorInfo(hMonitor, &info);
 
-        NativeDisplayInfo^ mi = gcnew NativeDisplayInfo();
+        DisplayInfo^ mi = gcnew DisplayInfo();
         mi->Handle = IntPtr(hMonitor);
         mi->Position = Vector2i(
             info.rcMonitor.left,
@@ -27,41 +27,41 @@ namespace MirageAPI::Window
         mi->IsPrimary = (info.dwFlags & MONITORINFOF_PRIMARY) != 0;
         mi->Name = gcnew String(info.szDevice);
 
-        NativeDisplay::Monitors->Add(mi);
+        DisplayManager::DisplayList->Add(mi);
         return TRUE;
     }
 
-    CSList<NativeDisplayInfo^>^ NativeDisplay::GetAllMonitors()
+    CSList<DisplayInfo^>^ DisplayManager::GetAllDisplays()
     {
-        return Monitors->Count == 0 ? UpdateMonitors() : Monitors;
+        return DisplayList->Count == 0 ? UpdateDisplayList() : DisplayList;
     }
 
-    CSList<NativeDisplayInfo^>^ NativeDisplay::UpdateMonitors()
+    CSList<DisplayInfo^>^ DisplayManager::UpdateDisplayList()
     {
-        Monitors->Clear();
+        DisplayList->Clear();
         EnumDisplayMonitors(
             nullptr, nullptr,
             MonitorEnumProc,
             0
         );
-        return Monitors;
+        return DisplayList;
     }
 
-    NativeDisplayInfo^ NativeDisplay::GetPrimaryMonitor()
+    DisplayInfo^ DisplayManager::GetPrimaryDisplay()
     {
-        if (Monitors->Capacity == 0) UpdateMonitors();
-        for each (auto monitor in Monitors)
+        if (DisplayList->Capacity == 0) UpdateDisplayList();
+        for each (auto monitor in DisplayList)
         {
             if (monitor->IsPrimary)
                 return monitor;
         }
-        return Monitors[0];
+        return DisplayList[0];
     }
 
-    NativeDisplayInfo^ NativeDisplay::GetMonitorFromHandle(IntPtr hMonitor)
+    DisplayInfo^ DisplayManager::GetDisplayFromHandle(IntPtr hMonitor)
     {
-        if (Monitors->Capacity == 0) UpdateMonitors();
-        for each (auto monitor in Monitors)
+        if (DisplayList->Capacity == 0) UpdateDisplayList();
+        for each (auto monitor in DisplayList)
         {
             if (monitor->Handle == hMonitor) return monitor;
         }
