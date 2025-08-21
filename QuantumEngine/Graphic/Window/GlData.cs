@@ -14,7 +14,7 @@ public sealed class GlData
     public DX12SwapEffect SwapEffect = DX12SwapEffect.FlipDiscard;
     public DX12ResourceFormat Format = DX12ResourceFormat.RGBA8_UNORM;
 
-    public SimpleRect Viewport = new(0, 0, -1, -1);
+    public Rect Viewport = new(0, 0, -1, -1);
     public Vector2 ClipPlanes = new(0.01f, 100.0f);
     public Color4 ClearColor = new(0.08f, 0.16f, 0.18f, 1.0f);
 }

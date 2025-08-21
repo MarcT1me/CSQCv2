@@ -84,7 +84,7 @@ namespace MirageAPI::DirectX
 
     public ref struct DX12ContextConfig
     {
-        SimpleRect^ Viewport;
+        Rect^ Viewport;
         float Near;
         float Far;
         Vector2i Resolution;

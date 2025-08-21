@@ -2,10 +2,18 @@
 
 namespace MirageAPI
 {
-    public ref class NullptrException : public QuantumFailure
+    public ref class MirageAPIException : public QuantumFailure
     {
     public:
-        NullptrException(String^ msg) : QuantumFailure(gcnew String(msg))
+        MirageAPIException(String^ msg) : QuantumFailure(gcnew String(msg))
+        {
+        }
+    };
+    
+    public ref class NullptrException : public MirageAPIException
+    {
+    public:
+        NullptrException(String^ msg) : MirageAPIException(gcnew String(msg))
         {
         }
     };

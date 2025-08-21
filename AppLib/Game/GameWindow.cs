@@ -15,7 +15,6 @@ using MirageAPI.DirectX.Pipeline;
 using MirageAPI.DirectX.Resource;
 using MirageAPI.DirectX.Shader;
 using OpenTK.Mathematics;
-using Window = Engine.Graphic.Window.Window;
 
 // MirageAPI
 // Engine
@@ -37,50 +36,36 @@ public struct MatrixBufferData
     public Matrix4 Projection;
 }
 
-public class GameWindow : Window
+public class GameWindow : Engine.Graphic.Window.Window
 {
     // shader
-    private DX12Shader _vertexShader = null!;
-    private DX12Shader _pixelShader = null!;
-    private DX12PipelineState _pipelineState = null!;
+    private readonly DX12Shader _vertexShader;
+    private readonly DX12Shader _pixelShader;
+    private readonly DX12PipelineState _pipelineState;
 
     // vertex
-    private DX12VertexBuffer _vertexBuffer = null!;
-    private int _vertexCount;
+    private readonly DX12VertexBuffer _vertexBuffer;
+    private readonly int _vertexCount;
 
     // texture
-    private DX12DescriptorHeap _descriptorHeap = null!;
-    private DX12Texture _texture = null!;
+    private readonly DX12DescriptorHeap _descriptorHeap;
+    private readonly DX12Texture _texture;
 
     // 3d
-    private DX12ConstantBuffer _matrixBuffer = null!;
-    public GameCamera Camera = null!;
+    private readonly DX12ConstantBuffer _matrixBuffer;
+    public GameCamera Camera;
 
     public GameWindow(
         WinData winData,
         GlData glData,
         string name,
-        DisplayInfo? display = null,
-        IconInfo? icon = null,
-        CursorInfo? cursor = null
+        DisplayInfo? display = null
     ) : base(
         winData, glData, name,
-        icon: icon,
-        display: display,
-        cursor: cursor
+        display: display
     )
     {
-        LoadShaders();
-        CreatePipelineState();
-        LoadImage();
-        CreateGeometryBuffers();
-        CreateMatrixBuffer();
-        CreateCamera();
-    }
-
-    private void LoadShaders()
-    {
-        Logger.Debug("Compiling shaders...");
+        Logger.Debug("Loading Shaders...");
 
         var vertShader = (ShaderData)AssetManager.Load(
             new(
@@ -97,11 +82,8 @@ public class GameWindow : Window
             )
         ).Content;
         _pixelShader = pixShader.GetNativeShader;
-    }
 
-    private void CreatePipelineState()
-    {
-        Logger.Debug("Creating pipeline...");
+        Logger.Debug("Creating Pipeline...");
 
         // Создание конфигураций
         var config = new DX12PipelineStateConfig(
@@ -139,11 +121,8 @@ public class GameWindow : Window
         );
         NativeWindow.DXContext.CmdList.PipelineState =
             _pipelineState = new DX12PipelineState(_vertexShader, _pixelShader, config);
-    }
 
-    private void LoadImage()
-    {
-        Logger.Debug("Loading image...");
+        Logger.Debug("Loading Image...");
 
         // Загружаем ассет текстуры
         Image img = (Image)AssetManager.Load(
@@ -155,21 +134,14 @@ public class GameWindow : Window
 
         // Создаём текстуру
         _texture = img.GetNativeTexture();
-        _texture.SRVHeap = CreateDescriptorHeap();
-        _texture.CreateSRV();
-    }
 
-    private DX12DescriptorHeap CreateDescriptorHeap()
-    {
         Logger.Debug("Creating Descriptor Heap...");
-        return
-            NativeWindow.DXContext.CmdList.DescriptorHeap =
-                _descriptorHeap =
-                    new DX12DescriptorHeap(DX12DescriptorHeapType.CBV_SRV_UAV, 1, true);
-    }
+        _texture.SRVHeap = NativeWindow.DXContext.CmdList.DescriptorHeap =
+            _descriptorHeap =
+                new DX12DescriptorHeap(DX12DescriptorHeapType.CBV_SRV_UAV, 1, true);
 
-    private void CreateGeometryBuffers()
-    {
+        _texture.CreateSRV();
+
         Logger.Debug("Creating geometry buffer...");
 
         float unitX = _texture.Width / 200f;
@@ -234,19 +206,14 @@ public class GameWindow : Window
         }
         catch
         {
-            _vertexBuffer.Dispose();
+            _vertexBuffer?.Dispose();
             throw;
         }
-    }
 
-    private void CreateMatrixBuffer()
-    {
-        Logger.Debug("Creating matrix buffer...");
+        Logger.Debug("Creating matrix Constant Buffer...");
         _matrixBuffer = new DX12ConstantBuffer(256, DX12ResourceFlags.None);
-    }
 
-    private void CreateCamera()
-    {
+        Logger.Debug("Creating Camera...");
         Camera = new GameCamera(
             new(
                 position: (0, -10, 0),
@@ -254,29 +221,38 @@ public class GameWindow : Window
                 identifier: "GameCamera"
             )
         );
-    }
 
-    protected override void Establish()
-    {
-        NativeWindow.IconMenu = new TrayIconMenu(NativeWindow, "ХУЙ меню", 1, null);
-        NativeWindow.IconMenu.AddItem(
-            new MenuItem(MenuItemType.String, 1, "ХУЙ"
-            )
+        Logger.Debug("Creating Tray icon menu...");
+        NativeWindow.TrayMenu = new TrayMenu(
+            NativeWindow, 1, null,
+            "Test Tray icon", "info", "idk what info"
         );
-        NativeWindow.IconMenu.AddItem(
-            new MenuItem(MenuItemType.String, 2, "Вертай нахуй"
-            )
-        );
-        NativeWindow.IconMenu.Callback += id =>
+        var empty = NativeWindow.TrayMenu.TextItem("Empty");
+        var pop = NativeWindow.TrayMenu.TextItem("Pop from tray");
+        NativeWindow.TrayMenu.Callback += id =>
         {
-            Logger.Info($"SysMenu: {id}");
-            if (id == 2)
+            if (id == empty)
             {
+                Logger.Debug("crickets chirping...");
+            }
+
+            if (id == pop)
+            {
+                Logger.Debug("removing tray icon...");
                 NativeWindow.ShowFromTray();
             }
         };
 
-        base.Establish();
+        Logger.Debug("Changing System window menu...");
+        NativeWindow.SysMenu.Separator();
+        var testSysMenu = NativeWindow.SysMenu.TextItem("TEST SYSTEM MENU ITEM");
+        NativeWindow.SysMenu.Callback += id =>
+        {
+            if (id == testSysMenu)
+            {
+                Logger.Debug("crickets chirping...");
+            }
+        };
     }
 
     public override void HandleEvent(QuantumEvent e)
@@ -292,13 +268,13 @@ public class GameWindow : Window
             case KeyEvent { Type: EventType.KeyDown, Key: Key.F11 } keyEvent:
             {
                 Logger.Debug("Toggle Fullscreen");
-                ToggleFullscreen();
+                NativeWindow.IsFullscreen = !NativeWindow.IsFullscreen;
 
                 if (keyEvent.Mods.HasFlag(KeyMod.Shift))
                 {
                     Logger.Debug("set Mouse Capture and visibility");
-                    NativeWindow.SetMouseCapture(MetaData.WinData.Fullscreen);
-                    NativeWindow.SetMouseVisibility(!MetaData.WinData.Fullscreen);
+                    Mouse.CaptureWindow = MetaData.WinData.Fullscreen ? NativeWindow : null;
+                    Mouse.IsVisible = !MetaData.WinData.Fullscreen;
                 }
 
                 break;

@@ -19,5 +19,8 @@
 #define QLogger Engine::Logging::Logger
 #define QLog(logLevel, msg) QLogger::logLevel((msg))
 
-#define CSStringToWString(string) msclr::interop::marshal_as<std::wstring>((string))
-#define CStringToWChar(string) CSStringToWString(string).c_str()
+#define CStringToWString(string) msclr::interop::marshal_as<std::wstring>((string))
+#define CStringToWChar(string) CStringToWString(string).c_str()
+
+#define UnpacVec2(vector) vector->X, vector->Y
+#define UnpacVec4(vector) UnpacVec2(vector), vector->Z, vector->W

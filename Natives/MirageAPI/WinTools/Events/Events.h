@@ -5,10 +5,48 @@ using namespace OpenTK::Mathematics;
 
 namespace MirageAPI::Events
 {
-    public ref struct NativeKeyEvent
+    public ref struct EventParams
     {
-        IntPtr windowID;
+        unsigned short lowW;
+        unsigned short highW;
+        unsigned short lowL;
+        unsigned short highL;
 
+        WPARAM wParam;
+        LPARAM lParam;
+
+    internal:
+        EventParams(WPARAM wParam, LPARAM lParam) : wParam(wParam), lParam(lParam)
+        {
+            lowW = LOWORD(wParam);
+            highW = HIWORD(wParam);
+            lowL = LOWORD(lParam);
+            highL = HIWORD(lParam);
+        }
+    };
+
+    public enum class EventType
+    {
+        MouseButton,
+        MouseMove, MouseScroll,
+        MouseLeave, MouseEnter,
+
+        WindowFocus, WindowVisibility,
+        WindowDisplayChange,
+        WindowResize, WindowMove,
+        WindowCreate, WindowClose, WindowDestroy
+    };
+
+    public ref class Event
+    {
+    public:
+        EventType Type;
+        IntPtr windowID;
+    };
+
+    public ref class KeyEvent : Event
+    {
+    public:
         int Key;
         bool Pressed;
 
@@ -16,16 +54,9 @@ namespace MirageAPI::Events
         int Mods;
     };
 
-    public enum class NativeMouseEventType
+    public ref class MouseEvent : Event
     {
-        Button, Move, Scroll, Leave, Enter
-    };
-
-    public ref struct NativeMouseEvent
-    {
-        NativeMouseEventType Type;
-        IntPtr windowID;
-
+    public:
         int Button;
         bool Pressed;
 
@@ -35,48 +66,24 @@ namespace MirageAPI::Events
         int Mode;
     };
 
-    public enum class NativeWindowEventType
+    public ref class WindowEvent : Event
     {
-        Focus, Maximize, Iconify, Resize, Move, Refresh, Close,
-    };
-
-    public ref struct NativeWindowEvent
-    {
-        NativeWindowEventType Type;
-        IntPtr windowID;
+    public:
+        bool Flag;
+        int State;
 
         int X;
         int Y;
     };
 
-    public ref struct NativeCharEvent
+    public ref class DropEvent : Event
     {
-        IntPtr windowID;
-
-        unsigned int codepoint;
-    };
-
-    public ref struct NativeDropEvent
-    {
-        IntPtr windowID;
-
+    public:
         int count;
-        const char** paths;
+        CSList<String^>^ paths;
     };
 
-    public enum class NativeEventType
-    {
-        Joystick, Monitor
-    };
-
-    public ref struct NativeJoystickEvent
-    {
-        int JoystickID;
-
-        bool Connected;
-    };
-
-    public ref struct NativeJoystickState
+    public ref struct JoystickState
     {
         int JoystickID;
 
@@ -88,10 +95,5 @@ namespace MirageAPI::Events
 
         int HatCount;
         const unsigned char* Hats;
-    };
-
-    public ref class Event
-    {
-        int eventType;
     };
 }

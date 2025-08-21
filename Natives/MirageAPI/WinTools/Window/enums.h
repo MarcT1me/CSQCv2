@@ -2,8 +2,10 @@
 
 namespace MirageAPI
 {
-    public enum class WindowType : unsigned long
+    [System::Flags]
+    public enum class WindowType : unsigned long long
     {
+        None = 0,
         Overlapped = WS_OVERLAPPEDWINDOW | WS_EX_LAYERED,
         Fullscreen = WS_OVERLAPPED,
         Popup = WS_POPUPWINDOW | WS_EX_LAYERED,

@@ -1,9 +1,8 @@
 ﻿using Engine.Input.Keyboard;
-using MirageAPI.Events;
 
 namespace Engine.Events.QuantumEvents;
 
-public class KeyEvent(NativeKeyEvent e)
+public class KeyEvent(MirageAPI.Events.KeyEvent e)
     : WindowedQuantumEvent(e.Pressed ? EventType.KeyDown : EventType.KeyUp, e.windowID)
 {
     public readonly Key Key = (Key)e.Key;

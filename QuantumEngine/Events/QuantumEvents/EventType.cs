@@ -16,13 +16,11 @@ public enum EventType : uint
     
     WindowFocusGained,
     WindowFocusLost,
-    WindowMaximize,
-    WindowMinimize,
-    WindowRestore,
-    WindowIconify,
     WindowResize,
     WindowMove,
+    WindowCreate,
     WindowClose,
+    WindowDestroy,
     
     Char,
     Drop,

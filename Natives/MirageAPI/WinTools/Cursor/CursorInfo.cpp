@@ -1,65 +1,55 @@
 ﻿#include "pch.h"
 #include "CursorInfo.h"
 
+#include "../../NativeInstance.h"
+
 namespace MirageAPI
 {
     CursorInfo::CursorInfo(
-        CursorType cursorType
-    ) : m_hCursor(
-        LoadCursor(
-            nullptr,
-            MAKEINTRESOURCE(cursorType)
-        )
+        NativeInstance^ instance,
+        int resource
     )
+    {
+        if (resource)
+        {
+            m_hCursor = LoadCursorW(
+                instance->hInstance, MAKEINTRESOURCEW(resource)
+            );
+
+            CheckNull(m_hCursor)
+            {
+                QLog(
+                    Warning, CSFormat(
+                        "Error loading CURSOR with resourceId: {0} from {1}. Error: {2}",
+                        resource, instance->instanceName, GetLastError()
+                    )
+                );
+            }
+        }
+    }
+
+    CursorInfo::CursorInfo(
+        int resource
+    ) : CursorInfo(NativeInstance::MirageAPI, resource)
+    {
+    }
+
+    CursorInfo::CursorInfo(
+        CursorType cursorType
+    ) : CursorInfo(NativeInstance::System, static_cast<int>(cursorType))
     {
     }
 
     CursorInfo::CursorInfo(
         String^ path
-    ) : m_hCursor(static_cast<HCURSOR>(LoadImageW(
-            nullptr,
-            CStringToWChar(path),
-            IMAGE_CURSOR,
-            0, 0,
-            LR_LOADFROMFILE | LR_DEFAULTSIZE
-        ))
-    )
+    ) : m_hCursor(LoadCursorFromFileW(CStringToWChar(path)))
     {
+        CheckNull(m_hCursor)
+            QLog(Warning, CSFormat("Error loading cursor from path: {0}. Error: {1}", path, GetLastError()));
     }
 
     CursorInfo::CursorInfo(
-        array<unsigned char>^ pixelData,
-        int width, int height,
-        int hotX, int hotY
-    )
-    {
-        pin_ptr<Byte> pinData = &pixelData[0];
-        HBITMAP hColor = CreateBitmap(
-            width, height,
-            1, 32,
-            pinData
-        );
-        HBITMAP hMask = CreateBitmap(
-            width, height,
-            1, 1,
-            nullptr
-        );
-
-        ICONINFO iconInfo;
-        iconInfo.fIcon = false;
-        iconInfo.xHotspot = hotX;
-        iconInfo.yHotspot = hotY;
-        iconInfo.hbmColor = hColor;
-        iconInfo.hbmMask = hMask;
-
-        m_hCursor = CreateIconIndirect(&iconInfo);
-
-        DeleteObject(hColor);
-        DeleteObject(hMask);
-    }
-
-    CursorInfo::CursorInfo(
-        array<unsigned char>^ data
+        array<Byte>^ data
     )
     {
         pin_ptr<Byte> pinData = &data[0];
@@ -71,6 +61,9 @@ namespace MirageAPI
             0, 0,
             LR_DEFAULTCOLOR
         );
+
+        CheckNull(m_hCursor)
+            QLog(Warning, "Error loading cursor from data. Error:" + GetLastError());
     }
 
     void CursorInfo::!CursorInfo()

@@ -1,4 +1,5 @@
-﻿using OpenTK.Mathematics;
+﻿using MirageAPI;
+using OpenTK.Mathematics;
 
 namespace Engine.Graphic.Window;
 
@@ -6,7 +7,7 @@ public sealed class WinData(
     Vector2i size,
     Vector2i? position = null,
     float resolutionScaling = 1f,
-    float opacity = 1f,
+    WindowStyleInfo? windowStyle = null,
     uint vsyncInterval = 0,
     bool isFullscreen = false
 )
@@ -19,8 +20,19 @@ public sealed class WinData(
         (int)(ResolutionScaling * Size.Y)
     );
 
-    public Vector2i Position { get; internal set; } = position ?? new Vector2i(MirageAPI.Window.USE_DEFAULT_POSITION);
-    public float Opacity { get; internal set; } = opacity;
+    public float AspectRatio => (float)Size.X / Size.Y;
+
+    public Vector2i Position { get; internal set; } =
+        position ?? new Vector2i(MirageAPI.Window.USE_DEFAULT_POSITION);
+
+    public WindowStyleInfo WindowStyle { get; } =
+        windowStyle ?? new WindowStyleInfo(
+            255,
+            false, false, false,
+            null, null,
+            null, null
+        );
+
     public uint VSyncInterval { get; internal set; } = vsyncInterval;
     public bool Fullscreen { get; internal set; } = isFullscreen;
 }

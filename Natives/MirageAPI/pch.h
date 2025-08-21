@@ -8,6 +8,7 @@
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "d3dcompiler.lib")
+#pragma comment(lib, "dwmapi.lib")
 
 /* ---Includes--- */
 #include <msclr/marshal_cppstd.h>  // CLR
@@ -25,9 +26,10 @@ using namespace OpenTK::Mathematics;
 #include "rect.h"
 
 // Window and window tools
-#include "WinTools/enums.h"
+#include "WinTools/Window/enums.h"
 #include "WinTools/Events/Events.h"
 #include "WinTools/Cursor/enums.h"
+#include "WinTools/Icon/enums.h"
 #include "WinTools/Menu/enums.h"
 
 // DX12

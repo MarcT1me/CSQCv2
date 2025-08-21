@@ -20,7 +20,7 @@
         <Platforms>x64</Platforms>
         <RuntimeIdentifier>win-x64</RuntimeIdentifier>
 
-        <ApplicationIcon>Logo.ico</ApplicationIcon>
+        <ApplicationIcon>app.ico</ApplicationIcon>
 
         <Version>0.16.3</Version>
 
@@ -28,6 +28,7 @@
         <AssemblyVersion>$(Version)</AssemblyVersion>
         <FileVersion>$(Version)</FileVersion>
         <NeutralLanguage>ru-RU</NeutralLanguage>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
     </PropertyGroup>
 
     <ItemGroup>
@@ -35,11 +36,18 @@
         <ProjectReference Include="..\AppLib\AppLib.csproj"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <EmbeddedResource Include="app.ico">
+            <LogicalName>TestApp:app.ico</LogicalName>
+        </EmbeddedResource>
+    </ItemGroup>
+
     <Target Name="CopyRuntimes" AfterTargets="Build">
         <MakeDir Directories="$(OutputPath)\bin\runtimes"/>
 
         <ItemGroup>
             <RuntimeBinaries Include="$(OutputPath)\**\freetype6.dll"/>
+            <RuntimeBinaries Include="$(OutputPath)\**\Ijwhost.dll"/>
         </ItemGroup>
 
         <Move SourceFiles="@(RuntimeBinaries)" DestinationFolder="$(OutputPath)\bin\runtimes"/>
@@ -67,7 +75,6 @@
         <ItemGroup>
             <TempEngineBinaries Include="$(OutputPath)\**\EngineCore.dll"/>
             <TempEngineBinaries Include="$(OutputPath)\**\QuantumEngine.dll"/>
-            <TempEngineBinaries Include="$(OutputPath)\**\Ijwhost.dll"/>
             <TempEngineBinaries Include="$(OutputPath)\**\HeadlessQuantumEngine.dll"/>
             <TempEngineBinaries Include="$(OutputPath)\**\MirageAPI.dll"/>
         </ItemGroup>

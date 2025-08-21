@@ -20,7 +20,7 @@ namespace MirageAPI::DirectX
         // config
         DX12ContextConfig^ m_config;
 
-        DoubleRect^ m_winRect;
+        Rect^ m_winRect;
         bool m_isResized;
 
         void HandleResize();
@@ -62,8 +62,8 @@ namespace MirageAPI::DirectX
 
         // context methods
         void SetResolution(Vector2i^ resolution);
-        void SetWinRect(DoubleRect^ winRect);
-        void SetViewport(SimpleRect^ viewportRect);
+        void SetWinRect(Rect^ winRect);
+        void SetViewport(Rect^ viewportRect);
         void SetClipPlanes(Vector2^ depth);
         void BeginFrame();
         void Clear(Color4 color);

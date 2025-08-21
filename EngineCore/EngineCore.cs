@@ -74,26 +74,26 @@ public abstract class EngineCore
 
         QuantumTracer.HandleAssembly(
             [
-                AppLibAssembly
+                Assembly.GetExecutingAssembly(), // Engine Core module
+                Assembly.GetCallingAssembly(), // Headless or Quantum Engine module
+                AppLibAssembly, // AppLib module
+                Assembly.GetEntryAssembly() // TestApp
             ]
         );
 
         Logger.Separator();
 
-        if (BaseConfig.DebugMode) EnableDebugFeatures();
+        if (BaseConfig.DebugMode) DebugFeatures();
 
         Logger.Separator();
-        
-        InitializeModeSpecific();
-
-        Logger.Separator();
-
-        Logger.Success("EngineCore initialized");
-
+        Logger.Success("Core Engine module initialized");
         Logger.Separator();
     }
 
-    protected abstract void InitializeModeSpecific();
+    protected virtual void DebugFeatures()
+    {
+        Logger.Debug("Debug Features");
+    }
 
-    protected abstract void EnableDebugFeatures();
+    protected abstract void ModeSpecific();
 }

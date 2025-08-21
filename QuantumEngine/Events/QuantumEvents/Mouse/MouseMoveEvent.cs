@@ -1,10 +1,8 @@
 ﻿using OpenTK.Mathematics;
-using MirageAPI.Events;
-using WinRT;
 
 namespace Engine.Events.QuantumEvents.Mouse;
 
-public class MouseMoveEvent(NativeMouseEvent e)
+public class MouseMoveEvent(MirageAPI.Events.MouseEvent e)
     : MouseEvent(EventType.MouseMove, e.windowID)
 {
     public readonly Vector2i Pos = e.Pos;

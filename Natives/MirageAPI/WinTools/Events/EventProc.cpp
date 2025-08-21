@@ -2,12 +2,43 @@
 #include "EventProc.h"
 
 #include "EventManager.h"
+#include "../Window/WindowClass.h"
 
 namespace MirageAPI::Events
 {
-    Window^ EventProc::GetNativeWindow(HWND hWnd)
+    // native logic
+
+    LRESULT EventProc::QuantumProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     {
-        LONG_PTR ptr = GetWindowLongPtr(hWnd, GWLP_USERDATA);
+        if (msg == WM_NCCREATE)
+        {
+            CREATESTRUCT* createStruct = reinterpret_cast<CREATESTRUCT*>(lParam);
+            SetWindowLongPtrW(
+                hwnd, GWLP_USERDATA,
+                reinterpret_cast<LONG_PTR>(createStruct->lpCreateParams)
+            );
+
+            return DefWindowProcW(hwnd, msg, wParam, lParam);
+        }
+
+        auto window = GetNativeWindow(hwnd);
+        auto params = gcnew EventParams(wParam, lParam);
+
+        if (window)
+        {
+            if (auto eventProc = window->Class->EventProc)
+            {
+                return eventProc->Proc(window, msg, params);
+            }
+        }
+        return DefaultProc(window, msg, params);
+    }
+
+    Window^ EventProc::GetNativeWindow(HWND hwnd)
+    {
+        if (!hwnd) return nullptr;
+
+        LONG_PTR ptr = GetWindowLongPtr(hwnd, GWLP_USERDATA);
         if (ptr == 0) return nullptr;
 
         IntPtr managed_ptr(reinterpret_cast<void*>(ptr));
@@ -15,52 +46,99 @@ namespace MirageAPI::Events
         return safe_cast<Window^>(gch.Target);
     }
 
-    void matchMouseBtnMsg(UINT msg, int* button, bool* pressed)
+    // default proc
+
+    void MatchMouseBtnMsg(UINT msg, WPARAM wParam, int& button, bool& pressed)
     {
         switch (msg)
         {
         case WM_LBUTTONDOWN:
-            *button = 1;
-            *pressed = true;
+            button = 1;
+            pressed = true;
             break;
         case WM_LBUTTONUP:
-            *button = 1;
-            *pressed = false;
+            button = 1;
+            pressed = false;
             break;
-
-        case WM_MBUTTONDOWN:
-            *button = 2;
-            *pressed = true;
-            break;
-        case WM_MBUTTONUP:
-            *button = 2;
-            *pressed = false;
-            break;
-
         case WM_RBUTTONDOWN:
-            *button = 3;
-            *pressed = true;
+            button = 2;
+            pressed = true;
             break;
         case WM_RBUTTONUP:
-            *button = 3;
-            *pressed = false;
+            button = 2;
+            pressed = false;
             break;
-
-        default:
-            *button = -1;
-            *pressed = false;
+        case WM_MBUTTONDOWN:
+            button = 3;
+            pressed = true;
             break;
+        case WM_MBUTTONUP:
+            button = 3;
+            pressed = false;
+            break;
+        case WM_XBUTTONDOWN:
+            button = GET_XBUTTON_WPARAM(wParam) == XBUTTON1 ? 4 : 5;
+            pressed = true;
+            break;
+        case WM_XBUTTONUP:
+            button = GET_XBUTTON_WPARAM(wParam) == XBUTTON1 ? 4 : 5;
+            pressed = false;
+            break;
+        default: ;
         }
     }
 
-    LRESULT EventProc::QuantumWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+    void StartMouseTracking(Window^ window)
     {
-        QLogger::SimpleLog(CSFormat("native event proc - msg: {0}", msg));
+        TRACKMOUSEEVENT tme = {};
+        tme.cbSize = sizeof(TRACKMOUSEEVENT);
+        tme.dwFlags = TME_LEAVE;
+        tme.hwndTrack = window->NativeWindow;
+        TrackMouseEvent(&tme);
 
-        if (Window^ window = GetNativeWindow(hwnd))
+        window->Mouse->isTracking = true;
+        window->Mouse->isInWindow = true;
+    }
+
+    void StopMouseTracking(Window^ window)
+    {
+        window->Mouse->isTracking = false;
+        window->Mouse->isInWindow = false;
+    }
+
+    LRESULT EventProc::DefaultProc(Window^ window, UINT eventType, EventParams^ params)
+    {
+        switch (eventType)
         {
-            switch (msg)
+        // mouse
+        case WM_MOUSEMOVE:
             {
+                if (window && !window->Mouse->isTracking)
+                {
+                    EventManager::MouseEnterCallback(window);
+                    StartMouseTracking(window);
+                }
+                EventManager::MouseMoveCallback(window, params->lowL, params->highL);
+                break;
+            }
+        case WM_MOUSELEAVE:
+            {
+                if (window && window->Mouse->isTracking)
+                {
+                    EventManager::MouseLeaveCallback(window);
+                    StopMouseTracking(window);
+                }
+                break;
+            }
+        default: ;
+        }
+
+        // window required
+        if (window)
+        {
+            switch (eventType)
+            {
+            // keyboard
             case WM_KEYDOWN:
             case WM_KEYUP:
                 {
@@ -82,93 +160,143 @@ namespace MirageAPI::Events
 
                     EventManager::KeyCallback(
                         window,
-                        static_cast<int>(wParam),
-                        msg == WM_KEYDOWN,
-                        static_cast<int>(lParam >> 16 & 0xFF),
+                        static_cast<int>(params->wParam),
+                        eventType == WM_KEYDOWN,
+                        static_cast<int>(params->highL & 0xFF),
                         mods
                     );
                     break;
                 }
 
+            // mouse
             case WM_LBUTTONDOWN:
-            case WM_MBUTTONDOWN:
+            case WM_LBUTTONUP:
             case WM_RBUTTONDOWN:
             case WM_RBUTTONUP:
+            case WM_MBUTTONDOWN:
             case WM_MBUTTONUP:
-            case WM_LBUTTONUP:
+            case WM_XBUTTONDOWN:
+            case WM_XBUTTONUP:
                 {
-                    int button;
-                    bool pressed;
-                    matchMouseBtnMsg(msg, &button, &pressed);
+                    int button = 0;
+                    bool pressed = false;
+
+                    MatchMouseBtnMsg(eventType, params->wParam, button, pressed);
 
                     EventManager::MouseButtonCallback(
                         window,
                         button,
                         pressed,
-                        static_cast<int>(wParam)
+                        static_cast<int>(params->wParam)
                     );
                     break;
                 }
-
+            // wheel
             case WM_MOUSEWHEEL:
                 {
-                    EventManager::ScrollCallback(window, static_cast<int>(wParam));
-                    break;
-                }
-            case WM_MOUSEMOVE:
-                {
-                    int x = LOWORD(lParam);
-                    int y = HIWORD(lParam);
-
-                    window->UpdateMousePosition(x, y);
-
-                    EventManager::CursorPositionCallback(window, x, y);
-                    break;
-                }
-            case WM_MOUSELEAVE:
-                {
-                    window->CursorLeaveHandle();
-
-                    EventManager::CursorLeaveCallback(window);
+                    EventManager::MouseScrollCallback(window, params->highW);
                     break;
                 }
 
+            // window
             case WM_SIZE:
                 {
-                    int width = LOWORD(lParam);
-                    int height = HIWORD(lParam);
-
-                    EventManager::WindowResizeCallback(window, width, height);
+                    EventManager::WindowSizeCallback(
+                        window,
+                        params->lowL, params->highL,
+                        static_cast<int>(params->wParam),
+                        false
+                    );
                     break;
                 }
             case WM_MOVE:
                 {
-                    int x = LOWORD(lParam);
-                    int y = HIWORD(lParam);
-
-                    EventManager::WindowMoveCallback(window, x, y);
+                    EventManager::WindowMoveCallback(
+                        window,
+                        params->lowL, params->highL,
+                        false
+                    );
+                    break;
+                }
+            case WM_DISPLAYCHANGE:
+                {
+                    EventManager::WindowDisplayCallback(window);
+                    break;
+                }
+            // focus
+            case WM_SETFOCUS:
+            case WM_KILLFOCUS:
+                {
+                    EventManager::WindowFocusCallback(window, eventType == WM_SETFOCUS);
+                    break;
+                }
+            // life cycle
+            case WM_CREATE:
+                {
+                    EventManager::WindowCreateCallback(window);
+                    break;
+                }
+            case WM_CLOSE:
+                {
+                    EventManager::WindowCloseCallback(window);
+                    break;
+                }
+            case WM_DESTROY:
+                {
+                    EventManager::WindowDestroyCallback(window);
                     break;
                 }
 
+            // display
+            case WM_DPICHANGED:
+                {
+                    RECT* rect = reinterpret_cast<RECT*>(params->lParam);
+                    EventManager::WindowDpiCallback(
+                        window, params->highL,
+                        gcnew Rect(
+                            rect->left,
+                            rect->top,
+                            rect->right - rect->left,
+                            rect->bottom - rect->top
+                        )
+                    );
+                    break;
+                }
+            // cursor
             case WM_SETCURSOR:
                 {
-                    if (LOWORD(lParam) == HTCLIENT && window->Cursor != nullptr)
+                    if (params->lowL == HTCLIENT && window->Style->Cursor)
                     {
-                        SetCursor(window->Cursor->NativeCursor);
-                        return TRUE;
+                        if (auto hCursor = window->Style->Cursor->NativeCursor)
+                        {
+                            SetCursor(hCursor);
+                            return TRUE;
+                        }
                     }
                     break;
                 }
+            // hit test = cursor in window?
+            case WM_NCHITTEST:
+                {
+                    if (!window->Style->PixelTransparency) break;
 
+                    auto point = window->Mouse->Position;
+                    COLORREF color = GetPixel(
+                        GetDC(window->NativeWindow),
+                        UnpacVec2(point)
+                    );
+
+                    return (color & 0xFF000000) > 0 ? HTCLIENT : HTTRANSPARENT;
+                }
+
+            // menu
             case TRAY_MENU_EVENT_TYPE:
                 {
-                    if (lParam == WM_RBUTTONUP)
+                    if (params->lParam == WM_RBUTTONUP)
                     {
-                        POINT pt;
-                        GetCursorPos(&pt);
-                        window->IconMenu->Show(gcnew Vector2i(pt.x, pt.y));
+                        window->TrayMenu->Show(Mouse::PositionOnDisplay);
                     }
-                    else if (lParam == WM_LBUTTONDOWN)
+                    else if (params->lParam == WM_LBUTTONDOWN)
                     {
                         window->BringToFront();
                     }
@@ -176,32 +304,29 @@ namespace MirageAPI::Events
                 }
             case WM_COMMAND:
                 {
-                    int commandId = LOWORD(wParam);
-                    window->IconMenu->RaiseCallback(commandId);
+                    int commandId = params->lowW;
+                    window->TrayMenu->RaiseCallback(commandId);
                     break;
                 }
             case WM_SYSCOMMAND:
                 {
-                    int commandId = wParam & 0xFFF0;
+                    int commandId = params->lowW & 0xFFF0;
                     if (commandId >= 0xF000) break;
 
                     window->SysMenu->RaiseCallback(commandId);
                     break;
                 }
-
-            case WM_CLOSE:
-                {
-                    window->Destroy();
-                    EventManager::WindowCloseCallback(window);
-                }
-            case WM_DESTROY:
-                {
-                    PostQuitMessage(0);
-                    return FALSE;
-                }
             default: ;
             }
         }
-        return DefWindowProc(hwnd, msg, wParam, lParam);
+
+        return DefWindowProcW(window ? window->NativeWindow : nullptr, eventType, params->wParam, params->lParam);
+    }
+
+    // configurable proc
+
+    long long EventProc::Proc(Window^ window, UINT eventType, EventParams^ params)
+    {
+        return DefaultProc(window, eventType, params);
     }
 }

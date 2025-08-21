@@ -1,9 +1,8 @@
-﻿using MirageAPI.Events;
-using OpenTK.Mathematics;
+﻿using OpenTK.Mathematics;
 
 namespace Engine.Events.QuantumEvents.Window;
 
-public class WinResizeEvent(NativeWindowEvent e)
+public class WinResizeEvent(MirageAPI.Events.WindowEvent e)
     : WindowedQuantumEvent(EventType.WindowResize, e.windowID)
 {
     public readonly Vector2i Size = new(e.X, e.Y);

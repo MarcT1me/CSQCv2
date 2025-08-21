@@ -52,9 +52,9 @@ public class Camera<TData>(TData cameraData)
 
         ProjectionMatrix = Matrix4.CreatePerspectiveFieldOfView(
             MathHelper.DegreesToRadians(MetaData.FieldOfView),
-            winMeta.AspectRatio,
-            winMeta.ClipPlanes.X,
-            winMeta.ClipPlanes.Y
+            winMeta.WinData.AspectRatio,
+            winMeta.GlData.ClipPlanes.X,
+            winMeta.GlData.ClipPlanes.Y
         );
     }
 

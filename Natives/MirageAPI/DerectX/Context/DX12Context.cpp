@@ -33,7 +33,7 @@ namespace MirageAPI::DirectX
         SimpleDelete(m_commandQueue);
     }
 
-    void DX12Context::SetWinRect(DoubleRect^ winRect)
+    void DX12Context::SetWinRect(Rect^ winRect)
     {
         m_winRect = winRect;
     }
@@ -55,7 +55,7 @@ namespace MirageAPI::DirectX
         m_isResized = false;
     }
 
-    void DX12Context::SetViewport(SimpleRect^ viewportRect)
+    void DX12Context::SetViewport(Rect^ viewportRect)
     {
         m_config->Viewport = viewportRect;
     }

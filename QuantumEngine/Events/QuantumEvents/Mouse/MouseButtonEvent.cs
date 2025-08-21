@@ -1,8 +1,6 @@
-﻿using MirageAPI.Events;
+﻿namespace Engine.Events.QuantumEvents.Mouse;
 
-namespace Engine.Events.QuantumEvents.Mouse;
-
-public class MouseButtonEvent(NativeMouseEvent e)
+public class MouseButtonEvent(MirageAPI.Events.MouseEvent e)
     : MouseEvent(e.Pressed ? EventType.MouseButtonDown : EventType.MouseButtonUp, e.windowID)
 {
     public readonly int Button = e.Button;

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Concurrent;
 // engine sub-systems
-using MirageAPI.Events;
 
 namespace Engine.Events;
 
@@ -52,33 +51,27 @@ public class QEventSystem
         }
     }
 
+    static QEventSystem()
+    {
+        MirageAPI.Events.EventManager.OnKey += HandleKeyEvent;
+        MirageAPI.Mouse.OnMouse += HandleMouseEvent;
+    }
+
     public static void RegisterWindow(MirageAPI.Window window)
     {
-        window.OnKey += HandleKeyEvent;
-        window.OnMouse += HandleMouseEvent;
         window.OnWindow += HandleWindowEvent;
-        window.OnChar += HandleCharEvent;
-        window.OnDrop += HandleDropEvent;
     }
 
     public static void UnregisterWindow(MirageAPI.Window window)
     {
-        window.OnKey -= HandleKeyEvent;
-        window.OnMouse -= HandleMouseEvent;
         window.OnWindow += HandleWindowEvent;
-        window.OnChar -= HandleCharEvent;
-        window.OnDrop -= HandleDropEvent;
     }
 
-    private static void HandleKeyEvent(NativeKeyEvent nativeEvent) => EnqueueEvent(ConvertEvent(nativeEvent));
+    private static void HandleKeyEvent(MirageAPI.Events.KeyEvent nativeEvent) => EnqueueEvent(ConvertEvent(nativeEvent));
 
-    private static void HandleMouseEvent(NativeMouseEvent nativeEvent) => EnqueueEvent(ConvertEvent(nativeEvent));
+    private static void HandleMouseEvent(MirageAPI.Events.MouseEvent nativeEvent) => EnqueueEvent(ConvertEvent(nativeEvent));
 
-    private static void HandleWindowEvent(NativeWindowEvent nativeEvent) => EnqueueEvent(ConvertEvent(nativeEvent));
-
-    private static void HandleCharEvent(NativeCharEvent nativeEvent) => EnqueueEvent(ConvertEvent(nativeEvent));
-
-    private static void HandleDropEvent(NativeDropEvent nativeEvent) => EnqueueEvent(ConvertEvent(nativeEvent));
+    private static void HandleWindowEvent(MirageAPI.Events.WindowEvent nativeEvent) => EnqueueEvent(ConvertEvent(nativeEvent));
 
     public static void EnqueueEvent(QuantumEvent qEvent)
     {
@@ -92,10 +85,10 @@ public class QEventSystem
     {
         lock (Lock)
         {
-            var handler = new EventBatchHandler();
-
+            using var handler = new EventBatchHandler();
+            
             // Опрашиваем все окна
-            EventManager.ProcessEvents();
+            MirageAPI.Events.EventManager.ProcessEvents();
 
             // Обрабатываем накопленные события
             while (EventQueue.TryDequeue(out var qEvent))
@@ -110,8 +103,6 @@ public class QEventSystem
 
                 UpdateInputState(qEvent);
             }
-
-            handler.Dispose();
         }
     }
 
@@ -131,43 +122,38 @@ public class QEventSystem
         }
     }
 
-    private static QuantumEvent ConvertEvent(NativeKeyEvent e) => new KeyEvent(e);
+    private static QuantumEvent ConvertEvent(MirageAPI.Events.KeyEvent e) => new KeyEvent(e);
 
-    private static QuantumEvent ConvertEvent(NativeMouseEvent e) => e.Type switch
+    private static QuantumEvent ConvertEvent(MirageAPI.Events.MouseEvent e) => e.Type switch
     {
-        NativeMouseEventType.Button => new MouseButtonEvent(e),
-        NativeMouseEventType.Move => new MouseMoveEvent(e),
-        NativeMouseEventType.Scroll => new MouseScrollEvent(e),
-        NativeMouseEventType.Enter => new MouseEvent(EventType.MouseEnter, e.windowID),
-        NativeMouseEventType.Leave => new MouseEvent(EventType.MouseLeave, e.windowID),
+        MirageAPI.Events.EventType.MouseButton => new MouseButtonEvent(e),
+        MirageAPI.Events.EventType.MouseMove => new MouseMoveEvent(e),
+        MirageAPI.Events.EventType.MouseScroll => new MouseScrollEvent(e),
+        MirageAPI.Events.EventType.MouseEnter => new MouseEvent(EventType.MouseEnter, e.windowID),
+        MirageAPI.Events.EventType.MouseLeave => new MouseEvent(EventType.MouseLeave, e.windowID),
         _ => new QuantumEvent(EventType.Unknown)
     };
 
-    private static QuantumEvent ConvertEvent(NativeWindowEvent e) => e.Type switch
+    private static QuantumEvent ConvertEvent(MirageAPI.Events.WindowEvent e) => e.Type switch
     {
-        NativeWindowEventType.Close => new WindowedQuantumEvent(
+        MirageAPI.Events.EventType.WindowCreate => new WindowedQuantumEvent(
             EventType.WindowClose,
             e.windowID
         ),
-        NativeWindowEventType.Focus => new WindowedQuantumEvent(
+        MirageAPI.Events.EventType.WindowClose => new WindowedQuantumEvent(
+            EventType.WindowClose,
+            e.windowID
+        ),
+        MirageAPI.Events.EventType.WindowDestroy => new WindowedQuantumEvent(
+            EventType.WindowClose,
+            e.windowID
+        ),
+        MirageAPI.Events.EventType.WindowFocus => new WindowedQuantumEvent(
             e.X == 1 ? EventType.WindowFocusGained : EventType.WindowFocusLost,
             e.windowID
         ),
-        NativeWindowEventType.Maximize => new WindowedQuantumEvent(
-            e.X == 1 ? EventType.WindowMaximize : EventType.WindowMinimize,
-            e.windowID
-        ),
-        NativeWindowEventType.Refresh => new WindowedQuantumEvent(
-            EventType.WindowRestore,
-            e.windowID
-        ),
-        NativeWindowEventType.Resize => new QuantumEvents.Window.WinResizeEvent(e),
-        NativeWindowEventType.Move => new QuantumEvents.Window.WinMoveEvent(e),
-        NativeWindowEventType.Iconify => new QuantumEvents.Window.WinIconifyEvent(e),
+        MirageAPI.Events.EventType.WindowResize => new QuantumEvents.Window.WinResizeEvent(e),
+        MirageAPI.Events.EventType.WindowMove => new QuantumEvents.Window.WinMoveEvent(e),
         _ => new QuantumEvent(EventType.Unknown)
     };
-
-    private static QuantumEvent ConvertEvent(NativeCharEvent e) => new CharEvent(e);
-
-    private static QuantumEvent ConvertEvent(NativeDropEvent e) => new DropEvent(e);
 }

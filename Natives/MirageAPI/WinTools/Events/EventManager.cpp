@@ -1,6 +1,8 @@
 ﻿#include "pch.h"
 #include "EventManager.h"
 
+#define MaybeEmptyWindow(window) (window) ? (window)->Handle : IntPtr();
+
 namespace MirageAPI::Events
 {
     // key
@@ -14,8 +16,8 @@ namespace MirageAPI::Events
     )
     {
         // format event
-        NativeKeyEvent^ e = gcnew NativeKeyEvent();
-        e->windowID = window->Handle;
+        KeyEvent^ e = gcnew KeyEvent();
+        e->windowID = MaybeEmptyWindow(window);
 
         e->Key = key;
         e->Pressed = pressed;
@@ -24,11 +26,49 @@ namespace MirageAPI::Events
         e->Mods = mods;
 
         // raise event
-        window->RaiseKeyEvent(e);
+        KeyEventHandle(e);
     }
 
     // mouse
 
+    void EventManager::MouseMoveCallback(Window^ window, int xPos, int yPos)
+    {
+        // format event
+        MouseEvent^ e = gcnew MouseEvent();
+        e->windowID = MaybeEmptyWindow(window);
+        e->Type = EventType::MouseMove;
+
+        e->Pos = Vector2i(xPos, yPos);
+        e->Rel = *Mouse::DeltaForDisplay;
+
+        // raise event
+        Mouse::MouseEventHandle(window, e);
+    }
+
+    void EventManager::MouseLeaveCallback(Window^ window)
+    {
+        // format event
+        MouseEvent^ e = gcnew MouseEvent();
+        e->windowID = MaybeEmptyWindow(window);
+        e->Type = EventType::MouseLeave;
+
+        // raise event
+        Mouse::MouseEventHandle(window, e);
+    }
+
+    void EventManager::MouseEnterCallback(Window^ window)
+    {
+        // format event
+        MouseEvent^ e = gcnew MouseEvent();
+        e->windowID = MaybeEmptyWindow(window);
+        e->Type = EventType::MouseEnter;
+
+        // raise event
+        Mouse::MouseEventHandle(window, e);
+    }
+
+    // windowed mouse
+    
     void EventManager::MouseButtonCallback(
         Window^ window,
         int button,
@@ -37,9 +77,9 @@ namespace MirageAPI::Events
     )
     {
         // format event
-        NativeMouseEvent^ e = gcnew NativeMouseEvent();
+        MouseEvent^ e = gcnew MouseEvent();
         e->windowID = window->Handle;
-        e->Type = NativeMouseEventType::Button;
+        e->Type = EventType::MouseButton;
 
         e->Button = button;
         e->Pressed = pressed;
@@ -47,157 +87,153 @@ namespace MirageAPI::Events
         e->Mode = mods;
 
         // raise event
-        window->RaiseMouseEvent(e);
+        Mouse::MouseEventHandle(window, e);
     }
 
-    void EventManager::ScrollCallback(Window^ window, int params)
+    void EventManager::MouseScrollCallback(Window^ window, int delta)
     {
         // format event
-        NativeMouseEvent^ e = gcnew NativeMouseEvent();
+        MouseEvent^ e = gcnew MouseEvent();
         e->windowID = window->Handle;
-        e->Type = NativeMouseEventType::Scroll;
+        e->Type = EventType::MouseScroll;
 
-        e->Button = params;
+        e->Button = delta;
 
         // raise event
-        window->RaiseMouseEvent(e);
-    }
-
-    void EventManager::CursorPositionCallback(Window^ window, int xPos, int yPos)
-    {
-        // format event
-        NativeMouseEvent^ e = gcnew NativeMouseEvent();
-        e->windowID = window->Handle;
-        e->Type = NativeMouseEventType::Move;
-
-        e->Pos = Vector2i(xPos, yPos);
-        e->Rel = *window->MouseDelta;
-
-        // raise event
-        window->RaiseMouseEvent(e);
-    }
-
-    void EventManager::CursorLeaveCallback(Window^ window)
-    {
-        // format event
-        NativeMouseEvent^ e = gcnew NativeMouseEvent();
-        e->windowID = window->Handle;
-        e->Type = NativeMouseEventType::Leave;
-
-        // raise event
-        window->RaiseMouseEvent(e);
-    }
-
-    void EventManager::CursorEnterCallback(Window^ window)
-    {
-        // format event
-        NativeMouseEvent^ e = gcnew NativeMouseEvent();
-        e->windowID = window->Handle;
-        e->Type = NativeMouseEventType::Enter;
-
-        // raise event
-        window->RaiseMouseEvent(e);
+        Mouse::MouseEventHandle(window, e);
     }
 
     // window
 
-    void EventManager::WindowFocusedCallback(Window^ window, int focused)
+    void EventManager::WindowSizeCallback(Window^ window, int width, int height, int state, bool isFinal)
     {
         // format event
-        NativeWindowEvent^ e = gcnew NativeWindowEvent();
+        WindowEvent^ e = gcnew WindowEvent();
         e->windowID = window->Handle;
-        e->Type = NativeWindowEventType::Focus;
+        e->Type = EventType::WindowResize;
 
-        e->X = focused;
-
-        // raise event
-        window->RaiseWindowEvent(e);
-    }
-
-    void EventManager::WindowMaximizeCallback(Window^ window, int maximize)
-    {
-        // format event
-        NativeWindowEvent^ e = gcnew NativeWindowEvent();
-        e->windowID = window->Handle;
-        e->Type = NativeWindowEventType::Maximize;
-
-        e->X = maximize;
-
-        // raise event
-        window->RaiseWindowEvent(e);
-    }
-
-    void EventManager::WindowIconifyCallback(Window^ window, int iconify)
-    {
-        // format event
-        NativeWindowEvent^ e = gcnew NativeWindowEvent();
-        e->windowID = window->Handle;
-        e->Type = NativeWindowEventType::Iconify;
-
-        e->X = iconify;
-
-        // raise event
-        window->RaiseWindowEvent(e);
-    }
-
-    void EventManager::WindowResizeCallback(Window^ window, const int width, const int height)
-    {
-        // format event
-        NativeWindowEvent^ e = gcnew NativeWindowEvent();
-        e->windowID = window->Handle;
-        e->Type = NativeWindowEventType::Resize;
-
+        e->Flag = isFinal;
+        e->State = state;
         e->X = width;
         e->Y = height;
 
         // raise event
-        window->RaiseWindowEvent(e);
+        window->WindowEventHandle(e);
     }
 
-    void EventManager::WindowMoveCallback(Window^ window, int x, int y)
+    void EventManager::WindowMoveCallback(Window^ window, int x, int y, bool isFinal)
     {
         // format event
-        NativeWindowEvent^ e = gcnew NativeWindowEvent();
+        WindowEvent^ e = gcnew WindowEvent();
         e->windowID = window->Handle;
-        e->Type = NativeWindowEventType::Move;
+        e->Type = EventType::WindowMove;
 
+        e->Flag = isFinal;
         e->X = x;
         e->Y = y;
 
         // raise event
-        window->RaiseWindowEvent(e);
+        window->WindowEventHandle(e);
     }
+    
+    // flag only
 
-    void EventManager::WindowRefreshCallback(Window^ window)
+    void EventManager::WindowFocusCallback(Window^ window, bool focused)
     {
         // format event
-        NativeWindowEvent^ e = gcnew NativeWindowEvent();
+        WindowEvent^ e = gcnew WindowEvent();
         e->windowID = window->Handle;
-        e->Type = NativeWindowEventType::Refresh;
+        e->Type = EventType::WindowFocus;
+
+        e->Flag = focused;
 
         // raise event
-        window->RaiseWindowEvent(e);
+        window->WindowEventHandle(e);
+    }
+
+    void EventManager::WindowVisibilityCallback(Window^ window, bool visible)
+    {
+        // format event
+        WindowEvent^ e = gcnew WindowEvent();
+        e->windowID = window->Handle;
+        e->Type = EventType::WindowVisibility;
+
+        e->Flag = visible;
+
+        // raise event
+        window->WindowEventHandle(e);
+    }
+
+    // simple
+    
+    void EventManager::WindowCreateCallback(Window^ window)
+    {
+        // format event
+        WindowEvent^ e = gcnew WindowEvent();
+        e->windowID = window->Handle;
+        e->Type = EventType::WindowCreate;
+
+        // raise event
+        window->WindowEventHandle(e);
     }
 
     void EventManager::WindowCloseCallback(Window^ window)
     {
         // format event
-        NativeWindowEvent^ e = gcnew NativeWindowEvent();
+        WindowEvent^ e = gcnew WindowEvent();
         e->windowID = window->Handle;
-        e->Type = NativeWindowEventType::Close;
+        e->Type = EventType::WindowClose;
 
         // raise event
-        window->RaiseWindowEvent(e);
+        window->WindowEventHandle(e);
     }
 
+    void EventManager::WindowDestroyCallback(Window^ window)
+    {
+        // format event
+        WindowEvent^ e = gcnew WindowEvent();
+        e->windowID = window->Handle;
+        e->Type = EventType::WindowDestroy;
+
+        // raise event
+        window->WindowEventHandle(e);
+    }
+
+    void EventManager::WindowDisplayCallback(Window^ window)
+    {
+        WindowEvent^ e = gcnew WindowEvent();
+        e->windowID = window->Handle;
+        e->Type = EventType::WindowDisplayChange;
+
+        window->WindowEventHandle(e);
+    }
+
+    void EventManager::WindowDpiCallback(Window^ window, int dpi, Rect^ rect)
+    {
+    }
+
+    // key handling (maybe without window)
+    void EventManager::KeyEventHandle(KeyEvent^ event)
+    {
+        OnKey(event);
+    }
+
+    // event queue methods
+    
     void EventManager::ProcessEvents()
     {
         MSG msg = {nullptr};
-        while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+        Mouse::UpdateDisplayPositions();
+        while (PeekMessageW(&msg, nullptr, 0, 0, PM_REMOVE))
         {
             TranslateMessage(&msg);
-            DispatchMessage(&msg);
+            DispatchMessageW(&msg);
         }
+    }
+
+    void EventManager::PostQuit(int value)
+    {
+        PostQuitMessage(value);
     }
 
     void EventManager::PostEvent(
@@ -208,7 +244,7 @@ namespace MirageAPI::Events
         for (int i = 0; i < Window::winList->Count; i++)
         {
             PostEvent(
-                Window::winList[i]->hwnd,
+                Window::winList[i]->NativeWindow,
                 eventType, wParam, lParam
             );
         }
@@ -220,7 +256,7 @@ namespace MirageAPI::Events
     )
     {
         PostEvent(
-            window->hwnd,
+            window->NativeWindow,
             eventType, wParam, lParam
         );
     }
@@ -245,7 +281,7 @@ namespace MirageAPI::Events
     )
     {
         SendMessage(
-            window->hwnd,
+            window->NativeWindow,
             eventType, wParam, lParam | HTCLIENT
         );
     }

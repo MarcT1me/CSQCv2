@@ -14,20 +14,14 @@ namespace MirageAPI
         info.cbSize = sizeof(MONITORINFOEX);
         GetMonitorInfo(hMonitor, &info);
 
-        DisplayInfo^ mi = gcnew DisplayInfo();
-        mi->Handle = IntPtr(hMonitor);
-        mi->Position = Vector2i(
-            info.rcMonitor.left,
-            info.rcMonitor.top
+        DisplayInfo^ displayInfo = gcnew DisplayInfo(
+            IntPtr(hMonitor),
+            gcnew String(info.szDevice),
+            gcnew Rect(info.rcMonitor),
+            info.dwFlags & MONITORINFOF_PRIMARY
         );
-        mi->Size = Vector2i(
-            info.rcMonitor.right - info.rcMonitor.left,
-            info.rcMonitor.bottom - info.rcMonitor.top
-        );
-        mi->IsPrimary = (info.dwFlags & MONITORINFOF_PRIMARY) != 0;
-        mi->Name = gcnew String(info.szDevice);
 
-        DisplayManager::DisplayList->Add(mi);
+        DisplayManager::DisplayList->Add(displayInfo);
         return TRUE;
     }
 
@@ -52,10 +46,10 @@ namespace MirageAPI
         if (DisplayList->Capacity == 0) UpdateDisplayList();
         for each (auto monitor in DisplayList)
         {
-            if (monitor->IsPrimary)
+            if (monitor->isPrimary)
                 return monitor;
         }
-        return DisplayList[0];
+        throw gcnew QuantumFailure("Primary Monitor not found");
     }
 
     DisplayInfo^ DisplayManager::GetDisplayFromHandle(IntPtr hMonitor)
@@ -63,13 +57,8 @@ namespace MirageAPI
         if (DisplayList->Capacity == 0) UpdateDisplayList();
         for each (auto monitor in DisplayList)
         {
-            if (monitor->Handle == hMonitor) return monitor;
+            if (monitor->handle == hMonitor) return monitor;
         }
-        throw gcnew QuantumFailure(
-            CSFormat(
-                "Monitor for {0} not found",
-                hMonitor
-            )
-        );
+        throw gcnew QuantumFailure("Monitor for " + hMonitor + " not found");
     }
 }

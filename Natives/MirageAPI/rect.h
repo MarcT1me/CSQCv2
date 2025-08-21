@@ -2,54 +2,83 @@
 
 namespace MirageAPI
 {
-    public ref struct SimpleRect
+    public ref struct Rect
     {
         int X, Y, Width, Height;
 
-        SimpleRect()
+        Rect()
         {
         }
 
-        SimpleRect(int x, int y, int width, int height)
+        Rect(int x, int y, int width, int height)
             : X(x), Y(y), Width(width), Height(height)
         {
         }
 
-        SimpleRect(Vector2i^ pos, Vector2i^ size)
-            : X(pos->X), Y(pos->Y), Width(size->X), Height(size->Y)
+        Rect(RECT nativeRect)
+            : X(nativeRect.left), Y(nativeRect.top),
+              Width(nativeRect.right - nativeRect.left), Height(nativeRect.bottom - nativeRect.top)
         {
         }
 
-        static SimpleRect^ FromVector(Vector4i vector)
-        {
-            auto result = gcnew SimpleRect();
-            result->X = vector.X;
-            result->Y = vector.Y;
-            result->Width = vector.Z;
-            result->Height = vector.W;
-            return result;
-        }
-    };
-
-    public ref struct DoubleRect
-    {
-        int Right, Left, Top, Bottom;
-        int X, Y, Width, Height;
-
-        DoubleRect()
+        Rect(Vector4i^ vector)
+            : X(vector->X), Y(vector->Y),
+              Width(vector->Z), Height(vector->W)
         {
         }
 
-        DoubleRect(Vector2i^ pos, Vector2i^ size)
-            : Right(pos->X + size->X), Left(pos->X), Top(pos->Y), Bottom(pos->Y + size->Y),
-              X(pos->X), Y(pos->Y), Width(size->X), Height(size->Y)
+        Rect(Vector2i^ pos, Vector2i^ size)
+            : X(pos ? pos->X : CW_USEDEFAULT), Y(pos ? pos->Y : CW_USEDEFAULT),
+              Width(size ? size->X : 0), Height(size ? size->Y : 0)
         {
         }
 
-        DoubleRect(SimpleRect^ rect)
-            : Right(rect->X + rect->Width), Left(rect->X), Top(rect->Y), Bottom(rect->Y + rect->Height),
-              X(rect->X), Y(rect->Y), Width(rect->Width), Height(rect->Height)
+        property int Left
         {
+            int get() { return X + Width; }
+            void set(int value) { X = value; }
+        }
+        property int Right
+        {
+            int get() { return X; }
+            void set(int value) { X = value - Width; }
+        }
+        property int Top
+        {
+            int get() { return Y; }
+            void set(int value) { Y = value; }
+        }
+        property int Bottom
+        {
+            int get() { return Y + Height; }
+            void set(int value) { Y = value - Height; }
+        }
+
+        property Vector2i^ Pos
+        {
+            Vector2i^ get() { return gcnew Vector2i(X, Y); }
+
+            void set(Vector2i^ value)
+            {
+                this->X = value->X;
+                this->Y = value->Y;
+            }
+        }
+
+        property Vector2i^ Size
+        {
+            Vector2i^ get() { return gcnew Vector2i(Width, Height); }
+
+            void set(Vector2i^ value)
+            {
+                this->Width = value->X;
+                this->Height = value->Y;
+            }
+        }
+
+        Rect^ Copy()
+        {
+            return gcnew Rect(X, Y, Width, Height);
         }
     };
 }

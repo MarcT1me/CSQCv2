@@ -1,8 +1,6 @@
-﻿using MirageAPI.Events;
+﻿namespace Engine.Events.QuantumEvents.Mouse;
 
-namespace Engine.Events.QuantumEvents.Mouse;
-
-public class MouseScrollEvent(NativeMouseEvent e)
+public class MouseScrollEvent(MirageAPI.Events.MouseEvent e)
     : MouseEvent(EventType.MouseScroll, e.windowID)
 {
     public readonly int Scroll = e.Button;

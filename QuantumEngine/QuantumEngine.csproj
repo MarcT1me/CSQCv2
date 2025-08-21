@@ -31,7 +31,6 @@
     
     <ItemGroup>
         <!-- Hold folders in editor -->
-        <Folder Include="EngineData\"/>
         <!-- Embeded Files -->
         <EmbeddedResource Include="EngineData\**\*.*">
             <LogicalName>%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
@@ -40,6 +39,9 @@
         <Content Include="freetype6.dll">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <Link>freetype6.dll</Link>
+        </Content>
+        <Content Update="EngineData\Logo.ico">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
     </ItemGroup>
 

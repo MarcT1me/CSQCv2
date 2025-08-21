@@ -27,7 +27,6 @@
 
     <ItemGroup>
         <!-- Hold folders in editor -->
-        <Folder Include="EngineData\"/>
         <!-- Embeded Files -->
         <EmbeddedResource Include="EngineData\**\*.*">
             <LogicalName>%(RecursiveDir)%(Filename)%(Extension)</LogicalName>

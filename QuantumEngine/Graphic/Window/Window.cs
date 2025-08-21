@@ -19,21 +19,20 @@ public class Window
     : MetaObject<WindowData>, IPreparableInstance, IPreparable,
         IEventful, IUpdatable, IRenderable
 {
-    protected readonly MirageAPI.Window NativeWindow;
-    public IntPtr Handle => NativeWindow.Handle;
+    public static Window? ActiveWindow { get; protected set; }
 
-    public Window? ActiveWindow { get; protected set; }
-    public Window? ParentWindow { get; }
     public ObjectStatusFlags ObjectStatus => MetaData.Status;
+
+    public IntPtr Handle => NativeWindow.Handle;
+    public readonly MirageAPI.Window NativeWindow;
+    public readonly Window? ParentWindow;
 
     public Window(
         WinData winData,
         GlData? glData = null,
         string? name = null,
         Window? parent = null,
-        DisplayInfo? display = null,
-        IconInfo? icon = null,
-        CursorInfo? cursor = null
+        DisplayInfo? display = null
     ) : base(new WindowData(winData, glData ?? new GlData(), name))
     {
         Logger.Info(
@@ -45,19 +44,21 @@ public class Window
         ParentWindow = parent;
 
         NativeWindow = new MirageAPI.Window(
+            WindowClass.Default,
             WindowType.Overlapped,
-            new SimpleRect
+            MetaData.Identifier.GetNameAnyway(),
+            new Rect
             {
                 X = MetaData.WinData.Position.X,
                 Y = MetaData.WinData.Position.Y,
                 Width = MetaData.WinData.Size.X,
                 Height = MetaData.WinData.Size.Y
             },
-            MetaData.Identifier.GetNameAnyway(),
-            MetaData.WinData.Opacity,
             MetaData.WinData.Fullscreen,
-            parent?.NativeWindow, display, icon, cursor,
-            CreateDefaultWindowContextConfig()
+            MetaData.WinData.WindowStyle,
+            parent?.NativeWindow, display,
+            // ReSharper disable once VirtualMemberCallInConstructor
+            CreateWindowContextConfig()
         );
 
         // ReSharper disable once VirtualMemberCallInConstructor
@@ -75,7 +76,7 @@ public class Window
         Input.Keyboard.Keyboard.RegisterWindow(this);
     }
 
-    protected DX12ContextConfig CreateDefaultWindowContextConfig()
+    protected virtual DX12ContextConfig CreateWindowContextConfig()
     {
         var windowContextConfig = new DX12ContextConfig
         {
@@ -103,93 +104,97 @@ public class Window
         Establish();
     }
 
-    protected virtual void Establish()
+    protected void Establish() => NativeWindow.Establish();
+
+    public string Title
     {
-        NativeWindow.Establish();
+        get => NativeWindow.Title;
+        set => NativeWindow.Title = value;
     }
 
-    protected void ToggleFullscreen()
+    public Vector2i Size
     {
-        NativeWindow.ToggleFullscreen();
-        MetaData.WinData.Fullscreen = NativeWindow.IsFullscreen;
+        get => MetaData.WinData.Size;
+        set => NativeWindow.SetSize(MetaData.WinData.Size = value);
     }
 
-    protected void SetFullscreen(bool isFullscreen)
+    public float ResolutionScaling
     {
-        NativeWindow.SetFullscreen(isFullscreen);
-        MetaData.WinData.Fullscreen = NativeWindow.IsFullscreen;
+        get => MetaData.WinData.ResolutionScaling;
+        set => MetaData.WinData.ResolutionScaling = value;
     }
 
-    protected void SetOpacity(float opacity)
+    public Vector2i Position
     {
-        UpdateOpacity(opacity);
-        NativeWindow.Opacity = MetaData.WinData.Opacity;
+        get => MetaData.WinData.Position;
+        set => NativeWindow.SetPosition(MetaData.WinData.Position = value);
     }
 
-    protected void UpdateOpacity(float opacity)
+    public Rect Rect
     {
-        MetaData.WinData.Opacity = opacity;
+        get => NativeWindow.CurrentRect;
+        set => NativeWindow.CurrentRect = value;
     }
 
-    protected void SetPositionAndSize(Vector2i size, Vector2i position)
+    public bool IsFullscreen
     {
-        SetSize(size);
-        SetPosition(position);
+        get => MetaData.WinData.Fullscreen;
+        set => MetaData.WinData.Fullscreen = NativeWindow.IsFullscreen = value;
     }
 
-    protected void SetSize(Vector2i size)
+    public WindowStyleInfo Style => MetaData.WinData.WindowStyle;
+
+    public DisplayInfo Display
     {
-        UpdateSize(size);
-        NativeWindow.SetSize(MetaData.WinData.Size);
+        get => NativeWindow.Display;
+        set => NativeWindow.Display = value;
     }
 
-    protected void UpdateSize(Vector2i size)
+    public uint VSyncInterval
     {
-        MetaData.WinData.Size = size;
+        get => MetaData.WinData.VSyncInterval;
+        set => MetaData.WinData.VSyncInterval = NativeWindow.DXContext.VSync = value;
     }
 
-    protected void SetPosition(Vector2i position)
+    public Rect Viewport
     {
-        UpdatePosition(position);
-        NativeWindow.SetPosition(MetaData.WinData.Position);
+        get => MetaData.GlData.Viewport;
+        set => NativeWindow.DXContext.SetViewport(MetaData.GlData.Viewport = value);
     }
 
-    protected void UpdatePosition(Vector2i position)
+    public Vector2 ClipPlanes
     {
-        MetaData.WinData.Position = position;
+        get => MetaData.GlData.ClipPlanes;
+        set => NativeWindow.DXContext.SetClipPlanes(MetaData.GlData.ClipPlanes = value);
     }
 
-    protected void SetVsync(uint interval)
+    public bool IsEnabled => NativeWindow.IsEnabled;
+
+    public bool IsVisible
     {
-        UpdateVsync(interval);
-        NativeWindow.VSync = MetaData.WinData.VSyncInterval;
+        get => NativeWindow.IsVisible;
+        set => NativeWindow.IsVisible = value;
     }
 
-    protected void UpdateVsync(uint interval)
+    public bool IsMaximized
     {
-        MetaData.WinData.VSyncInterval = interval;
+        get => NativeWindow.IsMaximized;
+        set => NativeWindow.IsMaximized = value;
     }
 
-    protected void UpdateViewport()
-    {
-        NativeWindow.DXContext.SetViewport(MetaData.GlData.Viewport);
-    }
+    public bool IsIcon => NativeWindow.IsIcon;
 
-    protected void UpdateViewportDepth()
-    {
-        NativeWindow.DXContext.SetClipPlanes(MetaData.GlData.ClipPlanes);
-    }
-
-    protected void MoveOnDisplay(DisplayInfo display)
-    {
-        NativeWindow.Display = display;
-    }
-
-    protected void Show() => NativeWindow.Show();
-    protected void Hide() => NativeWindow.Hide();
-    protected void Maximize() => NativeWindow.Maximize();
     protected void Restore() => NativeWindow.Restore();
-    protected void Commit() => NativeWindow.Update();
+    protected void BringToFront() => NativeWindow.BringToFront();
+    protected void Flash(uint count, uint timeout) => NativeWindow.Flash(count, timeout);
+    protected void HideToTray() => NativeWindow.HideToTray();
+    protected void ShowFromTray() => NativeWindow.ShowFromTray();
+    protected void Update() => NativeWindow.Update();
+
+    protected void BeginFrame() => NativeWindow.BeginFrame();
+    protected void Clear(Color4 clearColor) => NativeWindow.Clear(clearColor);
+    protected void EndFrame() => NativeWindow.EndFrame();
+    public void Present() => NativeWindow.Present();
 
     public virtual void HandleEvent(QuantumEvent e)
     {
@@ -205,7 +210,7 @@ public class Window
                 ActiveWindow = null;
                 break;
             case WinResizeEvent winResize:
-                UpdateSize(winResize.Size);
+                MetaData.WinData.Size = winResize.Size;
                 NativeWindow.DXContext.SetResolution(MetaData.WinData.Resolution);
                 break;
         }
@@ -228,23 +233,15 @@ public class Window
         BeginFrame();
     }
 
-    protected void BeginFrame() => NativeWindow.BeginFrame();
-
     public virtual void Render()
     {
         Clear(MetaData.GlData.ClearColor);
     }
 
-    protected void Clear(Color4 clearColor) => NativeWindow.Clear(clearColor);
-
     public virtual void PostRender()
     {
         EndFrame();
     }
-
-    protected void EndFrame() => NativeWindow.EndFrame();
-
-    public void Present() => NativeWindow.Present();
 
     public virtual void Dispose()
     {

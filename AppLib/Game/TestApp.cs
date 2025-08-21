@@ -28,8 +28,7 @@ public class TestApp : GameType
         return new GameWindow(
             MetaData.WinData,
             MetaData.GlData,
-            winName,
-            icon: new IconInfo(AssetLoader.AssetDirectory + "/Logo.ico")
+            winName
         );
     }
 
