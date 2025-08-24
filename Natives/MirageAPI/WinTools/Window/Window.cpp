@@ -122,7 +122,7 @@ namespace MirageAPI
             DisplayInfo^ displayInfo = Display;
             SetWindowPos(
                 hwnd,
-                HWND_TOPMOST,
+                HWND_TOP,
                 displayInfo->rect->X,
                 displayInfo->rect->Y,
                 displayInfo->rect->Width,
@@ -150,7 +150,7 @@ namespace MirageAPI
 
     bool Window::IsHighContrastEnabled::get()
     {
-                HIGHCONTRAST contrastInfo;
+        HIGHCONTRAST contrastInfo;
         contrastInfo.cbSize = sizeof(HIGHCONTRAST);
         return SystemParametersInfoW(
             SPI_GETHIGHCONTRAST, sizeof(HIGHCONTRAST),

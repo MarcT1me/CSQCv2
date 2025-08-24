@@ -12,18 +12,18 @@
 namespace MirageAPI
 {
     WindowStyleInfo::WindowStyleInfo(
-        Byte opacity,
         bool isDarkMode,
         bool pixelTransparency,
-        bool isAcrylic,
+        Byte opacity,
+        SystemBackdropType backdropType,
         Color4^ borderColor,
         Color4^ captionColor,
         IconInfo^ icon,
         CursorInfo^ cursor
-    ) : opacity(opacity),
-        isDarkMode(isDarkMode),
+    ) : isDarkMode(isDarkMode),
         pixelTransparency(pixelTransparency),
-        isAcrylic(isAcrylic),
+        opacity(opacity),
+        backdropType(backdropType),
         borderColor(borderColor),
         captionColor(captionColor),
         icon(icon),
@@ -37,6 +37,10 @@ namespace MirageAPI
 
         DarkMode = this->isDarkMode;
         PixelTransparency = this->pixelTransparency;
+
+        Opacity = this->opacity;
+
+        BackdropType = this->backdropType;
 
         if (this->borderColor)
         {
@@ -75,7 +79,6 @@ namespace MirageAPI
             );
         }
 
-        Opacity = this->opacity;
 
         // info classes
         Icon = this->icon ? this->icon : window->Class->Icon;
@@ -93,9 +96,27 @@ namespace MirageAPI
         window->FrameChanged();
     }
 
+    void WindowStyleInfo::DarkMode::set(bool value)
+    {
+        isDarkMode = value;
+        DwmSetWindowAttribute(
+            window->NativeWindow, DWMWA_USE_IMMERSIVE_DARK_MODE,
+            &value, sizeof(value)
+        );
+    }
+
+    void WindowStyleInfo::Opacity::set(Byte value)
+    {
+        opacity = value;
+        SetLayeredWindowAttributes(
+            window->NativeWindow, 0, value, LWA_ALPHA
+        );
+    }
+
     void WindowStyleInfo::PixelTransparency::set(bool value)
     {
         pixelTransparency = value;
+
         if (value)
         {
             SetWindowLongW(
@@ -116,26 +137,25 @@ namespace MirageAPI
         }
     }
 
-    void WindowStyleInfo::Opacity::set(Byte value)
+    void WindowStyleInfo::BackdropType::set(SystemBackdropType value)
     {
-        opacity = value;
-        SetLayeredWindowAttributes(
-            window->NativeWindow, 0, value, LWA_ALPHA
-        );
-    }
+        backdropType = value;
 
-    void WindowStyleInfo::DarkMode::set(bool value)
-    {
-        isDarkMode = value;
+        DWORD attr = static_cast<DWORD>(value);
         DwmSetWindowAttribute(
-            window->NativeWindow, DWMWA_USE_IMMERSIVE_DARK_MODE,
-            &value, sizeof(value)
+            window->NativeWindow,
+            DWMWA_SYSTEMBACKDROP_TYPE,
+            &attr,
+            sizeof(attr)
         );
     }
 
     void WindowStyleInfo::BorderColor::set(Color4^ value)
     {
+        CheckNull(value) return;
+
         borderColor = value;
+
         COLORREF color = value->ToArgb();
         DwmSetWindowAttribute(
             window->NativeWindow, DWMWA_BORDER_COLOR,
@@ -145,7 +165,10 @@ namespace MirageAPI
 
     void WindowStyleInfo::CaptionColor::set(Color4^ value)
     {
+        CheckNull(value) return;
+
         captionColor = value;
+
         COLORREF color = value->ToArgb();
         DwmSetWindowAttribute(
             window->NativeWindow, DWMWA_CAPTION_COLOR,
@@ -155,9 +178,9 @@ namespace MirageAPI
 
     void WindowStyleInfo::Icon::set(IconInfo^ value)
     {
-        icon = value;
-
         CheckNull(value) return;
+
+        icon = value;
 
         Events::EventManager::SendEvent(
             window, WM_SETICON,
@@ -173,27 +196,14 @@ namespace MirageAPI
 
     void WindowStyleInfo::Cursor::set(CursorInfo^ value)
     {
-        cursor = value;
-
         CheckNull(value) return;
+
+        cursor = value;
 
         Events::EventManager::SendEvent(
             window, WM_SETCURSOR,
             reinterpret_cast<WPARAM>(window->NativeWindow),
             MAKELPARAM(HTCLIENT, 0)
         );
-    }
-
-    void WindowStyleInfo::SetAcrylicEffect(Color4 tintColor, float tintOpacity)
-    {
-        // DWM_ACRYLIC_EFFECT acrylic;
-        // acrylic.tintColor = tintColor.ToArgb();
-        // acrylic.tintOpacity = tintOpacity;
-        // acrylic.fallbackColor = 0;
-        //
-        // DwmSetWindowAttribute(
-        //     window->NativeWindow, DWMWA_ACRYLIC_EFFECT,
-        //     &acrylic, sizeof(acrylic)
-        // );
     }
 }

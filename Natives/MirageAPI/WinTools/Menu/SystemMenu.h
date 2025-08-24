@@ -6,7 +6,7 @@ namespace MirageAPI
 {
     public ref class SystemMenu : public Menu
     {
-        int count;
+        int count = static_cast<int>(MenuIdRanges::SystemMenuStart);
         
     public:
         SystemMenu(Window^ window);

@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "enums.h"
+
 namespace MirageAPI
 {
     ref class Window;
@@ -15,10 +17,10 @@ namespace MirageAPI
         // attached window
         Window^ window;
         // style
-        Byte opacity;
         bool isDarkMode;
         bool pixelTransparency;
-        bool isAcrylic;
+        Byte opacity;
+        SystemBackdropType backdropType;
         Color4^ borderColor;
         Color4^ captionColor;
         // info classes
@@ -31,31 +33,39 @@ namespace MirageAPI
 
     public:
         WindowStyleInfo(
-            Byte opacity,
             bool isDarkMode,
             bool pixelTransparency,
-            bool isAcrylic,
+            Byte opacity,
+            SystemBackdropType backdropType,
             Color4^ borderColor,
             Color4^ captionColor,
             IconInfo^ icon,
             CursorInfo^ cursor
         );
 
-        property bool PixelTransparency
-        {
-            bool get() { return pixelTransparency; }
-            void set(bool value);
-        }
-        property Byte Opacity
-        {
-            Byte get() { return opacity; }
-            void set(Byte value);
-        }
         property bool DarkMode
         {
             bool get() { return isDarkMode; }
             void set(bool value);
         }
+
+        property Byte Opacity
+        {
+            Byte get() { return opacity; }
+            void set(Byte value);
+        }
+        property bool PixelTransparency
+        {
+            bool get() { return pixelTransparency; }
+            void set(bool value);
+        }
+
+        property SystemBackdropType BackdropType
+        {
+            SystemBackdropType get() { return backdropType; }
+            void set(SystemBackdropType value);
+        }
+
         property Color4^ BorderColor
         {
             Color4^ get() { return borderColor; }
@@ -77,7 +87,5 @@ namespace MirageAPI
             CursorInfo^ get() { return cursor; }
             void set(CursorInfo^ value);
         }
-
-        void SetAcrylicEffect(Color4 tintColor, float tintOpacity);
     };
 }

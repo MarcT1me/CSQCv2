@@ -27,8 +27,8 @@ public sealed class WinData(
 
     public WindowStyleInfo WindowStyle { get; } =
         windowStyle ?? new WindowStyleInfo(
-            255,
-            false, false, false,
+            false, false, 255,
+            SystemBackdropType.Auto,
             null, null,
             null, null
         );

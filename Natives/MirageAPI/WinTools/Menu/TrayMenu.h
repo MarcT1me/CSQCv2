@@ -15,7 +15,7 @@ namespace MirageAPI
     public ref class TrayMenu : public Menu
     {
         int m_id;
-        int count;
+        int count = static_cast<int>(MenuIdRanges::TrayMenuStart);
         Rect^ m_rect;
         String^ m_tooltipText;
         String^ m_infoTitleText;

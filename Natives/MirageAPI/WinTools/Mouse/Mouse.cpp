@@ -37,16 +37,6 @@ namespace MirageAPI
 
     void Mouse::Update(Vector2i^ pos)
     {
-        if (IsCapture)
-        {
-            Rect^ rect = window->CurrentRect;
-
-            Position = pos = gcnew Vector2i(
-                static_cast<int>(rect->Width) / 2,
-                static_cast<int>(rect->Height) / 2
-            );
-        }
-
         lastPosition = savedPosition;
         savedPosition = pos;
 
@@ -54,6 +44,15 @@ namespace MirageAPI
             pos->X - lastPosition->X,
             pos->Y - lastPosition->Y
         );
+
+        if (IsCapture)
+        {
+            Rect^ rect = window->CurrentRect;
+            Position = savedPosition = gcnew Vector2i(
+                static_cast<int>(rect->Width) / 2,
+                static_cast<int>(rect->Height) / 2
+            );
+        }
     }
 
     void Mouse::UpdateDisplayPositions()
@@ -77,7 +76,7 @@ namespace MirageAPI
 
     void Mouse::Position::set(Vector2i^ value)
     {
-        POINT center = {static_cast<LONG>(value->X), static_cast<LONG>(value->Y)};
+        POINT center = {UnpacVec2(value)};
         ClientToScreen(window->NativeWindow, &center);
         SetCursorPos(center.x, center.y);
     }
@@ -91,7 +90,7 @@ namespace MirageAPI
 
     void Mouse::PositionOnDisplay::set(Vector2i^ value)
     {
-        POINT center = {static_cast<LONG>(value->X), static_cast<LONG>(value->Y)};
+        POINT center = {UnpacVec2(value)};
         SetCursorPos(center.x, center.y);
     }
 
@@ -103,16 +102,23 @@ namespace MirageAPI
 
     void Mouse::CaptureWindow::set(Window^ value)
     {
-        if (mouseCaptureWindow)
-        {
-            QLog(Warning, "Mouse has already been captured in another window\nTrying to release capture mouse");
-            CaptureWindow = nullptr;
-        }
-
         if (value)
         {
-            auto mouse = value->Mouse;
-            mouse->lastPosition = mouse->savedPosition = mouse->Position;
+            if (mouseCaptureWindow)
+            {
+                QLog(Warning, "Mouse has already been captured in another window. Trying to release capture mouse");
+                CaptureWindow = nullptr;
+            }
+
+            Rect^ rect = value->CurrentRect;
+            Vector2i^ center = gcnew Vector2i(
+                static_cast<int>(rect->Width) / 2,
+                static_cast<int>(rect->Height) / 2
+            );
+
+            value->Mouse->Position =
+                value->Mouse->lastPosition =
+                    value->Mouse->savedPosition = center;
         }
 
         mouseCaptureWindow = value;

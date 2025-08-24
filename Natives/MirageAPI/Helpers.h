@@ -24,3 +24,38 @@
 
 #define UnpacVec2(vector) vector->X, vector->Y
 #define UnpacVec4(vector) UnpacVec2(vector), vector->Z, vector->W
+
+
+namespace MirageAPI
+{
+    public ref class GlobalHelpers abstract
+    {
+    public:
+        static bool IsWindowVersion(UINT major, UINT minor, UINT build)
+        {
+            // create version
+            OSVERSIONINFOEXW osVersionInfo = {sizeof(osVersionInfo)};
+            osVersionInfo.dwMajorVersion = major;
+            osVersionInfo.dwMinorVersion = minor;
+            osVersionInfo.dwBuildNumber = build;
+
+            // verify with using mask
+            DWORDLONG const mask = VerSetConditionMask(
+                VerSetConditionMask(
+                    VerSetConditionMask(
+                        0,
+                        VER_MAJORVERSION, VER_GREATER_EQUAL
+                    ),
+                    VER_MINORVERSION, VER_GREATER_EQUAL
+                ),
+                VER_BUILDNUMBER, VER_GREATER_EQUAL
+            );
+
+            return VerifyVersionInfoW(
+                &osVersionInfo,
+                VER_MAJORVERSION | VER_MINORVERSION | VER_BUILDNUMBER,
+                mask
+            );
+        }
+    };
+}

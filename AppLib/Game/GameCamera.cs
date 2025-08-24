@@ -2,7 +2,9 @@
 using Engine.Events.QuantumEvents.Mouse;
 using Engine.Objects.Camera;
 using Engine.Input.Keyboard;
+using Engine.Logging;
 using Engine.Time;
+using OpenTK.Mathematics;
 
 namespace AppLib.Game;
 
@@ -17,11 +19,13 @@ public class GameCamera(CameraData cameraData) : Camera<CameraData>(cameraData)
 
         if (e is not MouseMoveEvent mouseMove || !TestApp.Instance.MainWindow.MetaData.WinData.Fullscreen) return;
 
+        Logger.Info(e.ToString());
+        
         var rotationSpeed = CameraSensitivity * (float)TestApp.Instance.Clock.MetaData.DeltaTime;
 
         // yaw-pitch
         Transform.Rotate(Transform.Right, rotationSpeed * mouseMove.Rel.Y);
-        Transform.Rotate(-Transform.Up, rotationSpeed * mouseMove.Rel.X);
+        Transform.Rotate(Engine.Data.Transform.WorldUp, -rotationSpeed * mouseMove.Rel.X);
     }
 
     public override void Update(ClockMeta clockMeta)
@@ -48,11 +52,11 @@ public class GameCamera(CameraData cameraData) : Camera<CameraData>(cameraData)
 
         var rotationSpeed = moveSpeed / 20;
 
-        // roll
-        if (Keyboard.GetKey(Key.E))
-            Transform.Rotate(Transform.Forward, rotationSpeed);
-        if (Keyboard.GetKey(Key.Q))
-            Transform.Rotate(Transform.Forward, -rotationSpeed);
+        // // roll
+        // if (Keyboard.GetKey(Key.E))
+        //     Transform.Rotate(Transform.Forward, rotationSpeed);
+        // if (Keyboard.GetKey(Key.Q))
+        //     Transform.Rotate(Transform.Forward, -rotationSpeed);
 
         // yaw-pitch
         if (Keyboard.GetKey(Key.Up))
@@ -60,8 +64,8 @@ public class GameCamera(CameraData cameraData) : Camera<CameraData>(cameraData)
         if (Keyboard.GetKey(Key.Down))
             Transform.Rotate(Transform.Right, rotationSpeed);
         if (Keyboard.GetKey(Key.Right))
-            Transform.Rotate(Transform.Up, -rotationSpeed);
+            Transform.Rotate(Engine.Data.Transform.WorldUp, -rotationSpeed);
         if (Keyboard.GetKey(Key.Left))
-            Transform.Rotate(Transform.Up, rotationSpeed);
+            Transform.Rotate(Engine.Data.Transform.WorldUp, rotationSpeed);
     }
 }

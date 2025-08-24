@@ -8,6 +8,7 @@ using Engine.Graphic.Window;
 using Engine.Input.Keyboard;
 using Engine.Logging;
 using Engine.Time;
+using Microsoft.Toolkit.Uwp.Notifications;
 using MirageAPI;
 using MirageAPI.DirectX;
 using MirageAPI.DirectX.Command;
@@ -34,6 +35,25 @@ public struct MatrixBufferData
     public Matrix4 World;
     public Matrix4 View;
     public Matrix4 Projection;
+}
+
+public class TestNotification() : Engine.Graphic.ToastNotification(DateTime.Now)
+{
+    public override void Build(ToastContentBuilder builder)
+    {
+        builder
+            .AddText("TestNotification");
+    }
+}
+
+public class StartNotification() : Engine.Graphic.ToastNotification(DateTime.Now)
+{
+    public override void Build(ToastContentBuilder builder)
+    {
+        builder
+            .AddText("Application started")
+            .AddAttributionText("window established");
+    }
 }
 
 public class GameWindow : Engine.Graphic.Window.Window
@@ -245,14 +265,15 @@ public class GameWindow : Engine.Graphic.Window.Window
 
         Logger.Debug("Changing System window menu...");
         NativeWindow.SysMenu.Separator();
-        var testSysMenu = NativeWindow.SysMenu.TextItem("TEST SYSTEM MENU ITEM");
-        NativeWindow.SysMenu.Callback += id =>
-        {
-            if (id == testSysMenu)
-            {
-                Logger.Debug("crickets chirping...");
-            }
-        };
+        NativeWindow.SysMenu.TextItem("TEST SYSTEM MENU ITEM");
+        NativeWindow.SysMenu.Callback += id => { Logger.Debug($"crickets chirping... {id}"); };
+    }
+
+    public override void Prepare()
+    {
+        base.Prepare();
+        new StartNotification()
+            .Show();
     }
 
     public override void HandleEvent(QuantumEvent e)
@@ -268,18 +289,24 @@ public class GameWindow : Engine.Graphic.Window.Window
             case KeyEvent { Type: EventType.KeyDown, Key: Key.F11 } keyEvent:
             {
                 Logger.Debug("Toggle Fullscreen");
-                NativeWindow.IsFullscreen = !NativeWindow.IsFullscreen;
+                IsFullscreen = !IsFullscreen;
 
                 if (keyEvent.Mods.HasFlag(KeyMod.Shift))
                 {
                     Logger.Debug("set Mouse Capture and visibility");
-                    Mouse.CaptureWindow = MetaData.WinData.Fullscreen ? NativeWindow : null;
-                    Mouse.IsVisible = !MetaData.WinData.Fullscreen;
+                    Mouse.CaptureWindow = IsFullscreen ? NativeWindow : null;
+                    Mouse.IsVisible = !IsFullscreen;
                 }
 
                 break;
             }
-            case KeyEvent { Type: EventType.KeyDown, Key: Key.F }:
+            case KeyEvent { Type: EventType.KeyDown, Key: Key.N }:
+            {
+                new TestNotification()
+                    .Show();
+                break;
+            }
+            case KeyEvent { Type: EventType.KeyDown, Key: Key.N1 }:
             {
                 NativeWindow.Flash(3, 1);
                 Logger.Beep();
@@ -288,6 +315,16 @@ public class GameWindow : Engine.Graphic.Window.Window
             case KeyEvent { Type: EventType.KeyDown, Key: Key.F1 }:
             {
                 NativeWindow.HideToTray();
+                break;
+            }
+            case KeyEvent { Type: EventType.KeyUp, Key: Key.F2 }:
+            {
+                Mouse.IsVisible = !Mouse.IsVisible;
+                break;
+            }
+            case KeyEvent { Type: EventType.KeyUp, Key: Key.F3 }:
+            {
+                Mouse.CaptureWindow = NativeWindow.Mouse.IsCapture ? null : NativeWindow;
                 break;
             }
         }

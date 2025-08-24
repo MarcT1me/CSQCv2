@@ -24,6 +24,7 @@
         <ProjectReference Include="..\EngineCore\EngineCore.csproj"/>
         <!-- Import MirageAPI for tests -->
         <ProjectReference Include="..\Natives\MirageAPI\MirageAPI.vcxproj"/>
+        <PackageReference Include="Microsoft.Toolkit.Uwp.Notifications" Version="7.1.3" />
         <!-- Libs -->
         <PackageReference Include="SpaceWizards.SharpFont" Version="1.0.2"/>
         <PackageReference Include="StbImageSharp" Version="2.30.15"/>

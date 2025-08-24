@@ -11,4 +11,13 @@ namespace MirageAPI
         Popup = WS_POPUPWINDOW | WS_EX_LAYERED,
         Child = WS_CHILDWINDOW
     };
+
+    public enum class SystemBackdropType
+    {
+        Auto = 0,
+        None = 1,
+        Mica = 2,
+        Acrylic = 3,
+        Tabbed = 4
+    };
 }
