@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace Engine.Asset;
+namespace QuantumCore.Asset;
 
 /// <summary>
 /// Класс - загрузчик ассетов
@@ -116,7 +116,7 @@ public abstract class AssetLoader
     /// Полный путь до папки ассетов
     /// </summary>
     public static string AssetDirectory => Path.Combine(
-        EngineCore.RootDirectory,
-        EngineCore.Core.Configuration.Get<string>("app.asset.dir")
+        Core.RootDirectory,
+        Core.CoreConfiguration.Get<string>("app.asset.dir")
     );
 }

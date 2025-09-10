@@ -1,4 +1,4 @@
-﻿namespace Engine.Extensions.Tracer;
+﻿namespace QuantumCore.Extensions.Tracer;
 
 /// <summary>
 /// Места хранения отсканированных типов

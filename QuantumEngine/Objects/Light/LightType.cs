@@ -1,4 +1,4 @@
-﻿namespace Engine.Objects.Light;
+﻿namespace QuantumCore.Objects.Light;
 
 public enum LightType : byte
 {

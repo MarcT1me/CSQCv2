@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace Engine.Extensions.Tracer;
+namespace QuantumCore.Extensions.Tracer;
 
 using Data.RegistryManagers;
 using Logging;

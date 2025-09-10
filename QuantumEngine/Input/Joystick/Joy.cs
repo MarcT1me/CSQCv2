@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using MirageAPI.Events;
 
-namespace Engine.Input.Joystick;
+namespace QuantumCore.Input.Joystick;
 
 using Events.QuantumEvents;
 using Events.QuantumEvents.Joystick;

@@ -2,7 +2,7 @@
 using IniParser.Model;
 using OpenTK.Mathematics;
 
-namespace Engine.Asset.Defaults;
+namespace QuantumCore.Asset.Defaults;
 
 public readonly struct LocalisationData
 {

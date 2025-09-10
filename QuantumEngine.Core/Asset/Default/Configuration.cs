@@ -1,6 +1,6 @@
-﻿using Engine.Failures;
+﻿using QuantumCore.Failures;
 
-namespace Engine.Asset.Default;
+namespace QuantumCore.Asset.Default;
 
 public class Configuration
 {

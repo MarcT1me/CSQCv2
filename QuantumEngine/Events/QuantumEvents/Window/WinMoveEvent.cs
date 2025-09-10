@@ -1,6 +1,6 @@
 ﻿using OpenTK.Mathematics;
 
-namespace Engine.Events.QuantumEvents.Window;
+namespace QuantumCore.Events.QuantumEvents.Window;
 
 public class WinMoveEvent(MirageAPI.Events.WindowEvent e)
     : WindowedQuantumEvent(EventType.WindowMove, e.windowID)

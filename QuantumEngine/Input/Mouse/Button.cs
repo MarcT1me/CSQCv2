@@ -1,4 +1,4 @@
-﻿namespace Engine.Input.Mouse;
+﻿namespace QuantumCore.Input.Mouse;
 
 public enum Button : byte
 {

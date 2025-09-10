@@ -1,7 +1,7 @@
-﻿using Engine.Data.Collections;
-using OpenTK.Mathematics;
+﻿using OpenTK.Mathematics;
+using QuantumCore.Data.Collections;
 
-namespace Engine.Objects.Camera;
+namespace QuantumCore.Objects.Camera;
 
 using Data;
 using Actor;

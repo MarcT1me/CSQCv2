@@ -1,4 +1,4 @@
-﻿namespace Engine.Events.QuantumEvents.Joystick;
+﻿namespace QuantumCore.Events.QuantumEvents.Joystick;
 
 public class JoyDeviceEvent(int joystickId, bool connected)
     : JoyEvent(connected ? EventType.JoyDeviceConnect : EventType.JoyDeviceDisconnect, joystickId)

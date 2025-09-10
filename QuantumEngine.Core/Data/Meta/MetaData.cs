@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace Engine.Data.Meta;
+namespace QuantumCore.Data.Meta;
 
 using StringKeyMap = IEnumerable<
     KeyValuePair<

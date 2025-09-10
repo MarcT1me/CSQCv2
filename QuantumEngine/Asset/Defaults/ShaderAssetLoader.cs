@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using MirageAPI.DirectX.Shader;
 
-namespace Engine.Asset.Defaults;
+namespace QuantumCore.Asset.Defaults;
 
 using Shader;
 

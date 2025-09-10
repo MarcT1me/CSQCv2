@@ -1,4 +1,4 @@
-﻿namespace Engine.Events.QuantumEvents.Mouse;
+﻿namespace QuantumCore.Events.QuantumEvents.Mouse;
 
 public class MouseButtonEvent(MirageAPI.Events.MouseEvent e)
     : MouseEvent(e.Pressed ? EventType.MouseButtonDown : EventType.MouseButtonUp, e.windowID)

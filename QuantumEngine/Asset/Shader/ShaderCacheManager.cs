@@ -1,9 +1,9 @@
 ﻿using System.Diagnostics;
 using System.Text;
-using Engine.Logging;
 using MirageAPI.DirectX.Shader;
+using QuantumCore.Logging;
 
-namespace Engine.Asset.Shader;
+namespace QuantumCore.Asset.Shader;
 
 // Cache generator
 public static class ShaderCacheManager
@@ -13,7 +13,7 @@ public static class ShaderCacheManager
     public static string CacheDirectory
     {
         get => _cacheDirectory ?? Path.Combine(
-            EngineCore.RootDirectory,
+            Core.RootDirectory,
             "CachedShaders"
         );
         set => _cacheDirectory = value;
@@ -51,7 +51,7 @@ public static class ShaderCacheManager
     {
         var cachePath = GetCachePath(shaderData);
 
-        if (!File.Exists(cachePath) || EngineCore.IsDebug) return (false, shaderData);
+        if (!File.Exists(cachePath) || Core.IsDebug) return (false, shaderData);
 
         Logger.Success($"Shader ({shaderData.Identifier}) cache file found!");
 
@@ -81,7 +81,7 @@ public static class ShaderCacheManager
         Logger.Success($"Shader ({shaderData.Identifier}) Compiled!");
 
         Directory.CreateDirectory(Path.Combine(CacheDirectory, shaderData.MasterShaderName));
-        if (!EngineCore.IsDebug)
+        if (!Core.IsDebug)
         {
             shader.SaveToFile(GetCachePath(shaderData));
             Logger.Success($"Cache for Shader ({shaderData.Identifier}) saved!");

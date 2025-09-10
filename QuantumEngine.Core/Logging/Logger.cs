@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics;
 using System.Globalization;
-using Engine.Failures;
+using QuantumCore.Failures;
 
-namespace Engine.Logging;
+namespace QuantumCore.Logging;
 
 using Data.Meta;
 using Data.Collections;

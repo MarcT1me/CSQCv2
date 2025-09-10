@@ -1,6 +1,6 @@
 ﻿// ReSharper disable VirtualMemberCallInConstructor
 
-namespace Engine.Base;
+namespace QuantumCore.Base;
 
 using Threading;
 using Data.Meta;

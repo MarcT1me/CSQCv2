@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using OpenTK.Mathematics;
 
-namespace Engine.Input.Mouse;
+namespace QuantumCore.Input.Mouse;
 
 using Events.QuantumEvents;
 using Events.QuantumEvents.Mouse;

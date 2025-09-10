@@ -1,7 +1,7 @@
 ﻿using MirageAPI;
 using OpenTK.Mathematics;
 
-namespace Engine.Graphic.Window;
+namespace QuantumCore.Graphic.Window;
 
 public sealed class WinData(
     Vector2i size,

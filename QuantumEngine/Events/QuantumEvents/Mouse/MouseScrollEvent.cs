@@ -1,4 +1,4 @@
-﻿namespace Engine.Events.QuantumEvents.Mouse;
+﻿namespace QuantumCore.Events.QuantumEvents.Mouse;
 
 public class MouseScrollEvent(MirageAPI.Events.MouseEvent e)
     : MouseEvent(EventType.MouseScroll, e.windowID)

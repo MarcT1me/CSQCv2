@@ -1,6 +1,6 @@
 ﻿using MirageAPI.DirectX.Shader;
 
-namespace Engine.Asset.Shader;
+namespace QuantumCore.Asset.Shader;
 
 using Data;
 using Data.Meta;

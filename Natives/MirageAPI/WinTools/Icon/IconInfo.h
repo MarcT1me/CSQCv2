@@ -34,7 +34,7 @@ namespace MirageAPI
         static IconInfo^ WinLogo = gcnew IconInfo(IconType::WinLogo);
         static IconInfo^ Shield = gcnew IconInfo(IconType::Shield);
         // default engine icons
-        static IconInfo^ QDefault = gcnew IconInfo(Engine::Asset::AssetLoader::AssetDirectory + "/Native/qEngine.ico");
+        static IconInfo^ QDefault = gcnew IconInfo(QuantumCore::Asset::AssetLoader::AssetDirectory + "/Native/qEngine.ico");
 
         IconInfo(
             IconType iconType

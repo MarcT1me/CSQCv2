@@ -1,7 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using OpenTK.Mathematics;
 
-namespace Engine.Objects.Light;
+namespace QuantumCore.Objects.Light;
 
 [StructLayout(LayoutKind.Sequential)]
 public struct LightUniforms

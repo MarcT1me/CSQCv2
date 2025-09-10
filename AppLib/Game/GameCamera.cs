@@ -1,8 +1,9 @@
-﻿using Engine.Events.QuantumEvents;
-using Engine.Events.QuantumEvents.Mouse;
-using Engine.Objects.Camera;
-using Engine.Input.Keyboard;
-using Engine.Time;
+﻿using QuantumCore.Data;
+using QuantumCore.Events.QuantumEvents;
+using QuantumCore.Events.QuantumEvents.Mouse;
+using QuantumCore.Objects.Camera;
+using QuantumCore.Input.Keyboard;
+using QuantumCore.Time;
 
 namespace AppLib.Game;
 
@@ -16,10 +17,9 @@ public class GameCamera(CameraData cameraData) : Camera<CameraData>(cameraData)
         base.HandleEvent(e);
 
         if (e is not MouseMoveEvent mouseMove || !TestApp.Instance.MainWindow.MetaData.WinData.Fullscreen) return;
-
         // yaw-pitch
-        Transform.Rotate(Transform.Right, CameraSensitivity * mouseMove.Rel.Y);
-        Transform.Rotate(Engine.Data.Transform.WorldUp, -CameraSensitivity * mouseMove.Rel.X);
+        MetaData.Transform.Rotate(MetaData.Transform.Right, CameraSensitivity * mouseMove.Rel.Y);
+        MetaData.Transform.Rotate(Transform.WorldUp, -CameraSensitivity * mouseMove.Rel.X);
     }
 
     public override void Update(ClockMeta clockMeta)
@@ -30,30 +30,30 @@ public class GameCamera(CameraData cameraData) : Camera<CameraData>(cameraData)
 
         // x-y
         if (Keyboard.GetKey(Key.W))
-            Transform.Translate(Transform.Forward * moveSpeed);
+            MetaData.Transform.Translate(MetaData.Transform.Forward * moveSpeed);
         if (Keyboard.GetKey(Key.S))
-            Transform.Translate(-Transform.Forward * moveSpeed);
+            MetaData.Transform.Translate(-MetaData.Transform.Forward * moveSpeed);
         if (Keyboard.GetKey(Key.D))
-            Transform.Translate(-Transform.Right * moveSpeed);
+            MetaData.Transform.Translate(-MetaData.Transform.Right * moveSpeed);
         if (Keyboard.GetKey(Key.A))
-            Transform.Translate(Transform.Right * moveSpeed);
+            MetaData.Transform.Translate(MetaData.Transform.Right * moveSpeed);
 
         // z
         if (Keyboard.GetKey(Key.R))
-            Transform.Translate(Transform.Up * moveSpeed);
+            MetaData.Transform.Translate(MetaData.Transform.Up * moveSpeed);
         if (Keyboard.GetKey(Key.F))
-            Transform.Translate(-Transform.Up * moveSpeed);
+            MetaData.Transform.Translate(-MetaData.Transform.Up * moveSpeed);
 
         var rotationSpeed = moveSpeed / 20;
 
         // yaw-pitch
         if (Keyboard.GetKey(Key.Up))
-            Transform.Rotate(Transform.Right, -rotationSpeed);
+            MetaData.Transform.Rotate(MetaData.Transform.Right, -rotationSpeed);
         if (Keyboard.GetKey(Key.Down))
-            Transform.Rotate(Transform.Right, rotationSpeed);
+            MetaData.Transform.Rotate(MetaData.Transform.Right, rotationSpeed);
         if (Keyboard.GetKey(Key.Right))
-            Transform.Rotate(Engine.Data.Transform.WorldUp, -rotationSpeed);
+            MetaData.Transform.Rotate(QuantumCore.Data.Transform.WorldUp, -rotationSpeed);
         if (Keyboard.GetKey(Key.Left))
-            Transform.Rotate(Engine.Data.Transform.WorldUp, rotationSpeed);
+            MetaData.Transform.Rotate(QuantumCore.Data.Transform.WorldUp, rotationSpeed);
     }
 }

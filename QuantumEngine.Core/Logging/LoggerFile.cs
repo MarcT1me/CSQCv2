@@ -1,4 +1,4 @@
-﻿namespace Engine.Logging;
+﻿namespace QuantumCore.Logging;
 
 /// <summary>
 /// Данные о файле для логирования
@@ -21,7 +21,7 @@ public sealed class LoggerFile(FileInfo info, StreamWriter writer) : IDisposable
     {
         if (_instance != null || filePath is null) return _instance;
 
-        var fullpath = Path.Join(EngineCore.RootDirectory, filePath);
+        var fullpath = Path.Join(Core.RootDirectory, filePath);
         var file = new FileInfo(fullpath);
         var fileWriter = new StreamWriter(
             new FileStream(fullpath, FileMode.Open, FileAccess.Write)

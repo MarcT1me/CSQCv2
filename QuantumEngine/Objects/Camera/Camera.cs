@@ -1,8 +1,8 @@
-﻿using Engine.Events.QuantumEvents.Window;
-using Engine.Time;
-using OpenTK.Mathematics;
+﻿using OpenTK.Mathematics;
+using QuantumCore.Events.QuantumEvents.Window;
+using QuantumCore.Time;
 
-namespace Engine.Objects.Camera;
+namespace QuantumCore.Objects.Camera;
 
 using Actor;
 using Events.QuantumEvents;
@@ -35,7 +35,7 @@ public class Camera<TData>(TData cameraData)
     public virtual void PreRender(WindowData winMeta)
     {
         // check necessity
-        if (!MetaData.NeedsUpdate) return;
+        if (!MetaData.IsNeedsUpdate) return;
 
         UpdateCameraMatrix(winMeta);
 
@@ -45,9 +45,9 @@ public class Camera<TData>(TData cameraData)
     public virtual void UpdateCameraMatrix(WindowData winMeta)
     {
         ViewMatrix = Matrix4.LookAt(
-            Transform.Position,
-            Transform.Position + Transform.Forward,
-            Transform.Up
+            MetaData.Transform.Position,
+            MetaData.Transform.Position + MetaData.Transform.Forward,
+            MetaData.Transform.Up
         );
 
         ProjectionMatrix = Matrix4.CreatePerspectiveFieldOfView(

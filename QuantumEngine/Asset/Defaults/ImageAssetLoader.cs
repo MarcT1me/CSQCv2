@@ -1,4 +1,4 @@
-﻿namespace Engine.Asset.Defaults;
+﻿namespace QuantumCore.Asset.Defaults;
 
 using Image;
 

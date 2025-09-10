@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace Engine.Decorators;
+namespace QuantumCore.Decorators;
 
 /// <summary>
 /// Метод задекорированный аттрибутом

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#define QuantumFailure Engine::Failures::FailureException
+#define QuantumFailure QuantumCore::Failures::FailureException
 
 #define CheckMissmatch(first, second) if ((first) != (second))
 #define CheckNull(resource) if (!(resource))
@@ -15,8 +15,8 @@
 #define CSList System::Collections::Generic::List
 #define CSDict System::Collections::Generic::Dictionary
 
-#define QIdentifier Engine::Data::Identifier
-#define QLogger Engine::Logging::Logger
+#define QIdentifier QuantumCore::Data::Identifier
+#define QLogger QuantumCore::Logging::Logger
 #define QLog(logLevel, msg) QLogger::logLevel((msg))
 
 #define CStringToWString(string) msclr::interop::marshal_as<std::wstring>((string))

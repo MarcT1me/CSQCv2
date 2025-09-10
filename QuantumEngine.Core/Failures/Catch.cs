@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
-using Engine.Logging;
+using QuantumCore.Logging;
 
-namespace Engine.Failures;
+namespace QuantumCore.Failures;
 
 using System;
 using Data;
@@ -212,7 +212,7 @@ public sealed class Catch : MetaObject<CatchMeta>, IContextManager
         if (MetaData.Handler != null)
             MetaData.Handler.OnFailure(failure);
         else
-            EngineCore.DefaultFailureHandler.OnFailure(failure);
+            Core.DefaultFailureHandler.OnFailure(failure);
     }
 
     public void Dispose()

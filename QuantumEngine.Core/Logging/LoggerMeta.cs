@@ -1,4 +1,4 @@
-﻿namespace Engine.Logging;
+﻿namespace QuantumCore.Logging;
 
 using Data.Meta;
 

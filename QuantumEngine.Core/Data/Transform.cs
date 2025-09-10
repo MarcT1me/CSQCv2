@@ -1,6 +1,6 @@
 ﻿using OpenTK.Mathematics;
 
-namespace Engine.Data;
+namespace QuantumCore.Data;
 
 /// <summary>
 /// Данные о положении и ориентации объекта в пространстве
@@ -13,42 +13,58 @@ public struct Transform(Vector3 position, Quaternion orientation, Vector3 scale)
     public Vector3 Position = position;
     public Quaternion Orientation = Quaternion.Normalize(orientation);
     public Vector3 Size = scale;
+    public bool NeedsUpdate { get; private set; } = false;
 
     /// <summary>
     /// Перемещение на какой-то offset
     /// </summary>
     /// <param name="translation">Offset перемещения</param>
-    public void Translate(Vector3 translation) =>
+    public void Translate(Vector3 translation)
+    {
         Position += translation;
+        NeedsUpdate = true;
+    }
 
     /// <summary>
     /// Изменение размера посредством сложение
     /// </summary>
     /// <param name="scale">Добавляемый размер</param>
-    public void Scale(Vector3 scale) =>
+    public void Scale(Vector3 scale)
+    {
         Size += scale;
+        NeedsUpdate = true;
+    }
 
     /// <summary>
     /// Изменение размера посредством умножением
     /// </summary>
     /// <param name="scale">Множитель размера</param>
-    public void Scale(float scale) =>
+    public void Scale(float scale)
+    {
         Size *= scale;
+        NeedsUpdate = true;
+    }
 
     /// <summary>
     /// Вращение на Quaternion (напрямую)
     /// </summary>
     /// <param name="rotation">Вращение</param>
-    public void Rotate(Quaternion rotation) =>
+    public void Rotate(Quaternion rotation)
+    {
         Orientation = Quaternion.Normalize(rotation * Orientation);
+        NeedsUpdate = true;
+    }
 
     /// <summary>
     /// Вращение вокруг какого-то вектора на угол
     /// </summary>
     /// <param name="axis">Вектор вращения</param>
     /// <param name="angle">Угол вращения</param>
-    public void Rotate(Vector3 axis, float angle) =>
+    public void Rotate(Vector3 axis, float angle)
+    {
         Orientation = Quaternion.Normalize(Quaternion.FromAxisAngle(axis, angle) * Orientation);
+        NeedsUpdate = true;
+    }
 
     /// <summary>
     /// Мировая координата, ответственная за "перед": X
@@ -86,6 +102,10 @@ public struct Transform(Vector3 position, Quaternion orientation, Vector3 scale)
     public Vector3 EulerAngles
     {
         get => Orientation.ToEulerAngles();
-        set => Orientation = Quaternion.Normalize(Quaternion.FromEulerAngles(value));
+        set
+        {
+            Orientation = Quaternion.Normalize(Quaternion.FromEulerAngles(value));
+            NeedsUpdate = true;
+        }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace Engine.Data.Meta;
+﻿namespace QuantumCore.Data.Meta;
 
 /// <summary>
 /// Метаданные хранящие и работающие со временем

@@ -1,4 +1,4 @@
-﻿namespace Engine.Objects.Camera;
+﻿namespace QuantumCore.Objects.Camera;
 
 public enum CameraType
 {

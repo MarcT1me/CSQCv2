@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
 
-namespace Engine.Data.RegistryManagers;
+namespace QuantumCore.Data.RegistryManagers;
 
 public class NodeRegistryManager : IRegistryManager<object>
 {

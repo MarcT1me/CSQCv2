@@ -1,4 +1,4 @@
-﻿namespace Engine.Base;
+﻿namespace QuantumCore.Base;
 
 using Graphic.Window;
 

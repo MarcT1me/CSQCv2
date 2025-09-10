@@ -1,6 +1,6 @@
-﻿using Engine.Graphic.Window;
+﻿using QuantumCore.Graphic.Window;
 
-namespace Engine.Objects.Light;
+namespace QuantumCore.Objects.Light;
 
 using Actor;
 

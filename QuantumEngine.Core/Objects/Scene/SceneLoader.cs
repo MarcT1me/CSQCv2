@@ -1,3 +1,3 @@
-﻿namespace Engine.Objects.Scene;
+﻿namespace QuantumCore.Objects.Scene;
 
 public class SceneLoader;

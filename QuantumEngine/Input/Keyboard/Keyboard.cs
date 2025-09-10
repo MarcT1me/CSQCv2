@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
 
-namespace Engine.Input.Keyboard;
+namespace QuantumCore.Input.Keyboard;
 
 using Events.QuantumEvents;
 using Graphic.Window;

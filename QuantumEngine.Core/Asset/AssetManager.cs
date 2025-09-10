@@ -1,6 +1,6 @@
-﻿using Engine.Logging;
+﻿using QuantumCore.Logging;
 
-namespace Engine.Asset;
+namespace QuantumCore.Asset;
 
 using Data.Meta;
 using Data.Collections;

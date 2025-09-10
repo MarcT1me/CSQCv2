@@ -1,4 +1,4 @@
-﻿namespace Engine.Events.QuantumEvents.Joystick;
+﻿namespace QuantumCore.Events.QuantumEvents.Joystick;
 
 public class JoyHatEvent(int joystickId, int button, bool pressed)
     : JoyEvent(pressed ? EventType.JoyHatDown : EventType.JoyHatUp, joystickId)

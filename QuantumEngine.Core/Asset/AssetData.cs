@@ -1,4 +1,4 @@
-﻿namespace Engine.Asset;
+﻿namespace QuantumCore.Asset;
 
 using Data;
 using Data.Meta;

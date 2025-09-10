@@ -1,6 +1,6 @@
 ﻿using OpenTK.Mathematics;
 
-namespace Engine.Events.QuantumEvents.Mouse;
+namespace QuantumCore.Events.QuantumEvents.Mouse;
 
 public class MouseMoveEvent(MirageAPI.Events.MouseEvent e)
     : MouseEvent(EventType.MouseMove, e.windowID)

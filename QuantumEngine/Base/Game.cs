@@ -1,8 +1,8 @@
 ﻿// ReSharper disable VirtualMemberCallInConstructor
 
-using Engine.Time;
+using QuantumCore.Time;
 
-namespace Engine.Base;
+namespace QuantumCore.Base;
 
 using Graphic.Window;
 using Data.RegistryManagers;

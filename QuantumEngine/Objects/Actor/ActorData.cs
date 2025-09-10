@@ -1,4 +1,4 @@
-﻿namespace Engine.Objects.Actor;
+﻿namespace QuantumCore.Objects.Actor;
 
 using Data;
 using SceneNode;
@@ -14,4 +14,9 @@ public class ActorData(
     public Transform Transform = transform ?? new Transform();
     public int Priority = priority ?? 0;
     public Identifier? ModelId = modelId;
+    
+    public bool IsNeedsUpdate
+    {
+        get => Status.HasFlag(ObjectStatusFlags.NeedsUpdate) || Transform.NeedsUpdate;
+    }
 }

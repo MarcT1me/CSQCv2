@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using OpenTK.Mathematics;
 
-namespace Engine.Objects.Light;
+namespace QuantumCore.Objects.Light;
 
 using Actor;
 

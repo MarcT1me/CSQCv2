@@ -1,3 +1,3 @@
-﻿namespace Engine.Decorators;
+﻿namespace QuantumCore.Decorators;
 
 public abstract class QuantumAttribute : Attribute;

@@ -1,4 +1,4 @@
-﻿namespace Engine.Events.QuantumEvents.Mouse;
+﻿namespace QuantumCore.Events.QuantumEvents.Mouse;
 
 public class MouseEvent(EventType type, IntPtr windowId) : WindowedQuantumEvent(type, windowId)
 {

@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
 
-namespace Engine.Asset;
+namespace QuantumCore.Asset;
 
 using Data;
 using Data.Meta;

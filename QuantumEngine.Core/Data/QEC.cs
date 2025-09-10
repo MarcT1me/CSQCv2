@@ -1,6 +1,6 @@
 ﻿using System.Dynamic;
 
-namespace Engine.Data;
+namespace QuantumCore.Data;
 
 /// <summary>
 /// Динамический объект для передачи данных

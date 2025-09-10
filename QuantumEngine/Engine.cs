@@ -1,11 +1,12 @@
 ﻿using System.Reflection;
-using Engine.Asset;
-using Engine.Asset.Defaults;
-using Engine.UI;
 using Microsoft.Toolkit.Uwp.Notifications;
 using MirageAPI.DirectX;
+using QuantumCore.Asset;
+using QuantumCore.Asset.Default;
+using QuantumCore.Asset.Defaults;
+using QuantumCore.UI;
 
-namespace Engine;
+namespace QuantumCore;
 
 using Extensions.Tracer;
 using Extensions;
@@ -25,14 +26,14 @@ internal sealed class ErrorMessage(Catch cth, Exception failure) : ToastNotifica
     }
 }
 
-public class QEngineCore : EngineCore
+public class Engine : Core
 {
-    public static Engine.Asset.Default.Configuration QConfiguration = new(
+    public static Configuration Configuration = new(
         "QuantumEngine:engine.configuration.properties"
     );
 
     [Obsolete("ENGINE ONLY USAGE")]
-    public static void Initialize(Assembly? appLibAssembly)
+    public new static void Initialize(Assembly? appLibAssembly)
     {
         With.Handle(
             new Catch("QuantumEngine Initialization Catch")
@@ -89,7 +90,7 @@ public class QEngineCore : EngineCore
     {
         Logger.Info("Initialize MirageAPI::DirectX12");
 
-        string flagNames = QConfiguration.Get<string>("engine.directx.device.adapter");
+        string flagNames = Configuration.Get<string>("engine.directx.device.adapter");
 
         DX12DeviceInitFlags flags = (DX12DeviceInitFlags)Enum.Parse(
             typeof(DX12DeviceInitFlags), "Use" + flagNames, false
@@ -105,11 +106,11 @@ public class QEngineCore : EngineCore
 
     public static T EngConfig<T>(string name)
     {
-        if (QConfiguration.Contains(name))
-            return QConfiguration.Get<T>(name);
-        if (Core.Configuration.Contains(name))
-            return Core.Configuration.Get<T>(name);
-        throw new Asset.Default.Configuration.ConfigurationError(name);
+        if (Configuration.Contains(name))
+            return Configuration.Get<T>(name);
+        if (CoreConfiguration.Contains(name))
+            return CoreConfiguration.Get<T>(name);
+        throw new Configuration.ConfigurationError(name);
     }
 
     [Obsolete("ENGINE ONLY USAGE")]

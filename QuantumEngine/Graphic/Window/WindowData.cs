@@ -1,4 +1,4 @@
-﻿namespace Engine.Graphic.Window;
+﻿namespace QuantumCore.Graphic.Window;
 
 using Data;
 using Data.Meta;

@@ -1,4 +1,4 @@
-﻿namespace Engine.Input.Joystick;
+﻿namespace QuantumCore.Input.Joystick;
 
 public enum JoyButton : byte
 {

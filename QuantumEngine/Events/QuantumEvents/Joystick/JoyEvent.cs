@@ -1,4 +1,4 @@
-﻿namespace Engine.Events.QuantumEvents.Joystick;
+﻿namespace QuantumCore.Events.QuantumEvents.Joystick;
 
 public class JoyEvent(EventType type, int joystickId) 
     : QuantumEvent(type)

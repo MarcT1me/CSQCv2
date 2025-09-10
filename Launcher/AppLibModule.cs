@@ -4,17 +4,17 @@ namespace QuantumLauncher;
 
 public class AppLibModule : QuantumModule
 {
-    public string MainClassName;
+    public string MainName;
     public AppDomain Domain;
 
     private static readonly HashSet<string> EngineBinaries =
     [
-        "QuantumEngine.Core.dll", "QuantumEngine.dll", "HeadlessQuantumEngine.dll", "MirageAPI.dll"
+        "QuantumEngine.Core.dll", "QuantumEngine.dll", "MirageAPI.dll"
     ];
 
-    public AppLibModule(AppDomain domain, string mainClassName)
+    public AppLibModule(AppDomain domain, string mainName)
     {
-        MainClassName = mainClassName;
+        MainName = mainName;
         Domain = domain;
 
         Domain.AssemblyResolve += CurrentDomain_AssemblyResolve!;
@@ -25,10 +25,10 @@ public class AppLibModule : QuantumModule
         Console.WriteLine(
             "Loading AppLib"
         );
-        Assembly = Assembly.Load(MainClassName);
+        Assembly = Assembly.Load(MainName);
     }
 
-    private static Assembly? CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+    private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
     {
         var assemblyName = new AssemblyName(args.Name).Name + ".dll";
 
@@ -61,6 +61,6 @@ public class AppLibModule : QuantumModule
         Console.WriteLine(
             "Start AppLib"
         );
-        InvokeAssemblyMethod($"{MainClassName}.{MainClassName}", "Start");
+        InvokeAssemblyMethod($"{MainName}.{MainName}", "Start");
     }
 }

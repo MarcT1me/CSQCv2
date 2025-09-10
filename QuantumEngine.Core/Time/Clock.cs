@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace Engine.Time;
+namespace QuantumCore.Time;
 
 using Defers;
 using Data;

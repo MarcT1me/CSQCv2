@@ -1,6 +1,6 @@
 ﻿using OpenTK.Mathematics;
 
-namespace Engine.Extensions;
+namespace QuantumCore.Extensions;
 
 public static class Extensions
 {

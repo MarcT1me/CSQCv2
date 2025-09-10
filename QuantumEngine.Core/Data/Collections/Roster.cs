@@ -2,7 +2,7 @@
 
 using System.Collections.Concurrent;
 
-namespace Engine.Data.Collections;
+namespace QuantumCore.Data.Collections;
 
 using Meta;
 

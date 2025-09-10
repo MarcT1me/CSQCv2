@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
 
-namespace Engine.Data.Collections;
+namespace QuantumCore.Data.Collections;
 
 public sealed class ConcurrentSet<T> where T : notnull
 {

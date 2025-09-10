@@ -1,6 +1,6 @@
 ﻿#pragma warning disable CS0618 // Type or member is obsolete
 
-namespace Engine.Data.RegistryManagers;
+namespace QuantumCore.Data.RegistryManagers;
 
 using Collections;
 using Asset;

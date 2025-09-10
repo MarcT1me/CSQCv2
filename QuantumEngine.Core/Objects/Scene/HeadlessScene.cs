@@ -1,6 +1,6 @@
-﻿using Engine.Time;
+﻿using QuantumCore.Time;
 
-namespace Engine.Objects.Scene;
+namespace QuantumCore.Objects.Scene;
 
 using SceneNode;
 

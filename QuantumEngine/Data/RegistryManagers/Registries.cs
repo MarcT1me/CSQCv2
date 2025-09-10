@@ -1,4 +1,4 @@
-﻿namespace Engine.Data.RegistryManagers;
+﻿namespace QuantumCore.Data.RegistryManagers;
 
 using Graphic.Window;
 

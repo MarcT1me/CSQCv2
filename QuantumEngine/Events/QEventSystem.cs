@@ -2,7 +2,7 @@
 
 // engine sub-systems
 
-namespace Engine.Events;
+namespace QuantumCore.Events;
 
 using Data.RegistryManagers;
 using QuantumEvents;
@@ -27,7 +27,7 @@ public class QEventSystem
         private readonly QuantumThreadPool? _threadPool;
 
         private static readonly bool IsMultiThreadEventHandling =
-            EngineCore.Core.Configuration.Get<bool>("engine.threading.multithreadEvents");
+            Core.CoreConfiguration.Get<bool>("engine.threading.multithreadEvents");
 
         public EventBatchHandler()
         {

@@ -1,12 +1,12 @@
-﻿using Engine.Events.QuantumEvents.Window;
-using Engine.Time;
-using MirageAPI;
+﻿using MirageAPI;
 using MirageAPI.DirectX;
 using OpenTK.Mathematics;
+using QuantumCore.Events.QuantumEvents.Window;
+using QuantumCore.Time;
 
 // engine sub-systems
 
-namespace Engine.Graphic.Window;
+namespace QuantumCore.Graphic.Window;
 
 using Events;
 using Events.QuantumEvents;

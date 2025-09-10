@@ -1,4 +1,4 @@
-﻿namespace Engine.Logging;
+﻿namespace QuantumCore.Logging;
 
 public sealed class LoggerFormats
 {

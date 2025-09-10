@@ -1,6 +1,6 @@
-﻿using Engine.Time;
+﻿using QuantumCore.Time;
 
-namespace Engine.Objects;
+namespace QuantumCore.Objects;
 
 public interface IUpdatable : IHasActorStatus
 {

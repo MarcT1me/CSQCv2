@@ -1,4 +1,4 @@
-﻿namespace Engine.Data.Meta;
+﻿namespace QuantumCore.Data.Meta;
 
 public delegate void ReloadDataEvent(MetaData data);
 

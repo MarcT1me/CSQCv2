@@ -1,6 +1,6 @@
 ﻿using OpenTK.Mathematics;
 
-namespace Engine.Asset.Image;
+namespace QuantumCore.Asset.Image;
 
 using Data;
 using Data.Meta;

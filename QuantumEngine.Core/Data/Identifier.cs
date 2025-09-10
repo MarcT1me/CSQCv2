@@ -1,4 +1,4 @@
-﻿namespace Engine.Data;
+﻿namespace QuantumCore.Data;
 
 using RegistryManagers;
 

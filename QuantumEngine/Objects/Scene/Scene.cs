@@ -1,6 +1,6 @@
-﻿using Engine.Graphic.Window;
+﻿using QuantumCore.Graphic.Window;
 
-namespace Engine.Objects.Scene;
+namespace QuantumCore.Objects.Scene;
 
 using Events.QuantumEvents;
 using SceneNode;

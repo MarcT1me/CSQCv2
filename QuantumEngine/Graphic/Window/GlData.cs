@@ -2,7 +2,7 @@
 using MirageAPI.DirectX;
 using OpenTK.Mathematics;
 
-namespace Engine.Graphic.Window;
+namespace QuantumCore.Graphic.Window;
 
 public sealed class GlData
 {

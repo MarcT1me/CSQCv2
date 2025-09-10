@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <!-- Project settings -->
-        <RootNamespace>Engine</RootNamespace>
+        <RootNamespace>QuantumCore</RootNamespace>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>

@@ -1,4 +1,4 @@
-﻿namespace Engine.Failures;
+﻿namespace QuantumCore.Failures;
 
 using Data.Meta;
 using Data.Collections;

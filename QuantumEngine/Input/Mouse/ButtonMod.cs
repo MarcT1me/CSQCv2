@@ -1,4 +1,4 @@
-﻿namespace Engine.Input.Mouse;
+﻿namespace QuantumCore.Input.Mouse;
 
 [Flags]
 public enum ButtonMod

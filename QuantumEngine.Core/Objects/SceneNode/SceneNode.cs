@@ -1,4 +1,4 @@
-﻿namespace Engine.Objects.SceneNode;
+﻿namespace QuantumCore.Objects.SceneNode;
 
 using Data.Meta;
 

@@ -1,4 +1,4 @@
-﻿namespace Engine.Threading;
+﻿namespace QuantumCore.Threading;
 
 using Data;
 using Data.Meta;

@@ -1,4 +1,4 @@
-﻿namespace Engine.Events.QuantumEvents.Joystick;
+﻿namespace QuantumCore.Events.QuantumEvents.Joystick;
 
 public class JoyAxisEvent(int joystickId, int axis, float value) 
     : JoyEvent(EventType.JoyAxisMotion, joystickId)

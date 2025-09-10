@@ -1,6 +1,6 @@
 ﻿using Microsoft.Toolkit.Uwp.Notifications;
 
-namespace Engine.UI;
+namespace QuantumCore.UI;
 
 public class ToastNotification
 {

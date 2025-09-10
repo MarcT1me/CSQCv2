@@ -1,4 +1,4 @@
-﻿namespace Engine.Input.Keyboard;
+﻿namespace QuantumCore.Input.Keyboard;
 
 public enum Key
 {

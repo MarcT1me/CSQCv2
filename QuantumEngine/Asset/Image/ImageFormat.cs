@@ -1,5 +1,5 @@
 ﻿// ReSharper disable InconsistentNaming
-namespace Engine.Asset.Image;
+namespace QuantumCore.Asset.Image;
 
 public enum ImageFormat
 {

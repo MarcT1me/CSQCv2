@@ -8,13 +8,6 @@ internal class EngineCoreModule : QuantumModule
     public EngineCoreModule(bool isHeadless, string rootPath)
     {
         Assembly = Assembly.Load("QuantumEngine.Core");
-
-        GetAssemblyProp("Engine.Configuration.BaseConfig", "AppName")?
-            .SetValue(null, QLauncher.AppLibModule.Domain.FriendlyName);
-        GetAssemblyProp("Engine.Configuration.BaseConfig", "Headless")?
-            .SetValue(null, isHeadless);
-        GetAssemblyProp("Engine.QuantumEngine.Core", "RootDirectory")?
-            .SetValue(null, rootPath);
     }
 }
 
@@ -22,8 +15,6 @@ public class EngineModule : QuantumModule
 {
     public static string NativeLibsPath = "runtimes";
     public static string EngineBinariesPath = "Engine";
-
-    private readonly string _baseClassName;
 
     public EngineModule(bool isHeadless, string rootPath)
     {
@@ -39,12 +30,7 @@ public class EngineModule : QuantumModule
         LoadNative("freetype6");
         LoadNative("Ijwhost");
 
-        _baseClassName = isHeadless ? "HEngineCore" : "QEngineCore";
-        var name = isHeadless ? "HeadlessQuantum" : "Quantum";
-        Console.WriteLine(
-            $"Loading {name} Engine Module"
-        );
-        Assembly = Assembly.Load(name + "Engine");
+        Assembly = Assembly.Load("QuantumEngine");
     }
 
     private void LoadNative(string name)
@@ -60,7 +46,7 @@ public class EngineModule : QuantumModule
         Console.WriteLine(
             "Activate EngineModule"
         );
-        InvokeAssemblyMethod($"Engine.{_baseClassName}", "Initialize", QLauncher.AppLibModule.Assembly);
+        InvokeAssemblyMethod("QuantumCore.Engine", "Initialize", QLauncher.AppLibModule.Assembly);
     }
 
     public void Deactivate()
@@ -68,6 +54,6 @@ public class EngineModule : QuantumModule
         Console.WriteLine(
             "Deactivate EngineModule"
         );
-        InvokeAssemblyMethod($"Engine.{_baseClassName}", "Uninitialize");
+        InvokeAssemblyMethod("QuantumCore.Engine", "Uninitialize");
     }
 }

@@ -3,7 +3,7 @@ using MirageAPI.DirectX.Resource;
 using OpenTK.Mathematics;
 using StbImageSharp;
 
-namespace Engine.Asset.Image;
+namespace QuantumCore.Asset.Image;
 
 using Failures;
 using Data;

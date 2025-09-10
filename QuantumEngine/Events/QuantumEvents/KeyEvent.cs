@@ -1,6 +1,6 @@
-﻿using Engine.Input.Keyboard;
+﻿using QuantumCore.Input.Keyboard;
 
-namespace Engine.Events.QuantumEvents;
+namespace QuantumCore.Events.QuantumEvents;
 
 public class KeyEvent(MirageAPI.Events.KeyEvent e)
     : WindowedQuantumEvent(e.Pressed ? EventType.KeyDown : EventType.KeyUp, e.windowID)

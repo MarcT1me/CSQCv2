@@ -1,4 +1,4 @@
-﻿namespace Engine.Failures;
+﻿namespace QuantumCore.Failures;
 
 /// <summary>
 /// Интерфейс реализации обработчика ошибок

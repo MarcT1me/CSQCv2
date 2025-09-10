@@ -1,10 +1,10 @@
-﻿using Engine.Asset;
-using Engine.Asset.Image;
-using Engine.Base;
-using Engine.Objects.Scene;
-using Engine.Objects.SceneNode;
-using Engine.Events.QuantumEvents;
-using Engine.Time;
+﻿using QuantumCore.Asset;
+using QuantumCore.Asset.Image;
+using QuantumCore.Base;
+using QuantumCore.Objects.Scene;
+using QuantumCore.Objects.SceneNode;
+using QuantumCore.Events.QuantumEvents;
+using QuantumCore.Time;
 using MirageAPI;
 
 namespace AppLib.Game;

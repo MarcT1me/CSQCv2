@@ -1,4 +1,4 @@
-﻿namespace Engine.Objects;
+﻿namespace QuantumCore.Objects;
 
 using Events.QuantumEvents;
 

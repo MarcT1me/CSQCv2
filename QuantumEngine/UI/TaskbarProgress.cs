@@ -1,7 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using Windows.Foundation.Metadata;
 
-namespace Engine.UI;
+namespace QuantumCore.UI;
 
 [ComImport]
 [System.Runtime.InteropServices.Guid("ea1afb91-9e28-4b86-90e9-9e9f8a5eefaf")]

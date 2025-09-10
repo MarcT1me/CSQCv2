@@ -42,21 +42,21 @@ namespace MirageAPI
         static initonly CursorInfo^ Person = gcnew CursorInfo(CursorType::PERSON);
         static initonly CursorInfo^ Default = Arrow;
         // default (engine) cursors
-        static initonly CursorInfo^ QArrow = gcnew CursorInfo(Engine::Asset::AssetLoader::AssetDirectory + "/Native/Cursors/arrow.cur");
-        static initonly CursorInfo^ QIBeam = gcnew CursorInfo(Engine::Asset::AssetLoader::AssetDirectory + "/Native/Cursors/ibeam.cur");
-        static initonly CursorInfo^ QWait = gcnew CursorInfo(Engine::Asset::AssetLoader::AssetDirectory + "/Native/Cursors/wait.ani");
-        static initonly CursorInfo^ QCross = gcnew CursorInfo(Engine::Asset::AssetLoader::AssetDirectory + "/Native/Cursors/cross.cur");
-        static initonly CursorInfo^ QSizeRight = gcnew CursorInfo(Engine::Asset::AssetLoader::AssetDirectory + "/Native/Cursors/size_right.cur");
-        static initonly CursorInfo^ QSizeLeft = gcnew CursorInfo(Engine::Asset::AssetLoader::AssetDirectory + "/Native/Cursors/size_left.cur");
-        static initonly CursorInfo^ QSizeVertical = gcnew CursorInfo(Engine::Asset::AssetLoader::AssetDirectory + "/Native/Cursors/size_vertical.cur");
-        static initonly CursorInfo^ QSizeHorizontal = gcnew CursorInfo(Engine::Asset::AssetLoader::AssetDirectory + "/Native/Cursors/size_horizontal.cur");
-        static initonly CursorInfo^ QSizeAll = gcnew CursorInfo(Engine::Asset::AssetLoader::AssetDirectory + "/Native/Cursors/size_all.cur");
-        static initonly CursorInfo^ QUnavailable = gcnew CursorInfo(Engine::Asset::AssetLoader::AssetDirectory + "/Native/Cursors/unavailable.cur");
-        static initonly CursorInfo^ QHand = gcnew CursorInfo(Engine::Asset::AssetLoader::AssetDirectory + "/Native/Cursors/hand.cur");
-        static initonly CursorInfo^ QAppStarting = gcnew CursorInfo(Engine::Asset::AssetLoader::AssetDirectory + "/Native/Cursors/app_starting.ani");
-        static initonly CursorInfo^ QHelp = gcnew CursorInfo(Engine::Asset::AssetLoader::AssetDirectory + "/Native/Cursors/help.cur");
-        static initonly CursorInfo^ QPin = gcnew CursorInfo(Engine::Asset::AssetLoader::AssetDirectory + "/Native/Cursors/pin.cur");
-        static initonly CursorInfo^ QPerson = gcnew CursorInfo(Engine::Asset::AssetLoader::AssetDirectory + "/Native/Cursors/person.cur");
+        static initonly CursorInfo^ QArrow = gcnew CursorInfo(QuantumCore::Asset::AssetLoader::AssetDirectory + "/Native/Cursors/arrow.cur");
+        static initonly CursorInfo^ QIBeam = gcnew CursorInfo(QuantumCore::Asset::AssetLoader::AssetDirectory + "/Native/Cursors/ibeam.cur");
+        static initonly CursorInfo^ QWait = gcnew CursorInfo(QuantumCore::Asset::AssetLoader::AssetDirectory + "/Native/Cursors/wait.ani");
+        static initonly CursorInfo^ QCross = gcnew CursorInfo(QuantumCore::Asset::AssetLoader::AssetDirectory + "/Native/Cursors/cross.cur");
+        static initonly CursorInfo^ QSizeRight = gcnew CursorInfo(QuantumCore::Asset::AssetLoader::AssetDirectory + "/Native/Cursors/size_right.cur");
+        static initonly CursorInfo^ QSizeLeft = gcnew CursorInfo(QuantumCore::Asset::AssetLoader::AssetDirectory + "/Native/Cursors/size_left.cur");
+        static initonly CursorInfo^ QSizeVertical = gcnew CursorInfo(QuantumCore::Asset::AssetLoader::AssetDirectory + "/Native/Cursors/size_vertical.cur");
+        static initonly CursorInfo^ QSizeHorizontal = gcnew CursorInfo(QuantumCore::Asset::AssetLoader::AssetDirectory + "/Native/Cursors/size_horizontal.cur");
+        static initonly CursorInfo^ QSizeAll = gcnew CursorInfo(QuantumCore::Asset::AssetLoader::AssetDirectory + "/Native/Cursors/size_all.cur");
+        static initonly CursorInfo^ QUnavailable = gcnew CursorInfo(QuantumCore::Asset::AssetLoader::AssetDirectory + "/Native/Cursors/unavailable.cur");
+        static initonly CursorInfo^ QHand = gcnew CursorInfo(QuantumCore::Asset::AssetLoader::AssetDirectory + "/Native/Cursors/hand.cur");
+        static initonly CursorInfo^ QAppStarting = gcnew CursorInfo(QuantumCore::Asset::AssetLoader::AssetDirectory + "/Native/Cursors/app_starting.ani");
+        static initonly CursorInfo^ QHelp = gcnew CursorInfo(QuantumCore::Asset::AssetLoader::AssetDirectory + "/Native/Cursors/help.cur");
+        static initonly CursorInfo^ QPin = gcnew CursorInfo(QuantumCore::Asset::AssetLoader::AssetDirectory + "/Native/Cursors/pin.cur");
+        static initonly CursorInfo^ QPerson = gcnew CursorInfo(QuantumCore::Asset::AssetLoader::AssetDirectory + "/Native/Cursors/person.cur");
         static initonly CursorInfo^ QDefault = QArrow;
 
         CursorInfo(

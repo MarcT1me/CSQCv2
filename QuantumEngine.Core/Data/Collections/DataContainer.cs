@@ -1,4 +1,4 @@
-﻿namespace Engine.Data.Collections;
+﻿namespace QuantumCore.Data.Collections;
 
 using RegistryManagers;
 using Meta;

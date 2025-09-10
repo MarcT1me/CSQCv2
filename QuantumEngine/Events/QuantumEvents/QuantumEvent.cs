@@ -1,4 +1,4 @@
-﻿namespace Engine.Events.QuantumEvents;
+﻿namespace QuantumCore.Events.QuantumEvents;
 
 public class QuantumEvent(EventType type)
 {

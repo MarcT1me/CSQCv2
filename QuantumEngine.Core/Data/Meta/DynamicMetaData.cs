@@ -1,6 +1,6 @@
 ﻿using System.Dynamic;
 
-namespace Engine.Data.Meta;
+namespace QuantumCore.Data.Meta;
 
 /// <summary>
 /// Метаданные, динамически меняющиеся в ходе выполнения

@@ -1,4 +1,4 @@
-﻿namespace Engine.Threading;
+﻿namespace QuantumCore.Threading;
 
 using Data.Meta;
 using Failures;
@@ -15,8 +15,8 @@ public class QThreadMeta(
     FailureLevel? failureLevel,
     bool isBackground,
     float? lifetimeSeconds
-) : TimedMetaData(name, lifetimeSeconds ?? EngineCore.Core.Configuration.Get<int>("engine.threading.lifetime"))
+) : TimedMetaData(name, lifetimeSeconds ?? Core.CoreConfiguration.Get<int>("engine.threading.lifetime"))
 {
-    public FailureLevel FailureLevel { get; } = failureLevel ?? EngineCore.Core.Configuration.Get<FailureLevel>("engine.threading.failure.level");
+    public FailureLevel FailureLevel { get; } = failureLevel ?? Core.CoreConfiguration.Get<FailureLevel>("engine.threading.failure.level");
     public bool IsBackground { get; } = isBackground;
 }

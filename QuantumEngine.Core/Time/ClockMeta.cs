@@ -1,4 +1,4 @@
-﻿namespace Engine.Time;
+﻿namespace QuantumCore.Time;
 
 using Data.Meta;
 using Data.Collections;
