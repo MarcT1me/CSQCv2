@@ -33,7 +33,7 @@
             <NewVersionString>$(MajorVersion).$(MinorVersion).$(ThirdVersion).$(NewBuildVersion).$(Revision)</NewVersionString>
         </PropertyGroup>
 
-        <WriteLinesToFile File="EngineData/engine.core.version.txt" Lines="$(NewVersionString)" Overwrite="true"/>
+        <WriteLinesToFile File="$(VersionFile).version.txt" Lines="$(NewVersionString)" Overwrite="true"/>
 
         <Message Importance="high" Text="Incremented version to: $(NewVersionString)"/>
     </Target>

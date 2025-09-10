@@ -51,4 +51,8 @@
     
     <!-- Import common version management -->
     <Import Project="..\Version.targets"/>
+    
+    <Target Name="CleanupCoreVersion" AfterTargets="IncrementVersion">
+        <Delete Files="EngineData\engine.core.version.txt"/>
+    </Target>
 </Project>
