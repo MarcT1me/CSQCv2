@@ -12,7 +12,8 @@ namespace MirageAPI
 
     Mouse::Mouse(
         Window^ window
-    ) : window(window)
+    ) : window(window),
+        delta(Vector2i::Zero)
     {
         if (window)
             savedPosition = lastPosition = Position;
@@ -41,17 +42,21 @@ namespace MirageAPI
         savedPosition = pos;
 
         delta = gcnew Vector2i(
-            pos->X - lastPosition->X,
-            pos->Y - lastPosition->Y
+            savedPosition->X - lastPosition->X,
+            savedPosition->Y - lastPosition->Y
         );
 
         if (IsCapture)
         {
             Rect^ rect = window->CurrentRect;
-            Position = savedPosition = gcnew Vector2i(
+            Vector2i^ center = gcnew Vector2i(
                 static_cast<int>(rect->Width) / 2,
                 static_cast<int>(rect->Height) / 2
             );
+            Position = center;
+
+            lastPosition = center;
+            savedPosition = lastPosition;
         }
     }
 
@@ -118,7 +123,7 @@ namespace MirageAPI
 
             value->Mouse->Position =
                 value->Mouse->lastPosition =
-                    value->Mouse->savedPosition = center;
+                value->Mouse->savedPosition = center;
         }
 
         mouseCaptureWindow = value;

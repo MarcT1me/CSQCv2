@@ -10,7 +10,6 @@ using Events;
 using Events.QuantumEvents;
 using Failures;
 using Logging;
-using Extensions;
 
 public abstract class App<TData>
     : MetaObject<TData>,
@@ -21,7 +20,7 @@ public abstract class App<TData>
     // ReSharper disable once StaticMemberInGenericType
     private static bool _mainloopRunning = true;
     public static App<TData> Instance { get; private set; } = null!;
-    
+
     public Clock Clock { get; }
     public ObjectStatusFlags ObjectStatus => MetaData.ObjectStatus;
 
@@ -52,22 +51,26 @@ public abstract class App<TData>
 
     public static void Mainloop(Type appType)
     {
-        while (_mainloopRunning)
-        {
-            var cth = new Catch("Mainloop");
-
-            With.Handle(cth, _ =>
+        new Catch("Mainloop")
+            .Try(cth =>
             {
                 Logger.Separator();
                 Logger.Debug("Mainloop Iteration");
 
+                // create app instance
                 using var instance = Activator.CreateInstance(appType) as App<TData>;
+                // check created instance and saving
                 Instance = instance ?? throw new NullReferenceException("App Instance could not be created");
-                cth.TryFunc(instance.Run);
-            });
-
-            _mainloopRunning = cth.MetaData.Failures.Count != 0;
-        }
+                // start app run mainloop
+                cth.TryAction(Instance.Run);
+                _mainloopRunning = false;
+            })
+            .Finally(cth =>
+            {
+                _mainloopRunning = cth.IsSuccess;
+                Logger.Info("Mainloop " + (_mainloopRunning ? "iteration ended" : "finished"));
+            })
+            .Handle();
     }
 
     public void Run()

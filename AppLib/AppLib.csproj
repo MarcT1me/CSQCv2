@@ -17,6 +17,12 @@
         <OutputPath>bin\$(Configuration)</OutputPath>
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
         <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+
+        <Company>QuantumDev</Company>
+        <Version>0.20.2</Version>
+        <AssemblyVersion>$(Version)</AssemblyVersion>
+        <FileVersion>0.20.0.0</FileVersion>
+        <VersionFile>applib</VersionFile>
     </PropertyGroup>
 
     <ItemGroup>
@@ -48,4 +54,6 @@
         <!--<Content Include="Config\GameConfig.ini">-->
     </ItemGroup>
 
+    <!-- Import common version management -->
+    <Import Project="..\Version.targets"/>
 </Project>

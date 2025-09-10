@@ -7,13 +7,13 @@ internal class EngineCoreModule : QuantumModule
 {
     public EngineCoreModule(bool isHeadless, string rootPath)
     {
-        Assembly = Assembly.Load("EngineCore");
+        Assembly = Assembly.Load("QuantumEngine.Core");
 
         GetAssemblyProp("Engine.Configuration.BaseConfig", "AppName")?
             .SetValue(null, QLauncher.AppLibModule.Domain.FriendlyName);
         GetAssemblyProp("Engine.Configuration.BaseConfig", "Headless")?
             .SetValue(null, isHeadless);
-        GetAssemblyProp("Engine.EngineCore", "RootDirectory")?
+        GetAssemblyProp("Engine.QuantumEngine.Core", "RootDirectory")?
             .SetValue(null, rootPath);
     }
 }

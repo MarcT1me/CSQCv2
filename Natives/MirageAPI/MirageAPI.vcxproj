@@ -203,9 +203,9 @@
         <ResourceCompile Include="app.rc"/>
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\..\EngineCore\EngineCore.csproj">
+        <ProjectReference Include="..\..\QuantumEngine.Core\QuantumEngine.Core.csproj">
             <Project>{e414a031-e41c-4da7-8370-162f040cf9db}</Project>
-            <Name>EngineCore</Name>
+            <Name>QuantumEngine.Core</Name>
         </ProjectReference>
     </ItemGroup>
     <ItemGroup>

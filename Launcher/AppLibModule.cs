@@ -9,7 +9,7 @@ public class AppLibModule : QuantumModule
 
     private static readonly HashSet<string> EngineBinaries =
     [
-        "EngineCore.dll", "QuantumEngine.dll", "HeadlessQuantumEngine.dll", "MirageAPI.dll"
+        "QuantumEngine.Core.dll", "QuantumEngine.dll", "HeadlessQuantumEngine.dll", "MirageAPI.dll"
     ];
 
     public AppLibModule(AppDomain domain, string mainClassName)

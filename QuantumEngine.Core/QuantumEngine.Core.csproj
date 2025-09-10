@@ -19,36 +19,23 @@
         <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
 
         <Company>QuantumDev</Company>
-        <VersionFile>EngineData\engine</VersionFile>
+        <VersionFile>EngineData\engine.core</VersionFile>
     </PropertyGroup>
 
     <ItemGroup>
-        <!-- Engine -->
-        <ProjectReference Include="..\QuantumEngine.Core\QuantumEngine.Core.csproj" />
-        <!-- Import MirageAPI for tests -->
-        <ProjectReference Include="..\Natives\MirageAPI\MirageAPI.vcxproj"/>
-        <PackageReference Include="Microsoft.Toolkit.Uwp.Notifications" Version="7.1.3" />
         <!-- Libs -->
-        <PackageReference Include="SpaceWizards.SharpFont" Version="1.0.2"/>
-        <PackageReference Include="StbImageSharp" Version="2.30.15"/>
+        <PackageReference Include="ini-parser" Version="2.5.2"/>
+        <PackageReference Include="OpenTK.Mathematics" Version="4.9.4"/>
     </ItemGroup>
-    
+
     <ItemGroup>
         <!-- Hold folders in editor -->
         <!-- Embeded Files -->
         <EmbeddedResource Include="EngineData\**\*.*">
             <LogicalName>%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
         </EmbeddedResource>
-        <!--Engine binary -->
-        <Content Include="freetype6.dll">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-            <Link>freetype6.dll</Link>
-        </Content>
-        <Content Update="EngineData\Logo.ico">
-          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </Content>
     </ItemGroup>
-    
+
     <!-- Import common version management -->
     <Import Project="..\Version.targets"/>
 </Project>

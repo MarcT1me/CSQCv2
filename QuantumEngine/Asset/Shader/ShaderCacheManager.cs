@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using System.Text;
-using Engine.Configuration;
 using Engine.Logging;
 using MirageAPI.DirectX.Shader;
 
@@ -52,7 +51,7 @@ public static class ShaderCacheManager
     {
         var cachePath = GetCachePath(shaderData);
 
-        if (!File.Exists(cachePath) || BaseConfig.DebugMode) return (false, shaderData);
+        if (!File.Exists(cachePath) || EngineCore.IsDebug) return (false, shaderData);
 
         Logger.Success($"Shader ({shaderData.Identifier}) cache file found!");
 
@@ -82,7 +81,7 @@ public static class ShaderCacheManager
         Logger.Success($"Shader ({shaderData.Identifier}) Compiled!");
 
         Directory.CreateDirectory(Path.Combine(CacheDirectory, shaderData.MasterShaderName));
-        if (!BaseConfig.DebugMode)
+        if (!EngineCore.IsDebug)
         {
             shader.SaveToFile(GetCachePath(shaderData));
             Logger.Success($"Cache for Shader ({shaderData.Identifier}) saved!");

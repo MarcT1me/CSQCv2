@@ -2,16 +2,14 @@
 using Engine.Events.QuantumEvents.Mouse;
 using Engine.Objects.Camera;
 using Engine.Input.Keyboard;
-using Engine.Logging;
 using Engine.Time;
-using OpenTK.Mathematics;
 
 namespace AppLib.Game;
 
 public class GameCamera(CameraData cameraData) : Camera<CameraData>(cameraData)
 {
     public float CameraSpeed = 0.025f;
-    public float CameraSensitivity = 0.000125f;
+    public float CameraSensitivity = 0.00125f;
 
     public override void HandleEvent(QuantumEvent e)
     {
@@ -19,13 +17,9 @@ public class GameCamera(CameraData cameraData) : Camera<CameraData>(cameraData)
 
         if (e is not MouseMoveEvent mouseMove || !TestApp.Instance.MainWindow.MetaData.WinData.Fullscreen) return;
 
-        Logger.Info(e.ToString());
-        
-        var rotationSpeed = CameraSensitivity * (float)TestApp.Instance.Clock.MetaData.DeltaTime;
-
         // yaw-pitch
-        Transform.Rotate(Transform.Right, rotationSpeed * mouseMove.Rel.Y);
-        Transform.Rotate(Engine.Data.Transform.WorldUp, -rotationSpeed * mouseMove.Rel.X);
+        Transform.Rotate(Transform.Right, CameraSensitivity * mouseMove.Rel.Y);
+        Transform.Rotate(Engine.Data.Transform.WorldUp, -CameraSensitivity * mouseMove.Rel.X);
     }
 
     public override void Update(ClockMeta clockMeta)
@@ -51,12 +45,6 @@ public class GameCamera(CameraData cameraData) : Camera<CameraData>(cameraData)
             Transform.Translate(-Transform.Up * moveSpeed);
 
         var rotationSpeed = moveSpeed / 20;
-
-        // // roll
-        // if (Keyboard.GetKey(Key.E))
-        //     Transform.Rotate(Transform.Forward, rotationSpeed);
-        // if (Keyboard.GetKey(Key.Q))
-        //     Transform.Rotate(Transform.Forward, -rotationSpeed);
 
         // yaw-pitch
         if (Keyboard.GetKey(Key.Up))

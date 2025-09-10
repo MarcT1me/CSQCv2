@@ -8,6 +8,7 @@ using Engine.Graphic.Window;
 using Engine.Input.Keyboard;
 using Engine.Logging;
 using Engine.Time;
+using Engine.UI;
 using Microsoft.Toolkit.Uwp.Notifications;
 using MirageAPI;
 using MirageAPI.DirectX;
@@ -37,22 +38,12 @@ public struct MatrixBufferData
     public Matrix4 Projection;
 }
 
-public class TestNotification() : Engine.Graphic.ToastNotification(DateTime.Now)
+public class TestNotification() : ToastNotification(DateTime.Now)
 {
     public override void Build(ToastContentBuilder builder)
     {
         builder
             .AddText("TestNotification");
-    }
-}
-
-public class StartNotification() : Engine.Graphic.ToastNotification(DateTime.Now)
-{
-    public override void Build(ToastContentBuilder builder)
-    {
-        builder
-            .AddText("Application started")
-            .AddAttributionText("window established");
     }
 }
 
@@ -90,7 +81,7 @@ public class GameWindow : Engine.Graphic.Window.Window
         var vertShader = (ShaderData)AssetManager.Load(
             new(
                 "vertexShader", "AppLib:Shaders/3dRenderShader.hlsl",
-                isEmbedded: true, identifier: "Shader-Vert"
+                identifier: "Shader-Vert"
             )
         ).Content;
         _vertexShader = vertShader.GetNativeShader;
@@ -98,7 +89,7 @@ public class GameWindow : Engine.Graphic.Window.Window
         var pixShader = (ShaderData)AssetManager.Load(
             new(
                 "pixelShader", "AppLib:Shaders/3dRenderShader.hlsl",
-                isEmbedded: true, identifier: "Shader-Pix"
+                identifier: "Shader-Pix"
             )
         ).Content;
         _pixelShader = pixShader.GetNativeShader;
@@ -148,7 +139,7 @@ public class GameWindow : Engine.Graphic.Window.Window
         Image img = (Image)AssetManager.Load(
             new(
                 "image", "AppLib:IMG.png",
-                isEmbedded: true, identifier: "IMG-Image"
+                identifier: "IMG-Image"
             )
         ).Content;
 
@@ -268,14 +259,6 @@ public class GameWindow : Engine.Graphic.Window.Window
         NativeWindow.SysMenu.TextItem("TEST SYSTEM MENU ITEM");
         NativeWindow.SysMenu.Callback += id => { Logger.Debug($"crickets chirping... {id}"); };
     }
-
-    public override void Prepare()
-    {
-        base.Prepare();
-        new StartNotification()
-            .Show();
-    }
-
     public override void HandleEvent(QuantumEvent e)
     {
         base.HandleEvent(e);
@@ -306,7 +289,7 @@ public class GameWindow : Engine.Graphic.Window.Window
                     .Show();
                 break;
             }
-            case KeyEvent { Type: EventType.KeyDown, Key: Key.N1 }:
+            case KeyEvent { Type: EventType.KeyDown, Key: Key.Tilda }:
             {
                 NativeWindow.Flash(3, 1);
                 Logger.Beep();

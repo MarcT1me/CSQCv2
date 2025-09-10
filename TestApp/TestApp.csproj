@@ -21,14 +21,14 @@
         <RuntimeIdentifier>win-x64</RuntimeIdentifier>
 
         <ApplicationIcon>app.ico</ApplicationIcon>
-
-        <Version>0.16.3</Version>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
 
         <Company>QuantumDev</Company>
+        <Version>0.2.1</Version>
         <AssemblyVersion>$(Version)</AssemblyVersion>
-        <FileVersion>$(Version)</FileVersion>
+        <FileVersion>0.2.0.0</FileVersion>
         <NeutralLanguage>ru-RU</NeutralLanguage>
-        <ApplicationManifest>app.manifest</ApplicationManifest>
+        <VersionFile>app</VersionFile>
     </PropertyGroup>
 
     <ItemGroup>
@@ -73,9 +73,9 @@
         <MakeDir Directories="$(OutputPath)\bin\Engine"/>
 
         <ItemGroup>
-            <TempEngineBinaries Include="$(OutputPath)\**\EngineCore.dll"/>
             <TempEngineBinaries Include="$(OutputPath)\**\QuantumEngine.dll"/>
-            <TempEngineBinaries Include="$(OutputPath)\**\HeadlessQuantumEngine.dll"/>
+            <TempEngineBinaries Include="$(OutputPath)\**\QuantumEngine.Core.dll"/>
+            <TempEngineBinaries Include="$(OutputPath)\**\QuantumEngine.Headless.dll"/>
             <TempEngineBinaries Include="$(OutputPath)\**\MirageAPI.dll"/>
         </ItemGroup>
 
@@ -95,6 +95,7 @@
     </Target>
 
     <Target Name="PrepareForPublish" AfterTargets="Publish">
+
         <ItemGroup>
             <PublishFiles Include="$(OutputPath)\**\*.*"/>
         </ItemGroup>
@@ -102,4 +103,6 @@
               DestinationFiles="@(PublishFiles->'$(PublishDir)\%(RecursiveDir)%(Filename)%(Extension)')"/>
     </Target>
 
+    <!-- Import common version management -->
+    <Import Project="..\Version.targets"/>
 </Project>

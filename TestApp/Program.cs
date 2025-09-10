@@ -22,14 +22,14 @@ public class Program
 
         try
         {
-            // Activate EngineCore
+            // Activate QuantumEngine.Core
             eng.Activate();
             // activate and start app
             app.Start();
         }
         finally
         {
-            // Deactivate EngineCore
+            // Deactivate QuantumEngine.Core
             eng.Deactivate();
         }
     }

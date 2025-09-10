@@ -39,7 +39,7 @@ namespace MirageAPI::Events
         e->Type = EventType::MouseMove;
 
         e->Pos = Vector2i(xPos, yPos);
-        e->Rel = *Mouse::DeltaForDisplay;
+        e->Rel = *(window ? window->Mouse->Delta : Mouse::DeltaForDisplay);
 
         // raise event
         Mouse::MouseEventHandle(window, e);

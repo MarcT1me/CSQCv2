@@ -17,6 +17,11 @@
         <Configurations>Debug;Release</Configurations>
         <Platforms>x64</Platforms>
         <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+        
+        <Company>QuantumDev</Company>
+        <VersionFile>launcher</VersionFile>
     </PropertyGroup>
 
+    <!-- Import common version management -->
+    <Import Project="..\Version.targets"/>
 </Project>

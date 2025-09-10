@@ -1,11 +1,11 @@
 ﻿using System.Collections.Concurrent;
+
 // engine sub-systems
 
 namespace Engine.Events;
 
 using Data.RegistryManagers;
 using QuantumEvents;
-using Configuration;
 using Threading;
 using QuantumEvents.Joystick;
 using QuantumEvents.Mouse;
@@ -26,15 +26,18 @@ public class QEventSystem
     {
         private readonly QuantumThreadPool? _threadPool;
 
+        private static readonly bool IsMultiThreadEventHandling =
+            EngineCore.Core.Configuration.Get<bool>("engine.threading.multithreadEvents");
+
         public EventBatchHandler()
         {
-            if (ThreadingConfig.IsMultiThreadEventHanlding)
+            if (IsMultiThreadEventHandling)
                 _threadPool = new QuantumThreadPool();
         }
 
         public void Handle(QuantumEvent qEvent)
         {
-            if (ThreadingConfig.IsMultiThreadEventHanlding)
+            if (IsMultiThreadEventHandling)
             {
                 _threadPool?.QueueWorkItem(() => EventHandling?.Invoke(qEvent));
             }
@@ -67,11 +70,14 @@ public class QEventSystem
         window.OnWindow += HandleWindowEvent;
     }
 
-    private static void HandleKeyEvent(MirageAPI.Events.KeyEvent nativeEvent) => EnqueueEvent(ConvertEvent(nativeEvent));
+    private static void HandleKeyEvent(MirageAPI.Events.KeyEvent nativeEvent) =>
+        EnqueueEvent(ConvertEvent(nativeEvent));
 
-    private static void HandleMouseEvent(MirageAPI.Events.MouseEvent nativeEvent) => EnqueueEvent(ConvertEvent(nativeEvent));
+    private static void HandleMouseEvent(MirageAPI.Events.MouseEvent nativeEvent) =>
+        EnqueueEvent(ConvertEvent(nativeEvent));
 
-    private static void HandleWindowEvent(MirageAPI.Events.WindowEvent nativeEvent) => EnqueueEvent(ConvertEvent(nativeEvent));
+    private static void HandleWindowEvent(MirageAPI.Events.WindowEvent nativeEvent) =>
+        EnqueueEvent(ConvertEvent(nativeEvent));
 
     public static void EnqueueEvent(QuantumEvent qEvent)
     {
@@ -86,7 +92,7 @@ public class QEventSystem
         lock (Lock)
         {
             using var handler = new EventBatchHandler();
-            
+
             // Опрашиваем все окна
             MirageAPI.Events.EventManager.ProcessEvents();
 

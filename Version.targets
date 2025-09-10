@@ -1,0 +1,41 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <VersionFile Condition="'$(VersionFile)' == ''">engine.core</VersionFile>
+    </PropertyGroup>
+
+    <!-- Read version from file -->
+    <Target Name="ReadVersion" BeforeTargets="BeforeBuild">
+        <ReadLinesFromFile File="$(VersionFile).version.txt">
+            <Output TaskParameter="Lines" ItemName="VersionLines"/>
+        </ReadLinesFromFile>
+
+        <PropertyGroup>
+            <VersionString>@(VersionLines)</VersionString>
+            <MajorVersion>$(VersionString.Split('.')[0])</MajorVersion>
+            <MinorVersion>$(VersionString.Split('.')[1])</MinorVersion>
+            <ThirdVersion>$(VersionString.Split('.')[2])</ThirdVersion>
+
+            <BuildVersion>$(VersionString.Split('.')[3])</BuildVersion>
+            <Revision>$(VersionString.Split('.')[4])</Revision>
+
+            <Version>$(MajorVersion).$(MinorVersion).$(ThirdVersion)</Version>
+            <AssemblyVersion>$(Version)</AssemblyVersion>
+            <FileVersion>$(MajorVersion).$(MinorVersion).$(BuildVersion).$(Revision)</FileVersion>
+        </PropertyGroup>
+
+        <Message Importance="high" Text="Version: $(Version) Build: $(BuildVersion) Revision: $(Revision)"/>
+    </Target>
+
+    <!-- Increment build number after release build -->
+    <Target Name="IncrementVersion" AfterTargets="AfterBuild" Condition="'$(Configuration)'=='Release'">
+        <PropertyGroup>
+            <NewBuildVersion>$([MSBuild]::Add($(BuildVersion), 1))</NewBuildVersion>
+            <NewVersionString>$(MajorVersion).$(MinorVersion).$(ThirdVersion).$(NewBuildVersion).$(Revision)</NewVersionString>
+        </PropertyGroup>
+
+        <WriteLinesToFile File="EngineData/engine.core.version.txt" Lines="$(NewVersionString)" Overwrite="true"/>
+
+        <Message Importance="high" Text="Incremented version to: $(NewVersionString)"/>
+    </Target>
+    
+</Project>
