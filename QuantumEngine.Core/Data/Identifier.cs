@@ -41,14 +41,16 @@ public sealed class Identifier : IDisposable
     public static Identifier? GiveFromUncertain(object value) =>
         CoreRegistries.IdentifierRegistry.Get(value);
 
+    public Identifier ChangeName(string format) => new(format.Replace("&ID", ToString()));
+
     public override string ToString() => Name ?? Uuid.ToString();
     public string GetNameAnyway() => Name ?? "Unnamed";
-    
+
     public void Dispose()
     {
         CoreRegistries.IdentifierRegistry.Pop(this);
         GC.SuppressFinalize(this);
     }
-    
+
     ~Identifier() => Dispose();
 }

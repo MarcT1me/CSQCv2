@@ -29,7 +29,7 @@ public static class ShaderCacheManager
         (var isSuccess, shaderData) = TryGetCachedShader(shaderData);
         if (isSuccess) return shaderData;
 
-        shaderData.Source = AssetLoader.ReadTextAsset(assetFile, encoding);
+        shaderData.Source = AssetLoader.ReadText(assetFile, encoding);
 
         return CompileAndSave(shaderData, flags);
     }

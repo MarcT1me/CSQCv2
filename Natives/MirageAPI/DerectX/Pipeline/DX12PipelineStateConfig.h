@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "enums.h"
+#include "../DX12ObjectData.h"
 
 namespace MirageAPI::DirectX::Pipeline
 {
@@ -234,27 +235,29 @@ namespace MirageAPI::DirectX::Pipeline
         }
     };
 
-    public ref struct DX12PipelineStateConfig
+    public ref class DX12PipelineStateConfig : public DX12ObjectData
     {
+    public:
         // root signature
         array<DX12RootParameter^>^ RootParams;
         array<DX12SamplerConfig^>^ SamplerConfigs;
-        DX12RootSignatureVersion RootSignatureVersion = DX12RootSignatureVersion::V_1_0;
+        DX12RootSignatureVersion RootSignatureVersion;
         // pso
         DX12RasterizerConfig^ RasterizerState;
         DX12BlendConfig^ BlendState;
         array<DX12InputElement^>^ InputLayouts;
         // dss
-        bool DepthWriteEnable = false;
-        DX12ComparisonFunc DepthFunc = DX12ComparisonFunc::Less;
-        bool DepthStencilEnable = false;
-        bool StencilEnable = false;
+        bool DepthWriteEnable;
+        DX12ComparisonFunc DepthFunc;
+        bool DepthStencilEnable;
+        bool StencilEnable;
         // other
-        UINT SampleMask = UINT_MAX;
-        DX12ResourceFormat DSVFormat = DX12ResourceFormat::Unknown;
-        DX12PrimitiveTopologyType PrimitiveTopologyType = DX12PrimitiveTopologyType::Triangle;
+        UINT SampleMask;
+        DX12ResourceFormat DSVFormat;
+        DX12PrimitiveTopologyType PrimitiveTopologyType;
 
         DX12PipelineStateConfig(
+            QIdentifier^ identifier,
             // root signature
             array<DX12RootParameter^>^ rootParams,
             array<DX12SamplerConfig^>^ samplerConfigs,
@@ -262,11 +265,20 @@ namespace MirageAPI::DirectX::Pipeline
             DX12RasterizerConfig^ rasterizerConfig,
             DX12BlendConfig^ blendConfig,
             array<DX12InputElement^>^ inputLayouts
-        ) : RootParams(rootParams),
+        ) : DX12ObjectData(identifier),
+            RootParams(rootParams),
             SamplerConfigs(samplerConfigs),
+            RootSignatureVersion(DX12RootSignatureVersion::V_1_0),
             RasterizerState(rasterizerConfig),
             BlendState(blendConfig),
-            InputLayouts(inputLayouts)
+            InputLayouts(inputLayouts),
+            DepthWriteEnable(false),
+            DepthFunc(DX12ComparisonFunc::Less),
+            DepthStencilEnable(false),
+            StencilEnable(false),
+            SampleMask(UINT_MAX),
+            DSVFormat(DX12ResourceFormat::Unknown),
+            PrimitiveTopologyType(DX12PrimitiveTopologyType::Triangle)
         {
         }
     };

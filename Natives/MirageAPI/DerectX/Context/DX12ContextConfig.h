@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "../DX12ObjectData.h"
 
 namespace MirageAPI::DirectX
 {
@@ -82,8 +83,9 @@ namespace MirageAPI::DirectX
         FlipDiscard = 4
     };
 
-    public ref struct DX12ContextConfig
+    public ref class DX12ContextConfig : public DX12ObjectData
     {
+    public:
         Rect^ Viewport;
         float Near;
         float Far;
@@ -99,6 +101,33 @@ namespace MirageAPI::DirectX
         UINT VSyncInterval;
 
         DX12FullscreenMode^ FullscreenConfig;
+
+        DX12ContextConfig(
+            QIdentifier^ identifier,
+            Rect^ Viewport,
+            float Near,
+            float Far,
+            Vector2i Resolution,
+            UINT BufferCount,
+            DX12ResourceFormat Format,
+            UINT SampleCount,
+            UINT SwapQuality,
+            DX12SwapEffect SwapEffect,
+            UINT VSyncInterval,
+            DX12FullscreenMode^ FullscreenConfig
+        ) : DX12ObjectData(identifier),
+            Viewport(Viewport),
+            Near(Near),
+            Far(Far),
+            Resolution(Resolution),
+            BufferCount(BufferCount),
+            Format(Format),
+            SampleCount(SampleCount),
+            SwapQuality(SwapQuality),
+            SwapEffect(SwapEffect),
+            VSyncInterval(VSyncInterval), FullscreenConfig(FullscreenConfig)
+        {
+        }
 
     internal:
         DXGI_SWAP_CHAIN_DESC1 NativeSwapChainDesk()

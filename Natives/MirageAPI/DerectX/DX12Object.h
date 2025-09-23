@@ -1,8 +1,11 @@
 ﻿#pragma once
 
+// ReSharper disable once CppRedundantNamespaceDefinition
 namespace MirageAPI::DirectX
 {
-    public ref class DX12Object abstract
+    generic <typename T>
+    where T : QuantumCore::Data::Meta::MetaData
+    public ref class DX12Object abstract : public QuantumCore::Data::Meta::MetaObject<T>
     {
     protected:
         bool disposed = false;
@@ -10,15 +13,16 @@ namespace MirageAPI::DirectX
 
     public:
         // constructors and deconstructors
-        DX12Object()
+        DX12Object(
+            T data
+        ) : MetaObject(data),
+            device(DX12Device::GetNativeDevice(true))
         {
-            device = DX12Device::GetNativeDevice(true);
         }
 
-        virtual ~DX12Object()
-        {
-            disposed = true;
-        }
+        // ReSharper disable once CppHidingFunction
+        ~DX12Object() { this->!DX12Object(); }
+        !DX12Object() { disposed = true; }
 
         // other getters
         property bool Disposed
@@ -27,12 +31,6 @@ namespace MirageAPI::DirectX
         }
 
         // other methods
-        virtual void Validate()
-        {
-            if (disposed)
-            {
-                throw gcnew InvalidOperationException("Can't operate on disposed object");
-            }
-        }
+        virtual void Validate() { if (disposed) throw gcnew DXException("Can't operate on disposed object"); }
     };
 }

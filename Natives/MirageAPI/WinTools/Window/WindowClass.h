@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "enums.h"
 #include "../../NativeInstance.h"
 #include "../Cursor/CursorInfo.h"
 #include "../Icon/IconInfo.h"
@@ -18,9 +17,8 @@ namespace MirageAPI::Events
 
 namespace MirageAPI
 {
-    public ref struct WindowClass
+    public ref class WindowClass
     {
-    private:
         int name;
         NativeInstance^ instance;
         Events::EventProc^ eventProc;

@@ -6,6 +6,7 @@ namespace MirageAPI::DirectX::Shader
     {
         Vertex = 0,
         Pixel = 1,
+        Render = Vertex | Pixel,
         Geometry = 2,
         Compute = 3,
         Domain = 4,
@@ -53,6 +54,6 @@ namespace MirageAPI::DirectX::Shader
         Geometry = 4,
         Pixel = 5,
         Amplification = 6,
-        Mesh = 7
+        Mesh = 7,
     };
 }

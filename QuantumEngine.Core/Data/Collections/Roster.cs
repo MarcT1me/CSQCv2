@@ -17,13 +17,13 @@ public class Roster<T> : DataContainer<T>
     /// </summary>
     public ConcurrentDictionary<Identifier, Roster<T>> Branches { get; } = [];
 
-    public Roster(MetaData metaData)
-        : base(metaData)
+    public Roster(MetaData metaData, object? lockObject = null)
+        : base(metaData, lockObject)
     {
     }
 
-    public Roster(MetaData metaData, Dictionary<Identifier, T> data)
-        : base(metaData, data)
+    public Roster(MetaData metaData, Dictionary<Identifier, T> data, object? lockObject = null)
+        : base(metaData, data, lockObject)
     {
     }
 
@@ -75,16 +75,31 @@ public class Roster<T> : DataContainer<T>
     {
         if (Identifier.GiveFromUncertain(key) is not { } identifier) return;
 
+        if (Lock is null)
+        {
+            _SetOperation(identifier, value);
+        }
+        else
+        {
+            lock (Lock)
+            {
+                _SetOperation(identifier, value);
+            }
+        }
+    }
+
+    private void _SetOperation(Identifier identifier, T? value)
+    {
         if (value == null)
         {
-            Pop(key);
+            Pop(identifier);
         }
         else
         {
             Data[identifier] = value;
         }
     }
-    
+
     public override T? Pop(object key)
     {
         var identifier = Identifier.GiveFromUncertain(key);

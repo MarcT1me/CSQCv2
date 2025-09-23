@@ -4,12 +4,16 @@
 namespace MirageAPI::DirectX::Command
 {
     DX12CommandQueue::DX12CommandQueue(
-        DX12CommandListType type
-    ) : m_type(type)
+        QIdentifier^ identifier,
+        DX12CommandListType type,
+        DX12Fence^ fence
+    ) : DX12Object(gcnew DX12ObjectData(identifier)),
+        _type(type),
+        _fence(fence)
     {
         // command queue
         D3D12_COMMAND_QUEUE_DESC queueDesc;
-        queueDesc.Type = static_cast<D3D12_COMMAND_LIST_TYPE>(m_type);
+        queueDesc.Type = static_cast<D3D12_COMMAND_LIST_TYPE>(_type);
         queueDesc.Priority = D3D12_COMMAND_QUEUE_PRIORITY_NORMAL;
         queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
         queueDesc.NodeMask = 0;
@@ -22,14 +26,14 @@ namespace MirageAPI::DirectX::Command
             ),
             "Failed to create command queue."
         );
-        m_commandQueue = commandQueue;
+        _commandQueue = commandQueue;
     }
 
     void DX12CommandQueue::!DX12CommandQueue()
     {
         Validate();
 
-        SimpleRelease(m_commandQueue);
+        SimpleRelease(_commandQueue);
     }
 
     void DX12CommandQueue::ExecuteList(DX12CommandList^ commandList)
@@ -37,7 +41,7 @@ namespace MirageAPI::DirectX::Command
         Validate();
 
         ID3D12CommandList* ppCommandLists[] = {commandList->NativeList};
-        m_commandQueue->ExecuteCommandLists(1, ppCommandLists);
+        _commandQueue->ExecuteCommandLists(1, ppCommandLists);
     }
 
     void DX12CommandQueue::Wait()
@@ -52,9 +56,9 @@ namespace MirageAPI::DirectX::Command
         Validate();
 
         // waiting for ends of all operations
-        if (m_commandQueue->Signal(m_fence->NativeFence, 1) && m_fence->CompletedValue < 1)
+        if (_commandQueue->Signal(_fence->NativeFence, 1) && _fence->CompletedValue < 1)
         {
-            WaitForSingleObject(m_fence->OnCompletion(), INFINITE);
+            WaitForSingleObject(_fence->OnCompletion(), INFINITE);
         }
     }
 
@@ -62,9 +66,9 @@ namespace MirageAPI::DirectX::Command
     {
         // signal queue
         CheckHResult(
-            m_commandQueue->Signal(m_fence->NativeFence, m_fence->Value + 1),
+            _commandQueue->Signal(_fence->NativeFence, _fence->Value + 1),
             "Native Queue signal err"
         );
-        m_fence->IncreaseValue();
+        _fence->IncreaseValue();
     }
 }

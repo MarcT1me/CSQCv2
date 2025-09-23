@@ -41,12 +41,23 @@ public abstract class AssetLoader
     }
 
     /// <summary>
+    /// Загрузка пути, как текстового
+    /// </summary>
+    /// <param name="fileName">Путь до ассета</param>
+    /// <param name="encoding">Кодировка текста ассета</param>
+    /// <returns>Текстовые данные ассета</returns>
+    public static string ReadText(string fileName, Encoding? encoding = null)
+    {
+        return ReadText(AssetFile.Simple(fileName), encoding);
+    }
+
+    /// <summary>
     /// Загрузка ассета, как текстового
     /// </summary>
     /// <param name="assetFile">Данные об ассете</param>
     /// <param name="encoding">Кодировка текста ассета</param>
     /// <returns>Текстовые данные ассета</returns>
-    public static string ReadTextAsset(AssetFile assetFile, Encoding? encoding = null)
+    public static string ReadText(AssetFile assetFile, Encoding? encoding = null)
     {
         using var stream = assetFile.GetStream();
         using var reader = new StreamReader(stream, encoding ?? Encoding.UTF8);
@@ -54,11 +65,21 @@ public abstract class AssetLoader
     }
 
     /// <summary>
+    /// Загрузка пути, как бинарного массива
+    /// </summary>
+    /// <param name="fileName">Путь до ассета</param>
+    /// <returns>Бинарные данные ассета</returns>
+    public static byte[] ReadBinary(string fileName)
+    {
+        return ReadBinary(AssetFile.Simple(fileName));
+    }
+
+    /// <summary>
     /// Загрузка ассета, как байтового массива
     /// </summary>
     /// <param name="assetFile">Данные об ассете</param>
     /// <returns>Байты данных ассета</returns>
-    public static byte[] ReadBinaryAsset(AssetFile assetFile)
+    public static byte[] ReadBinary(AssetFile assetFile)
     {
         using var stream = assetFile.GetStream();
         using var memoryStream = new MemoryStream();
@@ -89,20 +110,6 @@ public abstract class AssetLoader
         assetStream.CopyTo(memoryStream);
         return memoryStream.ToArray();
     }
-
-    /// <summary>
-    /// Загрузка файла, как текстового
-    /// </summary>
-    /// <param name="path">Путь до файла</param>
-    /// <returns>Текст из файла</returns>
-    public static string ReadTextFile(string path) => File.ReadAllText(path);
-
-    /// <summary>
-    /// Загрузка файла, как бинарного
-    /// </summary>
-    /// <param name="path">Путь до файла</param>
-    /// <returns>Бинарные данные файла</returns>
-    public static byte[] ReadBinaryFile(string path) => File.ReadAllBytes(path);
 
     /// <summary>
     /// Открытие файла на чтение

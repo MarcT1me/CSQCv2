@@ -1,13 +1,13 @@
 ﻿#pragma once
 
-#include "enums.h"
+#include "../DX12ObjectData.h"
 
 namespace MirageAPI::DirectX::Shader
 {
-    public ref class DX12Shader
+    public ref class DX12Shader : DX12ObjectData
     {
-        ID3DBlob* m_bytecode;
-        DX12ShaderType m_type;
+        ID3DBlob* _bytecode;
+        DX12ShaderType _type;
 
     public:
         DX12Shader(ID3DBlob* bytecode, DX12ShaderType type);
@@ -18,11 +18,11 @@ namespace MirageAPI::DirectX::Shader
 
         property ID3DBlob* Bytecode
         {
-            ID3DBlob* get() { return m_bytecode; }
+            ID3DBlob* get() { return _bytecode; }
         }
         property DX12ShaderType Type
         {
-            DX12ShaderType get() { return m_type; }
+            DX12ShaderType get() { return _type; }
         }
         property D3D12_SHADER_BYTECODE NativeBytecode
         {

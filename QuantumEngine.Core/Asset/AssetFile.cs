@@ -87,4 +87,7 @@ public sealed class AssetFile(
     /// <param name="embedPath">Логическое имя / путь в сборке</param>
     /// <returns>Имя (первый перед точкой)</returns>
     private string GetEmbedName(string embedPath) => embedPath.Split("/").Last().Split('.').First();
+
+    public static AssetFile Simple(string fileName, Identifier? identifier = null) =>
+        new(null!, fileName, identifier: identifier);
 }

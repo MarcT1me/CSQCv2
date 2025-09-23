@@ -1,12 +1,15 @@
 ﻿#include "pch.h"
 #include "DX12Texture.h"
 
-#include "../Buffer/DX12UploadBuffer.h"
 #include "../../Command/DX12CommandQueue.h"
-#include "../../Command/DX12CommandList.h"
+#include "../../Command/DX12Fence.h"
 
 namespace MirageAPI::DirectX::Resource
 {
+    DX12Texture::DX12Texture(DX12ResourceConfig^ config, nullptr_t) : DX12ShaderResource(config)
+    {
+    }
+
     inline UINT GetRequiredIntermediateSize(
         ID3D12Resource* destinationResource,
         UINT firstSubresource,
@@ -27,14 +30,7 @@ namespace MirageAPI::DirectX::Resource
         return static_cast<UINT>(requiredSize);
     }
 
-    DX12Texture::DX12Texture(
-        DX12ResourceConfig config
-    ) : DX12Resource(config),
-        m_textureType(config.TextureType),
-        m_width(config.Width),
-        m_height(config.Height),
-        m_depth(config.Depth),
-        m_mipLevels(config.MipLevels)
+    DX12Texture::DX12Texture(DX12ResourceConfig^ config) : DX12ShaderResource(config)
     {
         // creating heap info
         D3D12_HEAP_PROPERTIES heapProps = {
@@ -46,15 +42,17 @@ namespace MirageAPI::DirectX::Resource
 
         // creating resource description
         D3D12_RESOURCE_DESC desc = {};
-        desc.Dimension = static_cast<D3D12_RESOURCE_DIMENSION>(m_textureType);
-        desc.Width = m_width;
-        desc.Height = m_height;
-        desc.DepthOrArraySize = m_depth;
-        desc.MipLevels = m_mipLevels;
-        desc.Format = static_cast<DXGI_FORMAT>(config.Format);
-        desc.Flags = static_cast<D3D12_RESOURCE_FLAGS>(config.Flags);
-        // constant
-        desc.SampleDesc = {1, 0};
+        desc.Dimension = static_cast<D3D12_RESOURCE_DIMENSION>(MetaData->TextureType);
+        desc.Width = MetaData->Width;
+        desc.Height = MetaData->Height;
+        desc.DepthOrArraySize = MetaData->Depth;
+        desc.MipLevels = MetaData->MipLevels;
+        desc.Format = static_cast<DXGI_FORMAT>(MetaData->Format);
+        desc.Flags = static_cast<D3D12_RESOURCE_FLAGS>(MetaData->Flags);
+        if (MetaData->SampleCount > 0)
+        {
+            desc.SampleDesc = {MetaData->SampleCount, MetaData->SampleQuality};
+        }
 
         // creating texture himself
         ID3D12Resource* texture = nullptr;
@@ -69,14 +67,7 @@ namespace MirageAPI::DirectX::Resource
             ),
             "Failed to create texture"
         );
-        m_nativeResource = texture;
-    }
-
-    void DX12Texture::!DX12Texture()
-    {
-        Validate();
-
-        ReleaseSRV();
+        _nativeResource = texture;
     }
 
     // texture operations
@@ -219,31 +210,30 @@ namespace MirageAPI::DirectX::Resource
         // validate texture himself and data
         Validate();
         if (!data || data->Length == 0)
-            throw gcnew ArgumentException("Invalid texture data");
+            throw gcnew DXException("Invalid texture data");
 
-        const UINT uploadBufferSize = GetRequiredIntermediateSize(m_nativeResource, 0, 1);
+        const UINT uploadBufferSize = GetRequiredIntermediateSize(_nativeResource, 0, 1);
 
         // check data sizes
-        if (data->Length != m_size)
+        if (data->Length != _size)
         {
             throw gcnew DXException(
-                "Texture data size mismatch. Required: " + m_size + ", Actual: " + data->Length
+                "Texture data size mismatch. Required: " + _size + ", Actual: " + data->Length
             );
         }
 
         // create lists for texture data copy operations
-        auto commandQueue = gcnew Command::DX12CommandQueue(DX12CommandListType::Direct);
-        auto commandList = gcnew Command::DX12CommandList(DX12CommandListType::Direct);
-        auto fence = gcnew Command::DX12Fence(0);
-        commandQueue->Fence = fence;
+        auto fence = gcnew Command::DX12Fence(nullptr, 0);
+        auto commandQueue = gcnew Command::DX12CommandQueue(nullptr, Command::DX12CommandListType::Direct, fence);
+        auto commandList = gcnew Command::DX12CommandList(nullptr, commandQueue);
 
         // creating one-time upload buffer
-        auto uploadBuffer = gcnew DX12UploadBuffer(uploadBufferSize, DX12ResourceFlags::None);
+        auto uploadBuffer = gcnew DX12Buffer(DX12ResourceConfig::UploadBufferConfig(uploadBufferSize, DX12ResourceFlags::None));
 
         // subresource
         {
             const size_t copySize = std::min(
-                static_cast<size_t>(m_size),
+                static_cast<size_t>(_size),
                 static_cast<size_t>(data->Length)
             );
 
@@ -253,8 +243,8 @@ namespace MirageAPI::DirectX::Resource
 
             D3D12_SUBRESOURCE_DATA textureSubresourceData;
             textureSubresourceData.pData = pUploadData;
-            textureSubresourceData.RowPitch = m_width * GetResourceFormatSize(m_resourceFormat);
-            textureSubresourceData.SlicePitch = textureSubresourceData.RowPitch * m_height;
+            textureSubresourceData.RowPitch = MetaData->Width * GetResourceFormatSize(MetaData->Format);
+            textureSubresourceData.SlicePitch = textureSubresourceData.RowPitch * MetaData->Height;
 
             // reset cmd list
             commandQueue->Signal();
@@ -266,7 +256,7 @@ namespace MirageAPI::DirectX::Resource
             // update subresources
             UpdateSubresources(
                 commandList->NativeList,
-                m_nativeResource,
+                _nativeResource,
                 uploadBuffer->NativeResource,
                 0, 0, 1,
                 &textureSubresourceData
@@ -276,7 +266,7 @@ namespace MirageAPI::DirectX::Resource
         // change to shader resource
         D3D12_RESOURCE_BARRIER barrier = {};
         barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-        barrier.Transition.pResource = m_nativeResource;
+        barrier.Transition.pResource = _nativeResource;
         barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
         barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
         barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
@@ -299,40 +289,16 @@ namespace MirageAPI::DirectX::Resource
         );
 
         // free used resources
+        delete fence;
         delete commandList;
         delete commandQueue;
         delete uploadBuffer;
     }
 
-    D3D12_SHADER_RESOURCE_VIEW_DESC DX12Texture::CreateSRVDesc()
+    D3D12_SHADER_RESOURCE_VIEW_DESC DX12Texture::CreateResourceDesc()
     {
-        D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-        srvDesc.Format = static_cast<DXGI_FORMAT>(m_resourceFormat);
-        srvDesc.ViewDimension = static_cast<D3D12_SRV_DIMENSION>(m_viewDimension);
-        srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-        srvDesc.Texture2D.MipLevels = m_mipLevels;
-        return srvDesc;
-    }
-
-    void DX12Texture::CreateSRV()
-    {
-        CheckMissmatch(m_srvDescriptorIndex, UINT_MAX) return;
-
-        m_srvDescriptorIndex = m_srvHeap->Allocate();
-
-        D3D12_SHADER_RESOURCE_VIEW_DESC desc = CreateSRVDesc();
-        device->CreateShaderResourceView(
-            m_nativeResource,
-            &desc,
-            SRVHandleForCPU
-        );
-    }
-
-    void DX12Texture::ReleaseSRV()
-    {
-        CheckMissmatch(m_srvDescriptorIndex, UINT_MAX) return;
-
-        m_srvHeap->Free(m_srvDescriptorIndex);
-        m_srvDescriptorIndex = UINT_MAX;
+        auto desc = DX12ShaderResource::CreateResourceDesc();
+        desc.Texture2D.MipLevels = MetaData->MipLevels;
+        return desc;
     }
 }

@@ -10,7 +10,7 @@ public sealed class ImageAssetLoader : AssetLoader
     )
     {
         return new Image(
-            data: ReadBinaryAsset(assetFile),
+            data: ReadBinary(assetFile),
             identifier: assetFile.Identifier
         );
     }

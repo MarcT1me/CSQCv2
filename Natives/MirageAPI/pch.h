@@ -32,15 +32,18 @@ using namespace OpenTK::Mathematics;
 #include "WinTools/Icon/enums.h"
 #include "WinTools/Menu/enums.h"
 
-// DX12
+/* ---General DX12--- */
 #include "DerectX/enums.h"
 #include "DerectX/DX12Exceptions.h"
 #include "DerectX/DX12Device.h"
 #include "DerectX/DX12Helpers.h"
+#include "DerectX/DX12Object.h"
+
+/* ---DX12 Enums--- */
 #include "DerectX/Command/enums.h"
 #include "DerectX/Pipeline/enums.h"
 #include "DerectX/Resource/enums.h"
 #include "DerectX/Shader/enums.h"
-#include "DerectX/DX12Object.h"
+#include "DerectX/Descriptors/enums.h"
 
 #endif

@@ -6,19 +6,16 @@
 #include "../Command/DX12CommandQueue.h"
 #include "../Command/DX12CommandList.h"
 #include "../Command/DX12Fence.h"
+#include "../Shader/DX12ShaderProgram.h"
 
 namespace MirageAPI::DirectX
 {
-    public ref class DX12Context : public DX12Object
+    public ref class DX12Context : public DX12Object<DX12ContextConfig^>
     {
-        // swap chain
-        DX12SwapChain^ m_swapChain;
-        // cmd
-        Command::DX12Fence^ m_fence;
-        Command::DX12CommandQueue^ m_commandQueue;
-        Command::DX12CommandList^ m_commandList;
-        // config
-        DX12ContextConfig^ m_config;
+        Command::DX12Fence^ _fence;
+        Command::DX12CommandQueue^ _commandQueue;
+        Command::DX12CommandList^ _commandList;
+        DX12SwapChain^ _swapChain;
 
         Rect^ m_winRect;
         bool m_isResized;
@@ -26,38 +23,44 @@ namespace MirageAPI::DirectX
         void HandleResize();
 
     public:
+        Shader::DX12ShaderProgram^ ShaderProgram;
+
         // constructors and deconstructors
         DX12Context(
-            HWND hwnd,
-            DX12ContextConfig^ config
+            DX12ContextConfig^ config,
+            HWND hwnd
         );
 
         ~DX12Context() { this->!DX12Context(); }
         !DX12Context();
 
         // native
-        property Command::DX12CommandList^ CmdList
-        {
-            Command::DX12CommandList^ get() { return m_commandList; }
-        }
         property Command::DX12CommandQueue^ CmdQueue
         {
-            Command::DX12CommandQueue^ get() { return m_commandQueue; }
+            Command::DX12CommandQueue^ get() { return _commandQueue; }
+        }
+        property Command::DX12CommandList^ CmdList
+        {
+            Command::DX12CommandList^ get() { return _commandList; }
+        }
+        property DX12SwapChain^ SwapChain
+        {
+            DX12SwapChain^ get() { return _swapChain; }
         }
         // config
         property UINT VSync
         {
-            UINT get() { return m_config->VSyncInterval; }
-            void set(UINT value) { m_config->VSyncInterval = value; }
+            UINT get() { return MetaData->VSyncInterval; }
+            void set(UINT value) { MetaData->VSyncInterval = value; }
         }
         property Vector2i Resolution
         {
-            Vector2i get() { return m_config->Resolution; }
+            Vector2i get() { return MetaData->Resolution; }
         }
         // other
         property bool IncorrectSize
         {
-            bool get() { return m_config->Resolution.X <= 0 || m_config->Resolution.Y <= 0; }
+            bool get() { return MetaData->Resolution.X <= 0 || MetaData->Resolution.Y <= 0; }
         }
 
         // context methods
@@ -65,6 +68,7 @@ namespace MirageAPI::DirectX
         void SetWinRect(Rect^ winRect);
         void SetViewport(Rect^ viewportRect);
         void SetClipPlanes(Vector2^ depth);
+        
         void BeginFrame();
         void Clear(Color4 color);
         void EndFrame();

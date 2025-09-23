@@ -35,7 +35,7 @@ public class Configuration
 
     private string ReadConfigurationFile()
     {
-        return AssetLoader.ReadTextAsset(
+        return AssetLoader.ReadText(
             new AssetFile(null!, FileName)
         );
     }

@@ -5,16 +5,14 @@
 
 namespace MirageAPI::DirectX
 {
-    public ref class DX12SwapChain : public DX12Object
+    public ref class DX12SwapChain : public DX12Object<DX12ContextConfig^>
     {
-        IDXGISwapChain3* m_swapChain = nullptr;
+        IDXGISwapChain3* _swapChain = nullptr;
 
-        DX12DescriptorHeap^ m_rtvHeap;
-        array<Resource::DX12RenderTarget^>^ m_frameBuffers;
-        UINT m_frameIndex;
-        Resource::DX12RenderTarget^ m_currentFrameBuffer;
-
-        DX12ContextConfig^ m_config;
+        Descriptors::DX12DescriptorHeap^ _rtHeap;
+        array<Resource::DX12RenderTarget^>^ _frameBuffers;
+        UINT _frameIndex;
+        Resource::DX12RenderTarget^ _currentFrameBuffer;
 
     internal:
         void CreateBuffers();
@@ -22,21 +20,21 @@ namespace MirageAPI::DirectX
 
     public:
         DX12SwapChain(
-            HWND hwnd,
             DX12ContextConfig^ config,
+            HWND hwnd,
             Command::DX12CommandQueue^ commandQueue
         );
 
         ~DX12SwapChain() { this->!DX12SwapChain(); }
         !DX12SwapChain();
 
-        property DX12DescriptorHeap^ RTVHeap
+        property Descriptors::DX12DescriptorHeap^ RTHeap
         {
-            DX12DescriptorHeap^ get() { return m_rtvHeap; }
+            Descriptors::DX12DescriptorHeap^ get() { return _rtHeap; }
         }
         property Resource::DX12RenderTarget^ CurrentFrameBuffer
         {
-            Resource::DX12RenderTarget^ get() { return m_currentFrameBuffer; }
+            Resource::DX12RenderTarget^ get() { return _currentFrameBuffer; }
         }
 
         void UpdateBufferSizes();

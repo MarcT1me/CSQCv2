@@ -49,6 +49,10 @@
         </Content>
     </ItemGroup>
     
+    <ItemGroup>
+      <Folder Include="Graphic\Shaders\" />
+    </ItemGroup>
+    
     <!-- Import common version management -->
     <Import Project="..\Version.targets"/>
 </Project>

@@ -2,5 +2,5 @@
 
 namespace QuantumCore.Data.Collections;
 
-public sealed class ConcurrentIdentifierMap<T>(Dictionary<Identifier, T>? data)
+public sealed class ConcurrentIdentifierMap<T>(Dictionary<Identifier, T>? data = null)
     : ConcurrentDictionary<Identifier, T>(data ?? new Dictionary<Identifier, T>());

@@ -79,22 +79,26 @@ public class Window
     protected virtual DX12ContextConfig CreateWindowContextConfig()
     {
         var windowContextConfig = new DX12ContextConfig
-        {
-            Viewport = MetaData.GlData.Viewport,
-            Near = MetaData.GlData.ClipPlanes.X,
-            Far = MetaData.GlData.ClipPlanes.Y,
+        (
+            Id,
+            
+            Viewport: MetaData.GlData.Viewport,
+            Near: MetaData.GlData.ClipPlanes.X,
+            Far: MetaData.GlData.ClipPlanes.Y,
 
-            Resolution = MetaData.WinData.Resolution,
+            Resolution: MetaData.WinData.Resolution,
 
-            BufferCount = MetaData.GlData.MaxFramesInFlight,
-            Format = MetaData.GlData.Format,
+            BufferCount: MetaData.GlData.MaxFramesInFlight,
+            Format: MetaData.GlData.Format,
 
-            SampleCount = MetaData.GlData.NumberOfSamples,
-            SwapQuality = MetaData.GlData.SwapQuality,
+            SampleCount: MetaData.GlData.NumberOfSamples,
+            SwapQuality: MetaData.GlData.SwapQuality,
 
-            SwapEffect = MetaData.GlData.SwapEffect,
-            VSyncInterval = MetaData.WinData.VSyncInterval
-        };
+            SwapEffect: MetaData.GlData.SwapEffect,
+            VSyncInterval: MetaData.WinData.VSyncInterval,
+            
+            null
+        );
 
         return windowContextConfig;
     }

@@ -1,36 +1,38 @@
 ﻿#include "pch.h"
 #include "DX12Context.h"
 
+#include "../Descriptors/DX12DescriptorHeap.h"
+
 namespace MirageAPI::DirectX
 {
     DX12Context::DX12Context(
-        HWND hwnd,
-        DX12ContextConfig^ config
-    ) : m_config(config)
+        DX12ContextConfig^ config,
+        HWND hwnd
+    ) : DX12Object(config)
     {
-        m_commandQueue = gcnew Command::DX12CommandQueue(DX12CommandListType::Direct);
-        m_swapChain = gcnew DX12SwapChain(hwnd, config, m_commandQueue);
-        m_commandQueue->Fence = m_fence = gcnew Command::DX12Fence(1);
-        m_commandList = gcnew Command::DX12CommandList(DX12CommandListType::Direct);
+        _fence = gcnew Command::DX12Fence(config->Identifier, 1);
+        _commandQueue = gcnew Command::DX12CommandQueue(config->Identifier, Command::DX12CommandListType::Direct, _fence);
+        _commandList = gcnew Command::DX12CommandList(config->Identifier, _commandQueue);
+        _swapChain = gcnew DX12SwapChain(config, hwnd, _commandQueue);
     }
 
     DX12Context::!DX12Context()
     {
         Validate();
 
-        if (m_commandQueue)
+        if (_commandQueue)
         {
-            m_commandQueue->Signal();
-            m_commandQueue->Wait();
+            _commandQueue->Signal();
+            _commandQueue->Wait();
         }
-        if (m_fence)
+        if (_fence)
         {
-            m_fence->Wait();
+            _fence->Wait();
         }
 
-        SimpleDelete(m_fence);
-        SimpleDelete(m_commandList);
-        SimpleDelete(m_commandQueue);
+        SimpleDelete(_fence);
+        SimpleDelete(_commandList);
+        SimpleDelete(_commandQueue);
     }
 
     void DX12Context::SetWinRect(Rect^ winRect)
@@ -40,30 +42,30 @@ namespace MirageAPI::DirectX
 
     void DX12Context::SetResolution(Vector2i^ resolution)
     {
-        m_config->Resolution = *resolution;
+        MetaData->Resolution = *resolution;
         m_isResized = true;
     }
 
     void DX12Context::HandleResize()
     {
         // wait last frame
-        m_commandQueue->Wait();
-        m_fence->Wait();
+        _commandQueue->Wait();
+        _fence->Wait();
 
         // update swap chain buffers
-        m_swapChain->UpdateBufferSizes();
+        _swapChain->UpdateBufferSizes();
         m_isResized = false;
     }
 
     void DX12Context::SetViewport(Rect^ viewportRect)
     {
-        m_config->Viewport = viewportRect;
+        MetaData->Viewport = viewportRect;
     }
 
     void DX12Context::SetClipPlanes(Vector2^ depth)
     {
-        m_config->Near = depth->X;
-        m_config->Far = depth->Y;
+        MetaData->Near = depth->X;
+        MetaData->Far = depth->Y;
     }
 
     void DX12Context::BeginFrame()
@@ -72,35 +74,31 @@ namespace MirageAPI::DirectX
 
         if (m_isResized) HandleResize();
 
-        m_commandQueue->Signal();
+        // prepare queue
+        _commandQueue->Signal();
 
         // prepare command list
-        m_commandList->Reset();
-        m_commandList->UpdatePipelineState();
-        m_commandList->UpdateDescriptorHeap();
-
-        // first (default) commands
-        m_commandList->SetViewport(
-            static_cast<float>(m_config->Viewport->X),
-            static_cast<float>(m_config->Viewport->Y),
-            m_config->Viewport->Width == -1
-                ? static_cast<float>(m_winRect->Width)
-                : m_config->Viewport->Width,
-            m_config->Viewport->Height == -1
-                ? static_cast<float>(m_winRect->Height)
-                : m_config->Viewport->Height,
-            m_config->Near,
-            m_config->Far
-        );
-        m_commandList->SetScissorRect(
-            0, 0,
-            m_winRect->Width,
-            m_winRect->Height
+        ShaderProgram->BeginFrame(
+            _swapChain->RTHeap->GetResourceDescriptor(
+                reinterpret_cast<Resource::DX12ShaderResource^>(_swapChain->AcquireNextBackBuffer(_commandList))
+            ),
+            _commandList
         );
 
-        // set frame buffer and go into render mode
-        m_commandList->BindBuffer(
-            m_swapChain->AcquireNextBackBuffer(m_commandList)
+        // setting render field
+        _commandList->SetViewport(
+            static_cast<float>(MetaData->Viewport->X),
+            static_cast<float>(MetaData->Viewport->Y),
+            static_cast<float>(MetaData->Viewport->Width),
+            static_cast<float>(MetaData->Viewport->Height),
+            static_cast<float>(MetaData->Near),
+            static_cast<float>(MetaData->Far)
+        );
+        _commandList->SetScissorRect(
+            MetaData->Viewport->X,
+            MetaData->Viewport->Y,
+            MetaData->Viewport->Width,
+            MetaData->Viewport->Height
         );
     }
 
@@ -108,7 +106,7 @@ namespace MirageAPI::DirectX
     {
         if (IncorrectSize) return;
 
-        m_commandList->ClearRenderTargetView(m_swapChain->CurrentFrameBuffer, color.R, color.G, color.B, color.A);
+        ShaderProgram->Clear(color);
     }
 
     void DX12Context::EndFrame()
@@ -116,21 +114,19 @@ namespace MirageAPI::DirectX
         if (IncorrectSize) return;
 
         // go into present mode
-        m_swapChain->ReleaseBackBufferToPresent(m_commandList);
+        ShaderProgram->ReleaseFrame();
+        _swapChain->ReleaseBackBufferToPresent(_commandList);
 
-        // close command list
-        m_commandList->Close();
-        // and execute him
-        m_commandQueue->ExecuteList(m_commandList);
-        m_commandQueue->Wait();
+        // execute
+        _commandQueue->ExecuteList(_commandList);
+        _commandQueue->Wait();
     }
 
     void DX12Context::Present()
     {
         if (IncorrectSize) return;
 
-        m_swapChain->Present();
-
-        m_fence->Wait();
+        _swapChain->Present();
+        _fence->Wait();
     }
 }

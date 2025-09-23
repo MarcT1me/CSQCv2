@@ -12,13 +12,13 @@ namespace MirageAPI::DirectX
 
     public ref class HRException : public DXException
     {
-        HRESULT m_hr;
+        HRESULT _hr;
 
     public:
-        HRException(HRESULT hr, String^ msg) : DXException(gcnew String(msg)), m_hr(hr)
+        HRException(HRESULT hr, String^ msg) : DXException(gcnew String(msg)), _hr(hr)
         {
         }
 
-        HRESULT HR() { return m_hr; }
+        HRESULT HR() { return _hr; }
     };
 }

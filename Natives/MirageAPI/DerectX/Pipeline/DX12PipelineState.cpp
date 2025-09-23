@@ -7,10 +7,25 @@
 namespace MirageAPI::DirectX::Pipeline
 {
     DX12PipelineState::DX12PipelineState(
-        Shader::DX12Shader^ vertexShader,
-        Shader::DX12Shader^ pixelShader,
+        array<Shader::DX12Shader^>^ shaders,
         DX12PipelineStateConfig^ config
-    ) : m_descriptorRanges(gcnew CSList<IntPtr>())
+    ) : DX12Object(config),
+        m_descriptorRanges(gcnew CSList<IntPtr>())
+    {
+        if (shaders->Length == 0)
+        {
+            throw gcnew DXException("Shaders required for PSO");
+        }
+
+        CreateRootSignature(config);
+
+        if (shaders[0]->Type == Shader::DX12ShaderType::Compute)
+            CreateComputePSO(config, shaders[0]);
+        else
+            CreateGraphicsPSO(config, shaders);
+    }
+
+    void DX12PipelineState::CreateRootSignature(DX12PipelineStateConfig^ config)
     {
         // generating root params
         if (config->RootParams)
@@ -68,13 +83,47 @@ namespace MirageAPI::DirectX::Pipeline
         SimpleRelease(errorBlob);
         CheckHResult(hr, "Failed to create root signature");
         m_rootSignature = rootSignature;
+    }
 
-        // pso
+    void DX12PipelineState::CreateGraphicsPSO(DX12PipelineStateConfig^ config, array<Shader::DX12Shader^>^ shaders)
+    {
         D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
         psoDesc.pRootSignature = m_rootSignature;
         // shaders
-        psoDesc.VS = vertexShader->NativeBytecode;
-        psoDesc.PS = pixelShader->NativeBytecode;
+        for each (auto shader in shaders)
+        {
+            auto byteCode = shader->NativeBytecode;
+            switch (shader->Type)
+            {
+            case Shader::DX12ShaderType::Vertex:
+                {
+                    psoDesc.VS = byteCode;
+                    break;
+                }
+            case Shader::DX12ShaderType::Pixel:
+                {
+                    psoDesc.PS = byteCode;
+                    break;
+                }
+            case Shader::DX12ShaderType::Geometry:
+                {
+                    psoDesc.GS = byteCode;
+                    break;
+                }
+            case Shader::DX12ShaderType::Hull:
+                {
+                    psoDesc.HS = byteCode;
+                    break;
+                }
+            case Shader::DX12ShaderType::Domain:
+                {
+                    psoDesc.DS = byteCode;
+                    break;
+                }
+            case Shader::DX12ShaderType::Compute:
+                throw gcnew DXException("Graphic PSO does not support compute shaders");
+            }
+        }
         // rasterizer
         psoDesc.RasterizerState = config->RasterizerState->GenerateNativeDesc();
         // rtv
@@ -127,6 +176,12 @@ namespace MirageAPI::DirectX::Pipeline
         );
         ThrowIfNull(pso, "PSO creation failed");
         m_pso = pso;
+    }
+
+    void DX12PipelineState::CreateComputePSO(DX12PipelineStateConfig^ config, Shader::DX12Shader^ shader)
+    {
+        // D3D12_COMPUTE_PIPELINE_STATE_DESC psoDesc = {};
+        throw gcnew NotImplementedException("Failed to create compute pipeline");
     }
 
     DX12PipelineState::!DX12PipelineState()

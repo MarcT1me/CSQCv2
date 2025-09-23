@@ -1,5 +1,6 @@
 ﻿using MirageAPI.DirectX;
 using MirageAPI.DirectX.Resource;
+using MirageAPI.DirectX.Shader;
 using OpenTK.Mathematics;
 using StbImageSharp;
 
@@ -20,10 +21,11 @@ public class Image : MetaObject<ImageData>
     {
         // convert if it needs
         Image operatedImg = MetaData.Format == ImageFormat.RGB ? ConvertToAlpha() : this;
-        
+
         // create native resource
         DX12Texture texture = new DX12Texture(
             DX12ResourceConfig.TextureConfig(
+                Id, DX12ShaderVisibility.All,
                 (uint)operatedImg.MetaData.Size.X,
                 (uint)operatedImg.MetaData.Size.Y,
                 operatedImg.NativeFormat, flags,

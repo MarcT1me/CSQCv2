@@ -63,7 +63,7 @@ public class Core
 
         Logger.Info(
             "QuantumEngineCore Initialization Started\n" +
-            "Configuration:\n\n"
+            "Configuration:\n"
         );
         foreach (var config in CoreConfiguration.IterConfigs())
         {
@@ -73,7 +73,7 @@ public class Core
         Logger.SimpleLog(
             "\nPaths:\n" +
             $"App path: {RootDirectory}\n" +
-            $"Asset path: {CoreConfiguration.Get<string>("app.asset.dir")}" +
+            $"Asset path: {CoreConfiguration.Get<string>("app.asset.dir")}\n" +
             $"Full asset path: {RootDirectory + CoreConfiguration.Get<string>("app.asset.dir")}"
         );
 

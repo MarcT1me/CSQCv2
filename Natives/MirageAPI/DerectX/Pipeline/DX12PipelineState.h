@@ -8,7 +8,7 @@
 
 namespace MirageAPI::DirectX::Pipeline
 {
-    public ref class DX12PipelineState : public DX12Object
+    public ref class DX12PipelineState : public DX12Object<DX12PipelineStateConfig^>
     {
         ID3D12RootSignature* m_rootSignature;
         ID3D12PipelineState* m_pso;
@@ -24,10 +24,13 @@ namespace MirageAPI::DirectX::Pipeline
         D3D12_INPUT_ELEMENT_DESC* m_inputLayoutsArr;
         UINT m_inputLayoutsLength;
 
+        void CreateRootSignature(DX12PipelineStateConfig^ config);
+        void CreateGraphicsPSO(DX12PipelineStateConfig^ config, array<Shader::DX12Shader^>^ shaders);
+        void CreateComputePSO(DX12PipelineStateConfig^ config, Shader::DX12Shader^ shader);
+
     public:
         DX12PipelineState(
-            Shader::DX12Shader^ vertexShader,
-            Shader::DX12Shader^ pixelShader,
+            array<Shader::DX12Shader^>^ shaders,
             DX12PipelineStateConfig^ config
         );
 

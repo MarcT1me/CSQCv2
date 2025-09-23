@@ -18,9 +18,6 @@ using MirageAPI.DirectX.Resource;
 using MirageAPI.DirectX.Shader;
 using OpenTK.Mathematics;
 
-// MirageAPI
-// Engine
-
 namespace AppLib.Game;
 
 [StructLayout(LayoutKind.Sequential)]
@@ -42,168 +39,73 @@ public class TestNotification() : ToastNotification(DateTime.Now)
 {
     public override void Build(ToastContentBuilder builder)
     {
-        builder
-            .AddText("TestNotification");
+        builder.AddText("TestNotification");
     }
 }
 
 public class GameWindow : QuantumCore.Graphic.Window.Window
 {
-    // shader
-    private readonly DX12Shader _vertexShader;
-    private readonly DX12Shader _pixelShader;
-    private readonly DX12PipelineState _pipelineState;
-
-    // vertex
-    private readonly DX12VertexBuffer _vertexBuffer;
+    private readonly DX12ShaderProgram _shader;
+    private readonly DX12Buffer _vertexBuffer;
     private readonly int _vertexCount;
-
-    // texture
-    private readonly DX12DescriptorHeap _descriptorHeap;
     private readonly DX12Texture _texture;
-
-    // 3d
-    private readonly DX12ConstantBuffer _matrixBuffer;
+    private readonly DX12Buffer _matrixBuffer;
     public GameCamera Camera;
 
-    public GameWindow(
-        WinData winData,
-        GlData glData,
-        string name,
-        DisplayInfo? display = null
-    ) : base(
-        winData, glData, name,
-        display: display
-    )
+    public GameWindow(WinData winData, GlData glData, string name, DisplayInfo? display = null) : base(winData, glData,
+        name, display: display)
     {
         Logger.Debug("Loading Shaders...");
+        var vertShader =
+            ((ShaderData)AssetManager
+                .Load(new("vertexShader", "AppLib:Shaders/3dRenderShader.hlsl", identifier: "Shader-Vert")).Content)
+            .GetNativeShader;
 
-        var vertShader = (ShaderData)AssetManager.Load(
-            new(
-                "vertexShader", "AppLib:Shaders/3dRenderShader.hlsl",
-                identifier: "Shader-Vert"
-            )
-        ).Content;
-        _vertexShader = vertShader.GetNativeShader;
-
-        var pixShader = (ShaderData)AssetManager.Load(
-            new(
-                "pixelShader", "AppLib:Shaders/3dRenderShader.hlsl",
-                identifier: "Shader-Pix"
-            )
-        ).Content;
-        _pixelShader = pixShader.GetNativeShader;
+        var pixShader =
+            ((ShaderData)AssetManager
+                .Load(new("pixelShader", "AppLib:Shaders/3dRenderShader.hlsl", identifier: "Shader-Pix")).Content)
+            .GetNativeShader;
 
         Logger.Debug("Creating Pipeline...");
-
-        // Создание конфигураций
-        var config = new DX12PipelineStateConfig(
+        NativeWindow.DXContext.ShaderProgram = _shader = new DX12ShaderProgram("test Shader", [vertShader, pixShader],
             [
-                new DX12RootParameter(
-                    DX12ResourceType.Texture,
-                    DX12ShaderVisibility.Pixel
-                ),
-                new DX12RootParameter(
-                    DX12ResourceType.ConstantBuffer,
-                    DX12ShaderVisibility.Vertex
-                )
+                new DX12InputElement("POSITION", DX12ResourceFormat.RGB32_FLOAT, 0),
+                new DX12InputElement("TEXCOORD", DX12ResourceFormat.RG32_FLOAT, 12)
             ],
             [
-                new DX12SamplerConfig(
-                    0,
-                    DX12ShaderVisibility.Pixel
-                )
-            ],
-            new DX12RasterizerConfig(),
-            new DX12BlendConfig(true, false),
-            [
-                new DX12InputElement(
-                    "POSITION",
-                    DX12ResourceFormat.RGB32_FLOAT,
-                    0
-                ),
-                new DX12InputElement
-                (
-                    "TEXCOORD",
-                    DX12ResourceFormat.RG32_FLOAT,
-                    12
-                )
-            ]
-        );
-        NativeWindow.DXContext.CmdList.PipelineState =
-            _pipelineState = new DX12PipelineState(_vertexShader, _pixelShader, config);
+                new DX12RootParameter(DX12ResourceType.Texture, DX12ShaderVisibility.Pixel),
+                new DX12RootParameter(DX12ResourceType.ConstantBuffer, DX12ShaderVisibility.Vertex)
+            ]);
 
         Logger.Debug("Loading Image...");
-
-        // Загружаем ассет текстуры
-        Image img = (Image)AssetManager.Load(
-            new(
-                "image", "AppLib:IMG.png",
-                identifier: "IMG-Image"
-            )
-        ).Content;
-
-        // Создаём текстуру
-        _texture = img.GetNativeTexture();
-
-        Logger.Debug("Creating Descriptor Heap...");
-        _texture.SRVHeap = NativeWindow.DXContext.CmdList.DescriptorHeap =
-            _descriptorHeap =
-                new DX12DescriptorHeap(DX12DescriptorHeapType.CBV_SRV_UAV, 1, true);
-
-        _texture.CreateSRV();
+        _shader.BindResource(_texture =
+            ((Image)AssetManager.Load(new("image", "AppLib:IMG.png", identifier: "IMG-Image")).Content)
+            .GetNativeTexture());
 
         Logger.Debug("Creating geometry buffer...");
-
-        float unitX = _texture.Width / 200f;
-        float unitY = _texture.Height / 200f;
+        float unitX = _texture.MetaData.Width / 200f;
+        float unitY = _texture.MetaData.Height / 200f;
 
         Vertex[] vertices =
         [
-            new()
-            {
-                Position = new Vector3(-unitX, 0.0f, unitY),
-                UV = new Vector2(0, 0)
-            },
-            new()
-            {
-                Position = new Vector3(unitX, 0.0f, unitY),
-                UV = new Vector2(1, 0)
-            },
-            new()
-            {
-                Position = new Vector3(-unitX, 0.0f, -unitY),
-                UV = new Vector2(0, 1)
-            },
-
-            new()
-            {
-                Position = new Vector3(unitX, 0.0f, unitY),
-                UV = new Vector2(1, 0)
-            },
-            new()
-            {
-                Position = new Vector3(unitX, 0.0f, -unitY),
-                UV = new Vector2(1, 1)
-            },
-            new()
-            {
-                Position = new Vector3(-unitX, 0.0f, -unitY),
-                UV = new Vector2(0, 1)
-            }
+            new() { Position = new Vector3(-unitX, 0.0f, unitY), UV = new Vector2(0, 0) },
+            new() { Position = new Vector3(unitX, 0.0f, unitY), UV = new Vector2(1, 0) },
+            new() { Position = new Vector3(-unitX, 0.0f, -unitY), UV = new Vector2(0, 1) },
+            new() { Position = new Vector3(unitX, 0.0f, unitY), UV = new Vector2(1, 0) },
+            new() { Position = new Vector3(unitX, 0.0f, -unitY), UV = new Vector2(1, 1) },
+            new() { Position = new Vector3(-unitX, 0.0f, -unitY), UV = new Vector2(0, 1) }
         ];
 
         try
         {
             int vertexSize = Marshal.SizeOf<Vertex>();
             _vertexCount = vertices.Length;
-
-            _vertexBuffer = new DX12VertexBuffer(
-                (uint)_vertexCount,
-                (uint)vertexSize,
-                DX12ResourceFlags.None
-            );
-
+            _vertexBuffer =
+                new DX12Buffer(
+                    DX12ResourceConfig.VertexBufferConfig(
+                        "v buff", (uint)_vertexCount, (uint)vertexSize, DX12ResourceFlags.None
+                    )
+                );
             unsafe
             {
                 fixed (Vertex* verticesPtr = vertices)
@@ -222,24 +124,20 @@ public class GameWindow : QuantumCore.Graphic.Window.Window
         }
 
         Logger.Debug("Creating matrix Constant Buffer...");
-        _matrixBuffer = new DX12ConstantBuffer(256, DX12ResourceFlags.None);
-
-        Logger.Debug("Creating Camera...");
-        Camera = new GameCamera(
-            new(
-                position: (0, -10, 0),
-                rotation: (0, 0, 90),
-                identifier: "GameCamera"
+        _matrixBuffer = new DX12Buffer(
+            DX12ResourceConfig.ConstantBufferConfig(
+                "m buff", DX12ShaderVisibility.Vertex, 256, DX12ResourceFlags.None
             )
         );
 
+        Logger.Debug("Creating Camera...");
+        Camera = new GameCamera(new(position: (0, -10, 0), rotation: (0, 0, 90), identifier: "GameCamera"));
+
         Logger.Debug("Creating Tray icon menu...");
-        NativeWindow.TrayMenu = new TrayMenu(
-            NativeWindow, 1, null,
-            "Test Tray icon", "info", "idk what info"
-        );
+        NativeWindow.TrayMenu = new TrayMenu(NativeWindow, 1, null, "Test Tray icon", "info", "idk what info");
         var empty = NativeWindow.TrayMenu.TextItem("Empty");
         var pop = NativeWindow.TrayMenu.TextItem("Pop from tray");
+
         NativeWindow.TrayMenu.Callback += id =>
         {
             if (id == empty)
@@ -259,10 +157,16 @@ public class GameWindow : QuantumCore.Graphic.Window.Window
         NativeWindow.SysMenu.TextItem("TEST SYSTEM MENU ITEM");
         NativeWindow.SysMenu.Callback += id => { Logger.Debug($"crickets chirping... {id}"); };
     }
+
+    public override void Prepare()
+    {
+        base.Prepare();
+        _shader.Prepare();
+    }
+
     public override void HandleEvent(QuantumEvent e)
     {
         base.HandleEvent(e);
-
         if (e is MouseEvent { Type: EventType.MouseMove }) return;
 
         Logger.Info($"handle event: {e}");
@@ -273,7 +177,6 @@ public class GameWindow : QuantumCore.Graphic.Window.Window
             {
                 Logger.Debug("Toggle Fullscreen");
                 IsFullscreen = !IsFullscreen;
-
                 if (keyEvent.Mods.HasFlag(KeyMod.Shift))
                 {
                     Logger.Debug("set Mouse Capture and visibility");
@@ -285,8 +188,7 @@ public class GameWindow : QuantumCore.Graphic.Window.Window
             }
             case KeyEvent { Type: EventType.KeyDown, Key: Key.N }:
             {
-                new TestNotification()
-                    .Show();
+                new TestNotification().Show();
                 break;
             }
             case KeyEvent { Type: EventType.KeyDown, Key: Key.Tilda }:
@@ -316,18 +218,11 @@ public class GameWindow : QuantumCore.Graphic.Window.Window
     public override void Update(ClockMeta clockMeta)
     {
         base.Update(clockMeta);
-
         Matrix4 world = Matrix4.Identity;
-
         MatrixBufferData matrixData = new MatrixBufferData
-        {
-            World = world,
-            View = Camera.ViewMatrix,
-            Projection = Camera.ProjectionMatrix
-        };
+            { World = world, View = Camera.ViewMatrix, Projection = Camera.ProjectionMatrix };
         var bufferSize = (int)_matrixBuffer.Size;
         byte[] buffer = new byte[bufferSize];
-
         IntPtr ptr = Marshal.AllocHGlobal(bufferSize);
         Marshal.StructureToPtr(matrixData, ptr, false);
         Marshal.Copy(ptr, buffer, 0, bufferSize);
@@ -344,38 +239,24 @@ public class GameWindow : QuantumCore.Graphic.Window.Window
     public override void Render()
     {
         base.Render();
-
         TestApp.Instance.Scene.Render(MetaData);
-
-        // Подготовка трубы и стыковка с CommandList
         var commandList = NativeWindow.DXContext.CmdList;
-
-        // Финальная подготовка объекта к рендеру
-        commandList.SetPrimitiveTopology(DX12PrimitiveTopology.TriangleList);
-        commandList.BindBuffer(_vertexBuffer);
-        commandList.BindBuffer(1, _matrixBuffer);
-
-        // Рендер
+        _shader.Bind(_vertexBuffer, null);
+        _shader.Bind(1, _matrixBuffer);
         commandList.DrawInstanced((uint)_vertexCount, 1, 0, 0);
     }
 
     public override void PostRender()
     {
         TestApp.Instance.Scene.PostRender(MetaData);
-
         base.PostRender();
     }
 
     public override void Dispose()
     {
-        _texture.ReleaseSRV();
+        _shader.Dispose();
         _texture.Dispose();
-        _descriptorHeap.Dispose();
-
         _vertexBuffer.Dispose();
-        _pipelineState.Dispose();
-        _pixelShader.Dispose();
-        _vertexShader.Dispose();
         base.Dispose();
     }
 }

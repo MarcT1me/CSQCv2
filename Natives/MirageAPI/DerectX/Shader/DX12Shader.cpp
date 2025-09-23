@@ -9,8 +9,9 @@ namespace MirageAPI::DirectX::Shader
     DX12Shader::DX12Shader(
         ID3DBlob* bytecode,
         DX12ShaderType type
-    ) : m_bytecode(bytecode),
-        m_type(type)
+    ) : DX12ObjectData(nullptr),
+        _bytecode(bytecode),
+        _type(type)
     {
         if (bytecode)
             bytecode->AddRef();
@@ -19,8 +20,9 @@ namespace MirageAPI::DirectX::Shader
     DX12Shader::DX12Shader(
         array<Byte>^ byteArray,
         DX12ShaderType type
-    ) : m_bytecode(nullptr),
-        m_type(type)
+    ) : DX12ObjectData(nullptr),
+        _bytecode(nullptr),
+        _type(type)
     {
         pin_ptr<Byte> pinnedData = &byteArray[0];
         UINT dataSize = byteArray->Length;
@@ -30,32 +32,32 @@ namespace MirageAPI::DirectX::Shader
             D3DCreateBlob(dataSize, &bytecode),
             "Failed to create shader blob from byte array"
         );
-        m_bytecode = bytecode;
+        _bytecode = bytecode;
 
-        memcpy(m_bytecode->GetBufferPointer(), pinnedData, dataSize);
+        memcpy(_bytecode->GetBufferPointer(), pinnedData, dataSize);
     }
 
     DX12Shader::!DX12Shader()
     {
-        SimpleRelease(m_bytecode);
+        SimpleRelease(_bytecode);
     }
 
     D3D12_SHADER_BYTECODE DX12Shader::NativeBytecode::get()
     {
-        if (!m_bytecode)
+        if (!_bytecode)
         {
             return {nullptr, 0};
         }
 
         return {
-            m_bytecode->GetBufferPointer(),
-            m_bytecode->GetBufferSize()
+            _bytecode->GetBufferPointer(),
+            _bytecode->GetBufferSize()
         };
     }
 
     void DX12Shader::SaveToFile(String^ filePath)
     {
-        if (!m_bytecode) return;
+        if (!_bytecode) return;
 
         pin_ptr<const wchar_t> nativePath = PtrToStringChars(filePath);
         std::FILE* file;
@@ -65,7 +67,7 @@ namespace MirageAPI::DirectX::Shader
             throw gcnew DXException("Failed to open file for writing");
         }
 
-        fwrite(m_bytecode->GetBufferPointer(), 1, m_bytecode->GetBufferSize(), file);
+        fwrite(_bytecode->GetBufferPointer(), 1, _bytecode->GetBufferSize(), file);
         fclose(file);
     }
 

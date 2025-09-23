@@ -2,34 +2,6 @@
 
 namespace MirageAPI::DirectX
 {
-    public enum class DX12HeapType
-    {
-        Default = 1,
-        Upload = 2,
-        Custom = 4,
-        Readback = 3
-    };
-
-    public enum class DX12CommandListType
-    {
-        Direct = 0,
-        Bundle = 1,
-        Compute = 2,
-        Copy = 3,
-
-        VideoDecode = 4,
-        VideoProcess = 5,
-        VideoEncode = 6
-    };
-
-    public enum class DX12DescriptorHeapType
-    {
-        CBV_SRV_UAV = 0,
-        Sampler = 1,
-        RTV = 2,
-        DSV = 3
-    };
-
     public enum class DX12ResourceType : UINT8
     {
         Texture = 0,
@@ -93,49 +65,6 @@ namespace MirageAPI::DirectX
         // 16 байт на пиксель
         RGBA32_FLOAT = DXGI_FORMAT_R32G32B32A32_FLOAT
     };
-
-    public enum class DX12ResourceState
-    {
-        Common = 0,
-        VertexAndConstantBuffer = 0x1,
-        IndexBuffer = 0x2,
-        RenderTarget = 0x4,
-        UnorderedAccess = 0x8,
-
-        DepthWrite = 0x10,
-        DepthRead = 0x20,
-
-        NonPixelShaderResource = 0x40,
-        PixelShaderResource = 0x80,
-        AllShaderResource = NonPixelShaderResource | PixelShaderResource,
-
-        StreamOut = 0x100,
-        IndirectArgument = 0x200,
-        CopyDest = 0x400,
-        CopySource = 0x800,
-        ResolveDest = 0x1000,
-        ResolveSource = 0x2000,
-        RaytracingStructure = 0x400000,
-        ShadingRateSource = 0x1000000,
-        GenericRead = VertexAndConstantBuffer
-        | IndexBuffer
-        | AllShaderResource
-        | IndirectArgument
-        | CopySource,
-
-        Present = 0,
-        Predication = 0x200,
-
-        VideoDecodeRead = 0x10000,
-        VideoDecodeWrite = 0x20000,
-
-        VideoProcessRead = 0x40000,
-        VideoProcessWrite = 0x80000,
-
-        VideoEncodeRead = 0x200000,
-        VideoEncodeWrite = 0x800000,
-    };
-
     [System::Flags]
     public enum class DX12DeviceInitFlags
     {

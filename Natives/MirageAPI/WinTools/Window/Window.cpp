@@ -58,7 +58,7 @@ namespace MirageAPI
 
         sysMenu = gcnew SystemMenu(this);
         mouse = gcnew MirageAPI::Mouse(this);
-        dxContext = gcnew DirectX::DX12Context(hwnd, dxContextConfig);
+        dxContext = gcnew DirectX::DX12Context(dxContextConfig, hwnd);
 
         winList->Add(this);
     }

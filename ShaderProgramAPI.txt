@@ -1,0 +1,32 @@
+﻿var program = new DX12ShaderProgram(
+	identifier: "TestProgram", 
+	type: DX12ShaderType::Render,
+	inputs: [ 
+		new DX12InputElement("POSITION", DX12ResourceFormat.RGB32_FLOAT) 
+	], // array with input signatures, example - vec3 POSITION var
+	resources: [ 
+		DX12RootParameter(DX12ResourceType.Texture, DX12ShaderVisibility.Pixel), 
+		DX12RootParameter(DX12ResourceType.ConstantBuffer, DX12ShaderVisibility.Vertex) 
+	], // array of shader resources, example - Texture for Pixel and ConstantBuffer for Vertex shader
+);
+
+var geometry = new DX12GeometryBuffer();
+geometry.UploadData<ProgramVertex>(data: arr); // class ProgramVertex : DX12Vertex // example - loading ProgramVertex array
+
+var texture = new DX12Texture();
+texture.UploadData(data: AssetManager.Load<Image>("assembly:path").Data); // example - loading embedded image
+
+var cBuffer = new DX12ConstantBuffer(); // class MatrixBuffer : ConstantBuffer
+cBuffer.UploadData(data: new MatrixBuffer().Data); // example - creating empty buffer with camera matrices
+
+public Render(DX12RenderTask renderTask)
+{
+	program.BeginFrame(target: renderTask.Target, commandList: renderTask.CmdList);
+	program.Clear(color: Color.Black);
+	
+	program.Bind(resources: [texture, cBuffer]);
+	
+	program.Render(topology: DX12PrimitiveTopology.Triangle, geometry: geometry);
+	
+	program.ReleaseFrame();
+}

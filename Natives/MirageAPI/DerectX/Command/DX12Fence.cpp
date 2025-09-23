@@ -3,7 +3,10 @@
 
 namespace MirageAPI::DirectX::Command
 {
-    DX12Fence::DX12Fence(UINT64 initValue)
+    DX12Fence::DX12Fence(
+        QIdentifier^ identifier,
+        UINT64 initValue
+    ) : DX12Object(gcnew DX12ObjectData(identifier))
     {
         ID3D12Fence* fence;
         CheckHResult(
