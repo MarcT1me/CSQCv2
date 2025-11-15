@@ -48,6 +48,7 @@
         <ItemGroup>
             <RuntimeBinaries Include="$(OutputPath)\**\freetype6.dll"/>
             <RuntimeBinaries Include="$(OutputPath)\**\Ijwhost.dll"/>
+            <RuntimeBinaries Include="$(OutputPath)\**\openxr_loader.dll"/>
         </ItemGroup>
 
         <Move SourceFiles="@(RuntimeBinaries)" DestinationFolder="$(OutputPath)\bin\runtimes"/>

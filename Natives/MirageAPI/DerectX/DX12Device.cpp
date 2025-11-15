@@ -8,21 +8,53 @@ namespace MirageAPI::DirectX
     inline void GetHardwareAdapter(
         IDXGIFactory1* factory,
         IDXGIAdapter1** outAdapter,
-        bool isHighPerformance = false
+        bool isHighPerformance,
+        DX12DeviceRequirements^ requirements
     )
     {
         IDXGIAdapter1* adapter;
+        const LUID* adapterLuid = requirements->AdapterLuid;
 
-        IDXGIFactory6* factory6;
-        if (SUCCEEDED(factory->QueryInterface(IID_PPV_ARGS(&factory6))))
+        if (adapterLuid && (adapterLuid->LowPart != 0 || adapterLuid->HighPart != 0))
         {
+            IDXGIFactory6* factory6;
+            if (SUCCEEDED(factory->QueryInterface(IID_PPV_ARGS(&factory6))))
+            {
+                for (UINT adapterIndex = 0;
+                     SUCCEEDED(factory6->EnumAdapterByGpuPreference(
+                         adapterIndex,
+                         DXGI_GPU_PREFERENCE_UNSPECIFIED,
+                         IID_PPV_ARGS(&adapter)));
+                     ++adapterIndex)
+                {
+                    DXGI_ADAPTER_DESC1 desc;
+                    adapter->GetDesc1(&desc);
+
+                    if (desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE)
+                    {
+                        adapter->Release();
+                        continue;
+                    }
+
+                    // Сравниваем LUID
+                    if (desc.AdapterLuid.LowPart == adapterLuid->LowPart &&
+                        desc.AdapterLuid.HighPart == adapterLuid->HighPart)
+                    {
+                        if (SUCCEEDED(D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_11_0, _uuidof(ID3D12Device), nullptr)))
+                        {
+                            factory6->Release();
+                            *outAdapter = adapter;
+                            return;
+                        }
+                    }
+                    adapter->Release();
+                }
+                factory6->Release();
+            }
+
+            // Если не нашли через factory6, ищем через EnumAdapters1
             for (UINT adapterIndex = 0;
-                 SUCCEEDED(factory6->EnumAdapterByGpuPreference(
-                     adapterIndex,
-                     isHighPerformance == true ? DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE :
-                     DXGI_GPU_PREFERENCE_UNSPECIFIED,
-                     IID_PPV_ARGS(&adapter)
-                 ));
+                 SUCCEEDED(factory->EnumAdapters1(adapterIndex, &adapter));
                  ++adapterIndex)
             {
                 DXGI_ADAPTER_DESC1 desc;
@@ -30,45 +62,82 @@ namespace MirageAPI::DirectX
 
                 if (desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE)
                 {
+                    adapter->Release();
                     continue;
                 }
 
-                if (SUCCEEDED(D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_11_0, _uuidof(ID3D12Device), nullptr)))
+                if (desc.AdapterLuid.LowPart == adapterLuid->LowPart &&
+                    desc.AdapterLuid.HighPart == adapterLuid->HighPart)
                 {
-                    break;
+                    if (SUCCEEDED(D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_11_0, _uuidof(ID3D12Device), nullptr)))
+                    {
+                        *outAdapter = adapter;
+                        return;
+                    }
                 }
+                adapter->Release();
             }
         }
-
-        if (adapter == nullptr)
+        else
         {
-            for (
-                UINT adapterIndex = 0;
-                SUCCEEDED(factory->EnumAdapters1(adapterIndex, &adapter));
-                ++adapterIndex
-            )
+            IDXGIFactory6* factory6;
+            if (SUCCEEDED(factory->QueryInterface(IID_PPV_ARGS(&factory6))))
             {
-                DXGI_ADAPTER_DESC1 desc;
-                adapter->GetDesc1(&desc);
-
-                if (desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE)
+                for (UINT adapterIndex = 0;
+                     SUCCEEDED(factory6->EnumAdapterByGpuPreference(
+                         adapterIndex,
+                         isHighPerformance == true ? DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE : DXGI_GPU_PREFERENCE_UNSPECIFIED,
+                         IID_PPV_ARGS(&adapter)
+                     ));
+                     ++adapterIndex)
                 {
-                    continue;
-                }
+                    DXGI_ADAPTER_DESC1 desc;
+                    adapter->GetDesc1(&desc);
 
-                if (SUCCEEDED(D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_11_0, _uuidof(ID3D12Device), nullptr)))
-                {
-                    break;
+                    if (desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE)
+                    {
+                        continue;
+                    }
+
+                    if (SUCCEEDED(D3D12CreateDevice(adapter, requirements->FeatureLevel, _uuidof(ID3D12Device), nullptr)))
+                    {
+                        break;
+                    }
                 }
             }
-        }
 
-        *outAdapter = adapter;
+            if (adapter == nullptr)
+            {
+                for (
+                    UINT adapterIndex = 0;
+                    SUCCEEDED(factory->EnumAdapters1(adapterIndex, &adapter));
+                    ++adapterIndex
+                )
+                {
+                    DXGI_ADAPTER_DESC1 desc;
+                    adapter->GetDesc1(&desc);
+
+                    if (desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE)
+                    {
+                        continue;
+                    }
+
+                    if (SUCCEEDED(D3D12CreateDevice(adapter, requirements->FeatureLevel, _uuidof(ID3D12Device), nullptr)))
+                    {
+                        break;
+                    }
+                }
+            }
+
+            *outAdapter = adapter;
+        }
     }
 
-    void DX12Device::Initialize(DX12DeviceInitFlags flags)
+    void DX12Device::Initialize(DX12DeviceInitFlags flags, DX12DeviceRequirements^ requirements)
     {
         s_isDebug = flags.HasFlag(DX12DeviceInitFlags::Debug);
+
+        requirements = requirements ? requirements : gcnew DX12DeviceRequirements(nullptr, D3D_FEATURE_LEVEL_11_0);
 
         // create debug layer
         if (s_isDebug)
@@ -106,7 +175,7 @@ namespace MirageAPI::DirectX
 
                 hr = D3D12CreateDevice(
                     warpAdapter,
-                    D3D_FEATURE_LEVEL_11_0,
+                    requirements->FeatureLevel,
                     IID_PPV_ARGS(&device)
                 );
             }
@@ -114,12 +183,14 @@ namespace MirageAPI::DirectX
             {
                 IDXGIAdapter1* hardwareAdapter;
                 GetHardwareAdapter(
-                    factory, &hardwareAdapter, flags.HasFlag(DX12DeviceInitFlags::UseHighPerformanceAdapter)
+                    factory, &hardwareAdapter,
+                    flags.HasFlag(DX12DeviceInitFlags::UseHighPerformanceAdapter),
+                    requirements
                 );
 
                 hr = D3D12CreateDevice(
                     hardwareAdapter,
-                    D3D_FEATURE_LEVEL_11_0,
+                    requirements->FeatureLevel,
                     IID_PPV_ARGS(&device)
                 );
             }
@@ -128,7 +199,7 @@ namespace MirageAPI::DirectX
         {
             hr = D3D12CreateDevice(
                 nullptr,
-                D3D_FEATURE_LEVEL_11_0,
+                requirements->FeatureLevel,
                 IID_PPV_ARGS(&device)
             );
         }

@@ -4,6 +4,9 @@
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 
+#define XR_USE_PLATFORM_WIN64
+#define XR_USE_GRAPHICS_API_D3D12
+
 // commenting libs
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
@@ -42,5 +45,6 @@ using namespace OpenTK::Mathematics;
 #include "DerectX/Resource/enums.h"
 #include "DerectX/Shader/enums.h"
 #include "DerectX/DX12Object.h"
+
 
 #endif

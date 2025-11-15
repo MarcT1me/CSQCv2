@@ -96,12 +96,8 @@
             <LanguageStandard>stdcpp20</LanguageStandard>
         </ClCompile>
         <Link>
-            <AdditionalDependencies>
-                %(AdditionalDependencies)
-            </AdditionalDependencies>
-            <AdditionalLibraryDirectories>
-                %(AdditionalLibraryDirectories)
-            </AdditionalLibraryDirectories>
+            <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+            <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
         </Link>
     </ItemDefinitionGroup>
     <!--  Headers-->
@@ -132,67 +128,67 @@
         <ClInclude Include="Exceptions.h"/>
         <ClInclude Include="Helpers.h"/>
         <ClInclude Include="NativeInstance.h"/>
-        <ClInclude Include="pch.h"/>
-        <ClInclude Include="rect.h"/>
-        <ClInclude Include="Resource.h"/>
-        <ClInclude Include="DerectX\DX12Device.h"/>
-        <ClInclude Include="DerectX\Resource\DX12Resource.h"/>
-        <ClInclude Include="DerectX\Resource\DX12ResourceConfig.h"/>
-        <ClInclude Include="DerectX\DX12Helpers.h"/>
-        <ClInclude Include="DerectX\Shader\DX12Shader.h"/>
-        <ClInclude Include="DerectX\Shader\DX12ShaderCompiler.h"/>
-        <ClInclude Include="DerectX\Command\DX12CommandList.h"/>
+        <ClInclude Include="pch.h" />
+        <ClInclude Include="rect.h" />
+        <ClInclude Include="Resource.h" />
+        <ClInclude Include="DerectX\DX12Device.h" />
+        <ClInclude Include="DerectX\Resource\DX12Resource.h" />
+        <ClInclude Include="DerectX\Resource\DX12ResourceConfig.h" />
+        <ClInclude Include="DerectX\DX12Helpers.h" />
+        <ClInclude Include="DerectX\Shader\DX12Shader.h" />
+        <ClInclude Include="DerectX\Shader\DX12ShaderCompiler.h" />
+        <ClInclude Include="DerectX\Command\DX12CommandList.h" />
         <ClInclude Include="WinTools\Icon\enums.h" />
-        <ClInclude Include="WinTools\Icon\IconInfo.h"/>
-        <ClInclude Include="WinTools\Menu\enums.h"/>
-        <ClInclude Include="WinTools\Menu\Menu.h"/>
-        <ClInclude Include="WinTools\Menu\SystemMenu.h"/>
-        <ClInclude Include="WinTools\Menu\TrayMenu.h"/>
-        <ClInclude Include="WinTools\Mouse\Mouse.h"/>
-        <ClInclude Include="WinTools\Display\DisplayManager.h"/>
-        <ClInclude Include="WinTools\Display\DisplayInfo.h"/>
-        <ClInclude Include="WinTools\Cursor\enums.h"/>
-        <ClInclude Include="WinTools\Cursor\CursorInfo.h"/>
-        <ClInclude Include="WinTools\Events\Events.h"/>
-        <ClInclude Include="WinTools\Events\EventManager.h"/>
-        <ClInclude Include="WinTools\Events\EventProc.h"/>
-        <ClInclude Include="WinTools\Window\enums.h"/>
-        <ClInclude Include="WinTools\Window\Window.h"/>
-        <ClInclude Include="WinTools\Window\WindowClass.h"/>
-        <ClInclude Include="WinTools\Window\WindowStyleInfo.h"/>
+        <ClInclude Include="WinTools\Icon\IconInfo.h" />
+        <ClInclude Include="WinTools\Menu\enums.h" />
+        <ClInclude Include="WinTools\Menu\Menu.h" />
+        <ClInclude Include="WinTools\Menu\SystemMenu.h" />
+        <ClInclude Include="WinTools\Menu\TrayMenu.h" />
+        <ClInclude Include="WinTools\Mouse\Mouse.h" />
+        <ClInclude Include="WinTools\Display\DisplayManager.h" />
+        <ClInclude Include="WinTools\Display\DisplayInfo.h" />
+        <ClInclude Include="WinTools\Cursor\enums.h" />
+        <ClInclude Include="WinTools\Cursor\CursorInfo.h" />
+        <ClInclude Include="WinTools\Events\Events.h" />
+        <ClInclude Include="WinTools\Events\EventManager.h" />
+        <ClInclude Include="WinTools\Events\EventProc.h" />
+        <ClInclude Include="WinTools\Window\enums.h" />
+        <ClInclude Include="WinTools\Window\Window.h" />
+        <ClInclude Include="WinTools\Window\WindowClass.h" />
+        <ClInclude Include="WinTools\Window\WindowStyleInfo.h" />
     </ItemGroup>
     <!--  Source-->
     <ItemGroup>
-        <ClCompile Include="AssemblyInfo.cpp"/>
-        <ClCompile Include="DerectX\Command\DX12CommandList.cpp"/>
-        <ClCompile Include="DerectX\Command\DX12CommandQueue.cpp"/>
-        <ClCompile Include="DerectX\Command\DX12Fence.cpp"/>
-        <ClCompile Include="DerectX\Context\DX12Context.cpp"/>
-        <ClCompile Include="DerectX\Context\DX12SwapChain.cpp"/>
-        <ClCompile Include="DerectX\DX12Device.cpp"/>
-        <ClCompile Include="DerectX\DX12DescriptorHeap.cpp"/>
-        <ClCompile Include="DerectX\Pipeline\DX12PipelineState.cpp"/>
-        <ClCompile Include="DerectX\Resource\Buffer\DX12Buffer.cpp"/>
-        <ClCompile Include="DerectX\Resource\Buffer\DX12IndexBuffer.cpp"/>
-        <ClCompile Include="DerectX\Resource\Buffer\DX12StructuredBuffer.cpp"/>
-        <ClCompile Include="DerectX\Resource\Buffer\DX12VertexBuffer.cpp"/>
-        <ClCompile Include="DerectX\Resource\DX12Resource.cpp"/>
-        <ClCompile Include="DerectX\Resource\Texture\DX12RenderTarget.cpp"/>
-        <ClCompile Include="DerectX\Resource\Texture\DX12Texture.cpp"/>
-        <ClCompile Include="DerectX\Shader\DX12Shader.cpp"/>
-        <ClCompile Include="DerectX\Shader\DX12ShaderCompiler.cpp"/>
-        <ClCompile Include="NativeInstance.cpp"/>
-        <ClCompile Include="WinTools\Icon\IconInfo.cpp"/>
-        <ClCompile Include="WinTools\Menu\SystemMenu.cpp"/>
-        <ClCompile Include="WinTools\Menu\TrayMenu.cpp"/>
-        <ClCompile Include="WinTools\Mouse\Mouse.cpp"/>
-        <ClCompile Include="WinTools\Events\EventProc.cpp"/>
-        <ClCompile Include="WinTools\Events\EventManager.cpp"/>
-        <ClCompile Include="WinTools\Display\DisplayManager.cpp"/>
-        <ClCompile Include="WinTools\Cursor\CursorInfo.cpp"/>
-        <ClCompile Include="WinTools\Window\Window.cpp"/>
-        <ClCompile Include="WinTools\Window\WindowClass.cpp"/>
-        <ClCompile Include="WinTools\Window\WindowStyleInfo.cpp"/>
+        <ClCompile Include="AssemblyInfo.cpp" />
+        <ClCompile Include="DerectX\Command\DX12CommandList.cpp" />
+        <ClCompile Include="DerectX\Command\DX12CommandQueue.cpp" />
+        <ClCompile Include="DerectX\Command\DX12Fence.cpp" />
+        <ClCompile Include="DerectX\Context\DX12Context.cpp" />
+        <ClCompile Include="DerectX\Context\DX12SwapChain.cpp" />
+        <ClCompile Include="DerectX\DX12Device.cpp" />
+        <ClCompile Include="DerectX\DX12DescriptorHeap.cpp" />
+        <ClCompile Include="DerectX\Pipeline\DX12PipelineState.cpp" />
+        <ClCompile Include="DerectX\Resource\Buffer\DX12Buffer.cpp" />
+        <ClCompile Include="DerectX\Resource\Buffer\DX12IndexBuffer.cpp" />
+        <ClCompile Include="DerectX\Resource\Buffer\DX12StructuredBuffer.cpp" />
+        <ClCompile Include="DerectX\Resource\Buffer\DX12VertexBuffer.cpp" />
+        <ClCompile Include="DerectX\Resource\DX12Resource.cpp" />
+        <ClCompile Include="DerectX\Resource\Texture\DX12RenderTarget.cpp" />
+        <ClCompile Include="DerectX\Resource\Texture\DX12Texture.cpp" />
+        <ClCompile Include="DerectX\Shader\DX12Shader.cpp" />
+        <ClCompile Include="DerectX\Shader\DX12ShaderCompiler.cpp" />
+        <ClCompile Include="NativeInstance.cpp" />
+        <ClCompile Include="WinTools\Icon\IconInfo.cpp" />
+        <ClCompile Include="WinTools\Menu\SystemMenu.cpp" />
+        <ClCompile Include="WinTools\Menu\TrayMenu.cpp" />
+        <ClCompile Include="WinTools\Mouse\Mouse.cpp" />
+        <ClCompile Include="WinTools\Events\EventProc.cpp" />
+        <ClCompile Include="WinTools\Events\EventManager.cpp" />
+        <ClCompile Include="WinTools\Display\DisplayManager.cpp" />
+        <ClCompile Include="WinTools\Cursor\CursorInfo.cpp" />
+        <ClCompile Include="WinTools\Window\Window.cpp" />
+        <ClCompile Include="WinTools\Window\WindowClass.cpp" />
+        <ClCompile Include="WinTools\Window\WindowStyleInfo.cpp" />
         <ClCompile Include="pch.cpp">
             <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
             <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -200,7 +196,7 @@
     </ItemGroup>
     <!--  Other-->
     <ItemGroup>
-        <ResourceCompile Include="app.rc"/>
+        <ResourceCompile Include="app.rc" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\..\QuantumEngine.Core\QuantumEngine.Core.csproj">

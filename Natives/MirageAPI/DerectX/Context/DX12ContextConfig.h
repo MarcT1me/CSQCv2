@@ -99,7 +99,6 @@ namespace MirageAPI::DirectX
         UINT VSyncInterval;
 
         DX12FullscreenMode^ FullscreenConfig;
-
     internal:
         DXGI_SWAP_CHAIN_DESC1 NativeSwapChainDesk()
         {

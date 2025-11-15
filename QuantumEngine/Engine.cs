@@ -46,11 +46,20 @@ public class Engine : Core
                 ),
             _ =>
             {
+                Logger.Info(
+                    "QuantumEngine Initialization Started\n" +
+                    "Configuration:"
+                );
+                foreach (var config in Configuration.IterConfigs())
+                {
+                    Logger.SimpleLog($"\"{config.Key}\": {config.Value} ({config.Value.GetType()})");
+                }
+
                 Core.Initialize(appLibAssembly);
 
                 Logger.Separator();
 
-                DebugFeatures();
+                ModeLogOutputs();
 
                 Logger.Separator();
 
@@ -63,8 +72,9 @@ public class Engine : Core
         );
     }
 
-    private static void DebugFeatures()
+    private static void ModeLogOutputs()
     {
+        // configs for assemblies
         foreach (
             var assembly in (List<Assembly?>)
             [
@@ -76,14 +86,23 @@ public class Engine : Core
         )
         {
             if (assembly == null) continue;
-
             var assemblyName = assembly.GetName().Name;
+
             Logger.Info($"Embed Resources for {assemblyName}:");
             foreach (var name in assembly.GetManifestResourceNames())
             {
                 Logger.SimpleLog($"{assemblyName}:{name}");
             }
         }
+
+        Logger.Separator();
+
+        // // OXR extensions
+        // Logger.Info("Available extensions for OpenXR:");
+        // foreach (var availableExtension in XRInstance.GetAvailableExtensions())
+        // {
+        //     Logger.SimpleLog(availableExtension);
+        // }
     }
 
     private static void ModeSpecific()
@@ -92,12 +111,17 @@ public class Engine : Core
 
         string flagNames = Configuration.Get<string>("engine.directx.device.adapter");
 
-        DX12DeviceInitFlags flags = (DX12DeviceInitFlags)Enum.Parse(
-            typeof(DX12DeviceInitFlags), "Use" + flagNames, false
-        );
-        flags |= IsDebug ? DX12DeviceInitFlags.Debug : DX12DeviceInitFlags.None;
+        DX12DeviceInitFlags flags =
+            // VrInstance != null
+            // ? DX12DeviceInitFlags.UseHighPerformanceAdapter
+            // : 
+            (DX12DeviceInitFlags)Enum.Parse(typeof(DX12DeviceInitFlags), "Use" + flagNames, false);
 
-        DX12Device.Initialize(flags);
+        flags |= IsDebug ? DX12DeviceInitFlags.Debug : DX12DeviceInitFlags.None;
+        DX12Device.Initialize(flags,
+            // VrInstance?.GetGraphicRequirements()
+            null
+        );
 
         AssetManager.RegisterAssetType(new AssetType("image", new ImageAssetLoader()));
         AssetManager.RegisterAssetType(new AssetType("vertexShader", new VertexShaderAssetLoader()));

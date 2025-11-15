@@ -19,8 +19,14 @@
 #define QLogger QuantumCore::Logging::Logger
 #define QLog(logLevel, msg) QLogger::logLevel((msg))
 
-#define CStringToWString(string) msclr::interop::marshal_as<std::wstring>((string))
-#define CStringToWChar(string) CStringToWString(string).c_str()
+#define CStringToWString(str) msclr::interop::marshal_as<std::wstring>((str))
+#define CStringToWChar(str) CStringToWString(str).c_str()
+
+#define CStringToString(str) msclr::interop::marshal_as<std::string>((str))
+#define CStringToChar(str) CStringToString(str).c_str()
+
+#define StringToAnsiPtr(str) Marshal::StringToHGlobalAnsi((str))
+#define FreeAnsiPtr(ptr) Marshal::FreeHGlobal((IntPtr)(ptr))
 
 #define UnpacVec2(vector) vector->X, vector->Y
 #define UnpacVec4(vector) UnpacVec2(vector), vector->Z, vector->W
@@ -31,7 +37,7 @@ namespace MirageAPI
     public ref class GlobalHelpers abstract
     {
     public:
-        static bool IsWindowVersion(UINT major, UINT minor, UINT build)
+        static bool IsWindowsVersion(UINT major, UINT minor, UINT build)
         {
             // create version
             OSVERSIONINFOEXW osVersionInfo = {sizeof(osVersionInfo)};

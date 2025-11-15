@@ -56,7 +56,7 @@ public class QLauncher
 
         return (
             AppLibModule = new AppLibModule(domain, mainClassName),
-            EngineModule = new EngineModule(isHeadless, RootDir)
+            EngineModule = new EngineModule()
         );
     }
 }

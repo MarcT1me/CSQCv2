@@ -1,0 +1,14 @@
+﻿{
+  "game": {
+    "name": "MyGame",
+    "version": "1.0.0"
+  },
+  "build": {
+    "graphicsBackend": "DirectX12",
+    "enableXR": true
+  },
+  "assets": {
+    "autoImport": true,
+    "includePatterns": ["Assets/**/*"]
+  }
+}

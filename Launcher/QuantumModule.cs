@@ -4,6 +4,8 @@ namespace QuantumLauncher;
 
 public abstract class QuantumModule
 {
+    public static string NativeLibsPath = "runtimes";
+    
     public Assembly? Assembly { get; protected init; }
 
     public Type? GetAssemblyType(string name)

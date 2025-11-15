@@ -18,9 +18,6 @@ using MirageAPI.DirectX.Resource;
 using MirageAPI.DirectX.Shader;
 using OpenTK.Mathematics;
 
-// MirageAPI
-// Engine
-
 namespace AppLib.Game;
 
 [StructLayout(LayoutKind.Sequential)]
@@ -65,6 +62,8 @@ public class GameWindow : QuantumCore.Graphic.Window.Window
     // 3d
     private readonly DX12ConstantBuffer _matrixBuffer;
     public GameCamera Camera;
+
+    // private readonly XRSession? _xrSession;
 
     public GameWindow(
         WinData winData,
@@ -258,7 +257,11 @@ public class GameWindow : QuantumCore.Graphic.Window.Window
         NativeWindow.SysMenu.Separator();
         NativeWindow.SysMenu.TextItem("TEST SYSTEM MENU ITEM");
         NativeWindow.SysMenu.Callback += id => { Logger.Debug($"crickets chirping... {id}"); };
+
+        // XRSessionConfig sessionCfg = new("XRSession", NativeWindow.DXContext.CmdQueue);
+        // _xrSession = QuantumCore.Engine.VrInstance?.CreateSession(sessionCfg);
     }
+
     public override void HandleEvent(QuantumEvent e)
     {
         base.HandleEvent(e);
@@ -310,6 +313,21 @@ public class GameWindow : QuantumCore.Graphic.Window.Window
                 Mouse.CaptureWindow = NativeWindow.Mouse.IsCapture ? null : NativeWindow;
                 break;
             }
+            // case KeyEvent { Type: EventType.KeyUp, Key: Key.S } keyEvent:
+            // {
+            //     if (keyEvent.Mods.HasFlag(KeyMod.Shift) && _xrSession != null)
+            //     {
+            //         if (_xrSession.IsRunning)
+            //         {
+            //             _xrSession.EndSession();
+            //         }
+            //         else
+            //         {
+            //             _xrSession.BeginSession();
+            //         }
+            //     }
+            //     break;
+            // }
         }
     }
 

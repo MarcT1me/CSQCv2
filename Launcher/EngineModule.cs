@@ -5,55 +5,50 @@ namespace QuantumLauncher;
 
 internal class EngineCoreModule : QuantumModule
 {
-    public EngineCoreModule(bool isHeadless, string rootPath)
+    public EngineCoreModule()
     {
+        Console.Write("Loading Engine Core Module ");
         Assembly = Assembly.Load("QuantumEngine.Core");
+
+        Console.WriteLine("Setting-up Engine Core Module");
+        GetAssemblyProp("QuantumCore.Core", "RootDirectory")?
+            .SetValue(null, QLauncher.RootDir);
     }
 }
 
 public class EngineModule : QuantumModule
 {
-    public static string NativeLibsPath = "runtimes";
-    public static string EngineBinariesPath = "Engine";
-
-    public EngineModule(bool isHeadless, string rootPath)
-    {
-        Console.WriteLine(
-            "Loading Core Engine Module"
-        );
-
-        _ = new EngineCoreModule(isHeadless, rootPath);
-
-        Console.WriteLine(
-            "Loading Native runtimes"
-        );
-        LoadNative("freetype6");
-        LoadNative("Ijwhost");
-
-        Assembly = Assembly.Load("QuantumEngine");
-    }
-
     private void LoadNative(string name)
     {
         string path = Path.Combine(QLauncher.BinariesPath, NativeLibsPath, name + ".dll");
-        Console.WriteLine("Load Native: " + path);
         string fullPath = Path.Combine(QLauncher.RootDir, path);
+
+        Console.WriteLine("Load Native: " + path);
         NativeLibrary.Load(fullPath);
+    }
+
+    public EngineModule()
+    {
+        _ = new EngineCoreModule();
+
+        Console.WriteLine("Loading Native runtimes for Client Module");
+        LoadNative("freetype6");
+        LoadNative("Ijwhost");
+        LoadNative("openxr_loader");
+
+        Console.Write("Loading Engine Client Module ");
+        Assembly = Assembly.Load("QuantumEngine");
     }
 
     public void Activate()
     {
-        Console.WriteLine(
-            "Activate EngineModule"
-        );
+        Console.WriteLine("Activate EngineModule");
         InvokeAssemblyMethod("QuantumCore.Engine", "Initialize", QLauncher.AppLibModule.Assembly);
     }
 
     public void Deactivate()
     {
-        Console.WriteLine(
-            "Deactivate EngineModule"
-        );
+        Console.WriteLine("Deactivate EngineModule");
         InvokeAssemblyMethod("QuantumCore.Engine", "Uninitialize");
     }
 }

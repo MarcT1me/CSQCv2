@@ -1,0 +1,46 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+    <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+
+    <PropertyGroup>
+        <!-- Quantum Configurations -->
+        <QuantumGameConfig Condition="'$(QuantumGameConfig)' == ''">Quantum.gameconfig</QuantumGameConfig>
+        <QuantumOutputStructure Condition="'$(QuantumOutputStructure)' == ''">Modern</QuantumOutputStructure>
+        <QuantumHeadless Condition="'$(QuantumHeadless)' == ''">true</QuantumHeadless>
+
+        <QuantumEnginePath Condition="'$(QuantumEnginePath)' == ''">$([System.Environment]::GetEnvironmentVariable('QUANTUM_ENGINE_PATH'))</QuantumEnginePath>
+        <Error Condition="'$(QuantumEnginePath)' == ''">QUANTUM_ENGINE_PATH environment variable is not set. Please run 'quantum init &lt;engine-path&gt;'</Error>
+    </PropertyGroup>
+    
+    <PropertyGroup>
+        <!-- Build Configs -->
+        <TargetFramework>net9.0-windows10.0.22621.0</TargetFramework>
+        <PlatformTarget>x64</PlatformTarget>
+        <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+
+        <!-- Code configs -->
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+        <!-- Build configuration -->
+        <Configurations>Debug;Release</Configurations>
+        <Platforms>x64</Platforms>
+    </PropertyGroup>
+
+    <!-- Автоматическое подключение Quantum Engine -->
+    <ItemGroup Condition="'$(QuantumEnginePath)' != ''">
+        <ProjectReference Include="$(QuantumEnginePath)\QuantumEngine\QuantumEngine.csproj"/>
+    </ItemGroup>
+
+    <!-- Автоматическое включение иконки и манифеста -->
+    <ItemGroup>
+        <Content Include="app.ico" Condition="Exists('app.ico')">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+        <Content Include="app.manifest" Condition="Exists('app.manifest')">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+
+</Project>

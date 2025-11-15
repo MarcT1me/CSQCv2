@@ -42,13 +42,10 @@ internal class DefaultFailureHandler : IFailureHandler
 /// </summary>
 public class Core
 {
-    // public abstract class Core
     public static string RootDirectory = "";
     public static IFailureHandler DefaultFailureHandler = new DefaultFailureHandler();
 
-    public static Configuration CoreConfiguration = new(
-        "QuantumEngine.Core:engine.core.configuration.properties"
-    );
+    public static Configuration CoreConfiguration = new("QuantumEngine.Core:engine.core.configuration.properties");
 
     public static bool IsDebug { get; set; } = CoreConfiguration.Get<bool>("app.debug.enabled");
 
@@ -63,7 +60,7 @@ public class Core
 
         Logger.Info(
             "QuantumEngineCore Initialization Started\n" +
-            "Configuration:\n\n"
+            "Configuration:"
         );
         foreach (var config in CoreConfiguration.IterConfigs())
         {
@@ -73,8 +70,7 @@ public class Core
         Logger.SimpleLog(
             "\nPaths:\n" +
             $"App path: {RootDirectory}\n" +
-            $"Asset path: {CoreConfiguration.Get<string>("app.asset.dir")}" +
-            $"Full asset path: {RootDirectory + CoreConfiguration.Get<string>("app.asset.dir")}"
+            $"Asset path: {RootDirectory + CoreConfiguration.Get<string>("app.asset.dir")}"
         );
 
         Logger.Separator();

@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+
+        <IsPackable>true</IsPackable>
+        <PackageId>Quantum.Sdk</PackageId>
+        <PackageVersion>0.2.0</PackageVersion>
+
+        <IncludeBuildOutput>false</IncludeBuildOutput>
+        <DevelopmentDependency>true</DevelopmentDependency>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.0.0"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="Sdk.props" Pack="true" PackagePath="Sdk/"/>
+        <None Include="Sdk.targets" Pack="true" PackagePath="Sdk/"/>
+
+        <None Include="..\Quantum.Sdk.Tasks\bin\Release\net9.0\Quantum.Sdk.Tasks.dll"
+              Pack="true" PackagePath="lib/win-x64"/>
+
+        <None Include="..\Quantum.Sdk.Tasks\bin\Release\netstandard2.0\*.dll"
+              Pack="true" PackagePath="lib/win-x64"
+              Exclude="..\Quantum.Sdk.Tasks\bin\Release\netstandard2.0\Quantum.Sdk.Tasks.dll"/>
+    </ItemGroup>
+</Project>

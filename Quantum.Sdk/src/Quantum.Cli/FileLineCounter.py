@@ -1,6 +1,6 @@
 import os
+import sys
 
-# Расширения файлов для подсчёта строк
 VALID_EXTENSIONS = {
     '.py', '.lua', '.cs', '.hpp', '.cpp', '.c', '.h',
     '.html', '.css', '.scss', '.less', '.xml', '.json', '.yaml', '.yml',
@@ -8,19 +8,17 @@ VALID_EXTENSIONS = {
     '.gitignore', '.sln', '.user', '.csproj', '.vcproj'
 }
 
-# Игнорируемые директории
 IGNORE_DIRS = {'bin', 'obj', 'Release', 'Debug', 'libs', '.idea'}
 
 total_lines = 0
 
-for root, dirs, files in os.walk('.'):
-    # Фильтрация игнорируемых директорий
+for root, dirs, files in os.walk(sys.argv[1]):
     dirs[:] = [d for d in dirs if d.lower() not in IGNORE_DIRS]
-    
+
     for file in files:
         file_path = os.path.join(root, file)
         ext = os.path.splitext(file)[1].lower()
-        
+
         # Проверка расширения и исключение .dll
         if ext in VALID_EXTENSIONS and ext != '.dll':
             try:
