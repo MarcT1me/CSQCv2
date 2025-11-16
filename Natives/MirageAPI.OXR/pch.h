@@ -7,29 +7,34 @@
 // OpenXR defines
 #define XR_USE_PLATFORM_WIN64
 
-// Graphic Platforms
 #ifdef UseDX12
 // TODO: create DX12 wrapper (Max priority)
-#define XR_USE_GRAPHICS_API_D3D12
 
 #include <d3d12.h>
+#define XR_USE_GRAPHICS_API_D3D12
+
 #endif
 
 #ifdef UseDX11
 // TODO: create DX11 wrapper
-#define XR_USE_GRAPHICS_API_D3D11
 
 #include <d3d11.h>
+#define XR_USE_GRAPHICS_API_D3D11
+
 #endif
 
 #ifdef UseOpenGL
 // TODO: create OGL wrapper (Max priority)
+
 #define XR_USE_GRAPHICS_API_OPENGL
+
 #endif
 
 #ifdef UseVulkan
 // TODO: create Vulkan wrapper (Min Priority)
+
 #define XR_USE_GRAPHICS_API_VULKAN
+
 #endif
 
 // includes

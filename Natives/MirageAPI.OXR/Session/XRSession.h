@@ -2,7 +2,7 @@
 
 #include "XRSessionConfig.h"
 
-namespace MirageAPI::OpenXR
+namespace MirageAPI::Native::OpenXR
 {
     class XRSession
     {

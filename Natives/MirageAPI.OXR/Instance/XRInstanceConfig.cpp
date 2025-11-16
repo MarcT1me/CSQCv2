@@ -1,7 +1,7 @@
 ﻿#include "pch.h"
 #include "XRInstanceConfig.h"
 
-namespace MirageAPI::OpenXR
+namespace MirageAPI::Native::OpenXR
 {
     XRInstanceConfig::XRInstanceConfig(const std::string& appName, int appVersion, OpenXR::FormFactor formFactor)
     {

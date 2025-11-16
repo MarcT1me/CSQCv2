@@ -2,7 +2,7 @@
 
 #include "../platform.h"
 
-namespace MirageAPI::OpenXR
+namespace MirageAPI::Native::OpenXR
 {
     enum class XRPrimaryViewConfigurationType
     {

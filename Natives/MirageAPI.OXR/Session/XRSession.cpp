@@ -3,7 +3,7 @@
 
 #include "../Instance/XRSystem.h"
 
-namespace MirageAPI::OpenXR
+namespace MirageAPI::Native::OpenXR
 {
     XRSession::XRSession(const XRSessionConfig& config)
         : _primaryViewConfigurationType(config.primaryViewConfigurationType), _environmentBlendMode(config.environmentBlendMode)
@@ -14,7 +14,7 @@ namespace MirageAPI::OpenXR
             config.flags,
             _xrInstance->GetSystem()->GetNativeSystemId()
         };
-        XRExceptionChecker::Check(
+        XRResultChecker::Check(
             xrCreateSession(_xrInstance->GetNativeInstance(), &createInfo, &_session),
             "Create XRSession"
         );
@@ -29,7 +29,7 @@ namespace MirageAPI::OpenXR
 
         if (_session != XR_NULL_HANDLE)
         {
-            XRExceptionChecker::Check(
+            XRResultChecker::Check(
                 xrDestroySession(_session),
                 "Destroy XRSession"
             );
@@ -46,7 +46,7 @@ namespace MirageAPI::OpenXR
             nullptr,
             XrViewConfigurationType(_primaryViewConfigurationType)
         };
-        XRExceptionChecker::Check(
+        XRResultChecker::Check(
             xrBeginSession(_session, &beginInfo),
             "begin XRSession"
         );
@@ -58,7 +58,7 @@ namespace MirageAPI::OpenXR
     {
         if (!_running) return;
 
-        XRExceptionChecker::Check(
+        XRResultChecker::Check(
             xrEndSession(_session),
             "end XRSession"
         );
@@ -70,7 +70,7 @@ namespace MirageAPI::OpenXR
     {
         XrFrameWaitInfo waitInfo{XR_TYPE_FRAME_WAIT_INFO};
         XrFrameState frameState{XR_TYPE_FRAME_STATE};
-        XRExceptionChecker::Check(
+        XRResultChecker::Check(
             xrWaitFrame(_session, &waitInfo, &frameState),
             "XRSession wait frame"
         );
@@ -83,7 +83,7 @@ namespace MirageAPI::OpenXR
         _waitFrame();
 
         XrFrameBeginInfo frameBeginInfo{XR_TYPE_FRAME_BEGIN_INFO};
-        XRExceptionChecker::Check(
+        XRResultChecker::Check(
             xrBeginFrame(_session, &frameBeginInfo),
             "XRSession begin frame"
         );
@@ -101,7 +101,7 @@ namespace MirageAPI::OpenXR
             0,
             nullptr
         };
-        XRExceptionChecker::Check(
+        XRResultChecker::Check(
             xrEndFrame(_session, &endInfo),
             "XRSession end frame"
         );

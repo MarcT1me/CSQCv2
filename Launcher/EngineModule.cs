@@ -34,7 +34,7 @@ public class EngineModule : QuantumModule
         Console.WriteLine("Loading Native runtimes for Client Module");
         LoadNative("freetype6");
         LoadNative("Ijwhost");
-        LoadNative("openxr_loader");
+        // LoadNative("openxr_loader");
 
         Console.Write("Loading Engine Client Module ");
         Assembly = Assembly.Load("QuantumEngine");

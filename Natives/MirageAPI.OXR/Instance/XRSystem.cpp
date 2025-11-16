@@ -1,7 +1,7 @@
 ﻿#include "pch.h"
 #include "XRSystem.h"
 
-namespace MirageAPI::OpenXR
+namespace MirageAPI::Native::OpenXR
 {
     XRSystem::XRSystem(const XRInstance& instance, FormFactor formFactor)
     {

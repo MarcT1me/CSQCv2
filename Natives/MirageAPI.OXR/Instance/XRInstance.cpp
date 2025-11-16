@@ -4,9 +4,11 @@
 #include "XRInstanceConfig.h"
 #include "XRSystem.h"
 
-
-namespace MirageAPI::OpenXR
+namespace MirageAPI::Native::OpenXR
 {
+    XRInstance* XRInstance::_xrInstance = nullptr;
+    bool XRInstance::_isDebug = false;
+
     XRInstance::XRInstance(const XRInstanceConfig& config)
     {
         if (IsInitialized()) return;
@@ -22,12 +24,12 @@ namespace MirageAPI::OpenXR
         appInfo.apiVersion = XR_CURRENT_API_VERSION;
 
         // layers
-        for each (std::string layer in config.EnabledLayers)
+        for (std::string layer : config.EnabledLayers)
         {
             _enabledLayers.push_back(layer.c_str());
         }
         // extensions
-        for each (std::string extension in config.EnabledExtensions)
+        for (std::string extension : config.EnabledExtensions)
         {
             _enabledExtensions.push_back(extension.c_str());
             _isDebug = _isDebug || _enabledExtensions.back() == "XR_EXT_debug_utils";
@@ -44,7 +46,7 @@ namespace MirageAPI::OpenXR
             static_cast<uint32_t>(_enabledExtensions.size()),
             _enabledExtensions.data()
         };
-        XRExceptionChecker::Check(
+        XRResultChecker::Check(
             xrCreateInstance(&createInfo, &_instance),
             "Create XRInstance"
         );
@@ -57,7 +59,7 @@ namespace MirageAPI::OpenXR
     {
         if (_xrInstance != XR_NULL_HANDLE)
         {
-            XRExceptionChecker::Check(
+            XRResultChecker::Check(
                 xrDestroyInstance(_instance),
                 "Destroy XRInstance"
             );
@@ -77,7 +79,7 @@ namespace MirageAPI::OpenXR
     {
         // count
         uint32_t extensionCount = 0;
-        XRExceptionChecker::Check(
+        XRResultChecker::Check(
             xrEnumerateInstanceExtensionProperties(nullptr, 0, &extensionCount, nullptr),
             "Enumerate Instance Extensions (for counting)"
         );
@@ -85,7 +87,7 @@ namespace MirageAPI::OpenXR
         // native data
         std::vector<XrExtensionProperties> extensions(extensionCount, {XR_TYPE_EXTENSION_PROPERTIES}); // NOLINT(clang-diagnostic-missing-field-initializers)
 
-        XRExceptionChecker::Check(
+        XRResultChecker::Check(
             xrEnumerateInstanceExtensionProperties(nullptr, extensionCount, &extensionCount, extensions.data()),
             "Enumerate Instance Extensions (for properties)"
         );
@@ -103,14 +105,14 @@ namespace MirageAPI::OpenXR
     {
         // count
         uint32_t layerCount = 0;
-        XRExceptionChecker::Check(
+        XRResultChecker::Check(
             xrEnumerateApiLayerProperties(0, &layerCount, nullptr),
             "Enumerate Instance Layers (for counting)"
         );
 
         // native data
         std::vector<XrApiLayerProperties> layers(layerCount, {XR_TYPE_API_LAYER_PROPERTIES}); // NOLINT(clang-diagnostic-missing-field-initializers)
-        XRExceptionChecker::Check(
+        XRResultChecker::Check(
             xrEnumerateApiLayerProperties(layerCount, &layerCount, layers.data()),
             "Enumerate Instance Layers (for properties)"
         );

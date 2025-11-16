@@ -3,17 +3,16 @@
 #include <string>
 #include <vector>
 
-namespace MirageAPI::OpenXR
+namespace MirageAPI::Native::OpenXR
 {
-    enum FormFactor
+    enum class FormFactor
     {
         HMD = XR_FORM_FACTOR_HEAD_MOUNTED_DISPLAY,
         HANDHELD = XR_FORM_FACTOR_HANDHELD_DISPLAY,
     };
 
-    class XRInstanceConfig
+    struct XRInstanceConfig
     {
-    public:
         std::string ApplicationName;
         int ApplicationVersion;
         std::string EngineName;
@@ -22,7 +21,7 @@ namespace MirageAPI::OpenXR
         std::vector<std::string> EnabledExtensions;
         std::vector<std::string> EnabledLayers;
         FormFactor FormFactor;
-        
+
         uint64_t Flags;
 
         XRInstanceConfig(const std::string& appName, int appVersion, OpenXR::FormFactor formFactor);

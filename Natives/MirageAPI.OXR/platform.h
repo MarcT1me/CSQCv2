@@ -2,19 +2,20 @@
 
 #ifdef UseDX12
 
-namespace MirageAPI::OpenXR::Platform
+namespace MirageAPI::Native::OpenXR::Platform
 {
     struct SessionRequirements
     {
-        ID3D12Device* device;
-        ID3D12CommandQueue* commandQueue;
+        XrGraphicsBindingD3D12KHR Bindings;
 
-        const void* GetBindings() const
+        SessionRequirements(ID3D12Device* device, ID3D12CommandQueue* queue)
+            : Bindings(XrGraphicsBindingD3D12KHR{XR_TYPE_GRAPHICS_BINDING_D3D12_KHR, nullptr, device, queue})
         {
-            XrGraphicsBindingD3D12KHR graphicsBinding = {XR_TYPE_GRAPHICS_BINDING_D3D12_KHR};
-            graphicsBinding.device = device;
-            graphicsBinding.queue = commandQueue;
-            return &graphicsBinding;
+        }
+
+        const void* GetBindings()
+        {
+            return &Bindings;
         }
     };
 }
@@ -24,17 +25,20 @@ namespace MirageAPI::OpenXR::Platform
 #ifdef UseDX11
 
 
-namespace MirageAPI::OpenXR::Platform
+namespace MirageAPI::Native::OpenXR::Platform
 {
     struct SessionRequirements
     {
-        ID3D11Device* device;
+        XrGraphicsBindingD3D11KHR Bindings;
+
+        SessionRequirements(ID3D12Device* device)
+            : Bindings(XrGraphicsBindingD3D12KHR{XR_TYPE_GRAPHICS_BINDING_D3D11_KHR, nullptr, device})
+        {
+        }
 
         const void* GetBindings()
         {
-            XrGraphicsBindingD3D11KHR graphicsBinding = {XR_TYPE_GRAPHICS_BINDING_D3D11_KHR};
-            graphicsBinding.device = device;
-            return &graphicsBinding;
+            return &Bindings;
         }
     };
 }
@@ -43,18 +47,21 @@ namespace MirageAPI::OpenXR::Platform
 
 #ifdef UseOpenGL
 
-namespace MirageAPI::OpenXR::Platform
+namespace MirageAPI::Native::OpenXR::Platform
 {
     struct SessionRequirements
     {
-        XrVersion minApiVersion;
-        XrVersion maxApiVersion;
+    };
+}
 
-        // const void* GetBindings()
-        // {
-        //     // TODO: выяснить нужен ли вообще этот метод
-        //     return nullptr;
-        // }
+#endif
+
+#ifdef UseVulkan
+
+namespace MirageAPI::Native::OpenXR::Platform
+{
+    struct SessionRequirements
+    {
     };
 }
 

@@ -1,9 +1,9 @@
 ﻿#pragma once
-#include "XRInstance.h"
 
+#include "XRInstance.h"
 #include "XRInstanceConfig.h"
 
-namespace MirageAPI::OpenXR
+namespace MirageAPI::Native::OpenXR
 {
     class XRSystem
     {

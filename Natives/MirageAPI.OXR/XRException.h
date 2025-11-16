@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace MirageAPI::OpenXR
+namespace MirageAPI::Native::OpenXR
 {
     class XRException : public std::exception
     {
@@ -30,11 +30,6 @@ namespace MirageAPI::OpenXR
         return e.what();
     }
 
-    inline std::ostream& operator<<(std::ostream& os, const XRException& e)
-    {
-        return os << to_string(e);
-    }
-
     class XRResultException : public XRException
     {
     protected:
@@ -50,7 +45,7 @@ namespace MirageAPI::OpenXR
         XrResult GetXRResult() const { return _result; }
     };
 
-    class XRExceptionChecker
+    class XRResultChecker
     {
     public:
         static void Check(XrResult result, const char* context)

@@ -3,9 +3,9 @@
 #include <string>
 #include <vector>
 
-namespace MirageAPI::OpenXR
+namespace MirageAPI::Native::OpenXR
 {
-    class XRInstanceConfig;
+    struct XRInstanceConfig;
     class XRSystem;
 
     class XRInstance
