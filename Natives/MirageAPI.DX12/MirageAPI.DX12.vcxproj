@@ -57,6 +57,7 @@
             <PrecompiledHeader>Use</PrecompiledHeader>
             <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
             <WarningLevel>Level3</WarningLevel>
+            <LanguageStandard>stdcpp20</LanguageStandard>
 
             <Optimization>Disabled</Optimization>
             <SDLCheck>true</SDLCheck>
@@ -69,8 +70,6 @@
                 _USRDLL;
                 %(PreprocessorDefinitions)
             </PreprocessorDefinitions>
-
-            <LanguageStandard>stdcpp20</LanguageStandard>
         </ClCompile>
         <Link>
             <SubSystem>Windows</SubSystem>
@@ -88,6 +87,7 @@
             <PrecompiledHeader>Use</PrecompiledHeader>
             <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
             <WarningLevel>Level3</WarningLevel>
+            <LanguageStandard>stdcpp20</LanguageStandard>
 
             <Optimization>MaxSpeed</Optimization>
             <SDLCheck>true</SDLCheck>

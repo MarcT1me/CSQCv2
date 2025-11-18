@@ -4,6 +4,10 @@
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 
+// defines
+#define CheckMissmatch(first, second) if ((first) != (second))
+#define CheckNull(resource) if (!(resource))
+
 // OpenXR defines
 #define XR_USE_PLATFORM_WIN64
 
