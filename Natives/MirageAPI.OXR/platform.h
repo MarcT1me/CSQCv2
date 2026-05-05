@@ -24,7 +24,6 @@ namespace MirageAPI::Native::OpenXR::Platform
 
 #ifdef UseDX11
 
-
 namespace MirageAPI::Native::OpenXR::Platform
 {
     struct SessionRequirements

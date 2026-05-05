@@ -1,5 +1,0 @@
-﻿<Project Sdk="Quantum.Sdk/0.1.2">
-    <PropertyGroup>
-        <OutputType>Exe</OutputType>
-    </PropertyGroup>
-</Project>
